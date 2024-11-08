@@ -137,7 +137,8 @@ The same cannot be said of the regression that estimates direct and indirect eff
 \end{align*}
 And so $Y_i$ can be written as a regression equation in terms of the observed factors and error terms.
 \begin{align*}
-    Y_i &= \mu_0(0; \vec X_i) \\
+    \Egiven{Y_i}{Z_i, D_i, \vec X_i}
+        &= \mu_0(0; \vec X_i) \\
         & \;\;\;\; + Z_i \left[\mu_0(1; \vec X_i) - \mu_0(0; \vec X_i) \right] \\
         & \;\;\;\; + D_i \left[\mu_1(0; \vec X_i) - \mu_0(0; \vec X_i) \right] \\
         & \;\;\;\; + Z_i D_i \left[\mu_1(1; \vec X_i) - \mu_0(1; \vec X_i)
