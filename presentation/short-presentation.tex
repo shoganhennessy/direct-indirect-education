@@ -928,7 +928,7 @@
         \singlespacing
         \begin{subfigure}[c]{0.45\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{presentation-files/headlines/times-ukbionk.png}
+            \includegraphics[width=\textwidth]{presentation-files/headlines/ukb.png}
         \end{subfigure}
         \hfill
         \begin{subfigure}[c]{0.525\textwidth}
@@ -941,8 +941,36 @@
         \end{subfigure}
     \end{figure}
     \vfill
+    \textcolor{white}{
     My access has not been processed yet, so I am merely describing the research design for using UK Biobank data. \\
-    $\to$ UK Biobank has a subsample of people with genetic data from parents included; public data do not have this.
+    $\to$ UK Biobank has a $N \approx 30,000$ subsample of people with genetic data from parents included; public data do not have this.}
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}[noframenumbering]
+    \frametitle{Data: UK Biobank}
+    This is \textbf{the} dataset that genetics researchers have used for genetics research.
+    \vspace{-0.5cm}
+    \begin{figure}[h!]
+        \centering
+        \singlespacing
+        \begin{subfigure}[c]{0.45\textwidth}
+            \centering
+            \includegraphics[width=1.2\textwidth]{presentation-files/headlines/times-ukbiobank.png}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[c]{0.525\textwidth}
+            \textbf{The first ``Biobank''}
+            \begin{itemize}
+                \item Tissue (e.g., DNA) samples from 500,000 Britons
+                \item Large-scale population study started in 2004, to investigate biological $+$ genetic basis of low-frequency diseases
+                \item Includes surveys for social outcomes, including education, occupation, etc.
+            \end{itemize}
+        \end{subfigure}
+    \end{figure}
+    \pause
+    \vfill
+    My access has not been processed yet, so I am merely describing the research design for using UK Biobank data. \\
+    $\to$ UK Biobank has a $N \approx 30,000$ subsample of people with genetic data from parents included; public data do not have this.
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
@@ -1483,33 +1511,34 @@
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Genetic Associations: Outcomes}
-    \textbf{Question:} Is Ed PGI related to labour market outcomes?
-    
-    \vspace{-0.5cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \begin{tikzpicture}
-            \node[state,blue] (instrument) at (0,0) {$Z$};
-            \node[state,ForestGreen] (outcome) [right=1.5cm of instrument] {$D$};
-            \path[->,thick] (instrument) edge (outcome);
-            % Label the nodes with econ examples
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[text width=0.1cm, color=ForestGreen] [right=-0.01cm of outcome] {Education};
-        \end{tikzpicture}
-    \end{figure}
-    \vspace{-0.25cm}
-    \begin{figure}
-        \centering
-        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
-            $+$ \textcolor{ForestGreen}{Education Years}.}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-edyears-causal.png}}
-    \end{figure}
-\end{frame}
+%\begin{frame}[noframenumbering]
+%    \frametitle{Genetic Associations: Outcomes}
+%    \textbf{Question:} Is Ed PGI related to labour market outcomes?
+%    
+%    \vspace{-0.5cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \begin{tikzpicture}
+%            \node[state,blue] (instrument) at (0,0) {$Z$};
+%            \node[state,ForestGreen] (outcome) [right=1.5cm of instrument] {$D$};
+%            \path[->,thick] (instrument) edge (outcome);
+%            % Label the nodes with econ examples
+%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+%            \node[text width=0.1cm, color=ForestGreen] [right=-0.01cm of outcome] {Education};
+%        \end{tikzpicture}
+%    \end{figure}
+%    \vspace{-0.25cm}
+%    \begin{figure}
+%        \centering
+%        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+%            $+$ \textcolor{ForestGreen}{Education Years}.}
+%        \makebox[\textwidth][c]{
+%            \includegraphics[width=0.8\textwidth]{
+%               ../text/sections/figures/genescore-edyears-causal.png}
+%            }
+%    \end{figure}
+%\end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
     \frametitle{Genetic Associations: Outcomes}
@@ -1539,33 +1568,34 @@
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Genetic Associations: Outcomes}
-    \textbf{Question:} Is Ed PGI related to labour market outcomes?
-
-    \vspace{-0.5cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \begin{tikzpicture}
-            \node[state,blue] (instrument) at (0,0) {$Z$};
-            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-            \path[->,thick] (instrument) edge (outcome);
-            % Label the nodes with econ examples
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-        \end{tikzpicture}
-    \end{figure}
-    \vspace{-0.25cm}
-    \begin{figure}
-        \centering
-        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
-            $+$ \textcolor{red}{Annual Earnings.}}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-earnings-causal.png}}
-    \end{figure}
-\end{frame}
+%\begin{frame}[noframenumbering]
+%    \frametitle{Genetic Associations: Outcomes}
+%    \textbf{Question:} Is Ed PGI related to labour market outcomes?
+%
+%    \vspace{-0.5cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \begin{tikzpicture}
+%            \node[state,blue] (instrument) at (0,0) {$Z$};
+%            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
+%            \path[->,thick] (instrument) edge (outcome);
+%            % Label the nodes with econ examples
+%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+%            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+%        \end{tikzpicture}
+%    \end{figure}
+%    \vspace{-0.25cm}
+%    \begin{figure}
+%        \centering
+%        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+%            $+$ \textcolor{red}{Annual Earnings.}}
+%        \makebox[\textwidth][c]{
+%            \includegraphics[width=0.8\textwidth]{
+%                ../text/sections/figures/genescore-earnings-causal.png}
+%                }
+%    \end{figure}
+%\end{frame}
 %-------------------------------------------------------------------------------
 \section{3. Direct and Indirect Effects}
 %-------------------------------------------------------------------------------
