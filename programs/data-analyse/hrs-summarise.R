@@ -686,11 +686,11 @@ X <- hrs.data %>%
         parents_smoke, child_headinjury)) %>%
     as.matrix()
 # Consider D = higher education (binary needed)
-Z <- as.integer(Z >= 0)
+#Z <- as.integer(Z >= 0)
 D <- as.integer(D >= 14)
 
 # Define number of samples to bootstrap over.
-boot.samples <- 1000
+boot.samples <- 10^4
 
 # Define the simple OLS model
 mediation_ols.reg <- 
@@ -819,7 +819,7 @@ mediation_percent.plot <- effects.data %>%
         limits = c(0, 1),
         name = "",
         breaks = seq(0, 1, by = 0.1)) +
-    ggtitle("Estimate, Percent Mediated Through Education") +
+    ggtitle("Estimate, Percent Mediated Through Higher Education") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0.25, 0), "mm"),
@@ -837,9 +837,8 @@ ggsave(file.path(figures.folder, "mediation-percent-plot.png"),
 
 # Point estimate with the Heckman parametric selection model.
 library(sampleSelection)
-library(splines)
 library(boot)
-boot.samples <- 1000
+boot.samples <- 10^4
 # Put relevant data into matrix form
 Z <- hrs.data %>% pull(genescore_educ_euro)
 D <- hrs.data %>% pull(indiv_edyears)
@@ -849,7 +848,7 @@ X <- hrs.data %>%
         survey_year, indiv_agey, parent_edyears, gender_female)) %>%
     as.matrix()
 # Consider D = higher education (binary needed)
-Z <- as.integer(Z >= 0)
+#Z <- as.integer(Z >= 0)
 D <- as.integer(D >= 14)
 
 # Define a function that outputs a parametric selection model's estimates of
@@ -873,17 +872,17 @@ selection_mediation.reg <- function(data, type = "parametric"){
             as.formula(D ~ (1 + Z) * X),
             # Second-stage
             list(as.formula(Y ~ (1 + Z)), as.formula(Y ~ (1 + Z) * X)),
-                method = "ml")
+                method = "2step")
         # Generate predictions
         EY_Zz_D0 <- predict(
             selection.reg, newdata = data.frame(Z = Z, D = 0, X = X))[, 1]
         EY_Zz_D1 <- predict(
             selection.reg, newdata = data.frame(Z = Z, D = 1, X = X))[, 2]
         EY_Z1_Dd <- predict(
-            selection.reg, newdata = data.frame(Z = 1, D = D, X = X))
+            selection.reg, newdata = data.frame(Z = Z + 0.5, D = D, X = X))
         EY_Z1_Dd <- ifelse(D == 1, EY_Z1_Dd[, 2], EY_Z1_Dd[, 1])
         EY_Z0_Dd <- predict(
-            selection.reg, newdata = data.frame(Z = 0, D = D, X = X))
+            selection.reg, newdata = data.frame(Z = Z - 0.5, D = D, X = X))
         EY_Z0_Dd <- ifelse(D == 1, EY_Z0_Dd[, 2], EY_Z0_Dd[, 1])
     }
     else if (type == "semi-parametric"){
@@ -897,21 +896,21 @@ selection_mediation.reg <- function(data, type = "parametric"){
             selection.reg, newdata = data.frame(Z = Z, D = 1, X = X,
                 controlfun = controlfun), rankdeficient = "simple")
         EY_Z1_Dd <- predict(
-            selection.reg, newdata = data.frame(Z = 1, D = D, X = X,
+            selection.reg, newdata = data.frame(Z = Z + 0.5, D = D, X = X,
                 controlfun = controlfun), rankdeficient = "simple")
         EY_Z0_Dd <- predict(
-            selection.reg, newdata = data.frame(Z = 0, D = D, X = X,
+            selection.reg, newdata = data.frame(Z = Z - 0.5, D = D, X = X,
                 controlfun = controlfun), rankdeficient = "simple")
     }
     # Get the total effect by prediction
     totaleffect.est <- mean(
-        (predict(totaleffect.reg, newdata = data.frame(Z = 1, X = X)) -
-            predict(totaleffect.reg, newdata = data.frame(Z = 0, X = X))))
+        (predict(totaleffect.reg, newdata = data.frame(Z = Z + 0.5, X = X)) -
+            predict(totaleffect.reg, newdata = data.frame(Z = Z - 0.5, X = X))))
     # Get the first-stage by prediction
     complier.score <- (predict(firststage.reg, 
-        newdata = data.frame(Z = 1, X = X), type = "response") -
+        newdata = data.frame(Z = Z + 0.5, X = X), type = "response") -
             predict(firststage.reg,
-                newdata = data.frame(Z = 0, X = X), type = "response"))
+                newdata = data.frame(Z = Z - 0.5, X = X), type = "response"))
     firststage.est <- mean(complier.score)
     # Direct Effect, E[ Y_i(1, D) - Y_i(0, D)].
     direct.gains <- EY_Z1_Dd - EY_Z0_Dd
@@ -1068,6 +1067,7 @@ mediation_selection_percent.plot <- selection_est.data %>%
         stat = "identity", position = position_dodge(0.9), width = 1 / 3) +
     theme_bw() +
     geom_hline(yintercept = 0, alpha = 0.5) +
+    geom_hline(yintercept = 1, alpha = 0.5, linetype = "dotted") +
     scale_x_discrete(
         name = "",
         limits = c("OLS + Controls",
@@ -1077,7 +1077,7 @@ mediation_selection_percent.plot <- selection_est.data %>%
         #limits = c(0, 1),
         name = "",
         breaks = seq(-2, 2, by = 0.1)) +
-    ggtitle("Estimate, Percent Mediated Through Education") +
+    ggtitle("Estimate, Percent Mediated Through Higher Education") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0.25, 0), "mm"),
@@ -1089,4 +1089,4 @@ ggsave(file.path(figures.folder, "mediation-selection-percent-plot.png"),
     units = "cm",
     width = presentation.width * 1.125, height = presentation.height * 1.125)
 
-#! Figure HERE FOR THE IMPLIED RETURNS TO EDUCATION.
+# Question: What are the implied returns to education estimates?
