@@ -43,10 +43,10 @@ tables.folder <- file.path("..", "..", "text", "sections", "tables")
 ## Convenience functions.
 
 # Define a function to automate Bin scatter.
-binscatter.plot <- function(data, x, y, colour.name){
+binscatter.plot <- function(data, x, y, colour.name, option = "none"){
     library(binsreg)
     # Run the binscatter regression.
-    binscatter.data <- binsreg(data[[y]], data[[x]],
+    binscatter.data <- binsreg(data[[y]], data[[x]], randcut = 1,
             line = c(1, 1), ci = c(1, 1), cb = c(1, 1), polyreg = 3)  %>%
         magrittr::use_series("data.plot") %>%
         magrittr::use_series("Group Full Sample")
@@ -65,6 +65,12 @@ binscatter.plot <- function(data, x, y, colour.name){
         # Add the line between bin means
         geom_smooth(data = binscatter.data$data.dots, aes(x = x, y = fit),
             se = FALSE, colour = colour.name, size = 0.5, linetype = "solid")
+        if (option == "half-line"){
+            binscatter.ggplot <- binscatter.ggplot +
+                geom_smooth(data = binscatter.data$data.dots,
+                aes(x = x, y = (6 + fit / 2)), se = FALSE,
+                colour = "orange", size = 1, linetype = "solid")
+        }
     # Return the ggplot of this.
     return(binscatter.ggplot)
 }
@@ -367,9 +373,9 @@ genescore_edyears.plot <- hrs.data %>%
     binscatter.plot(data = ., "genescore_educ_euro", "indiv_edyears",
         colour.list[2]) +
     annotate("text", colour = colour.list[2],
-        x = 1.5, y = 10.5,
+        x = 0.875, y = 10.5,
         fontface = "bold",
-        label = ("Slope = +0.60 Edyears"),
+        label = ("Slope = +0.61 (0.02) Ed years"),
         size = 4.25, hjust = 0.5, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0),
@@ -392,6 +398,47 @@ ggsave(file.path(figures.folder, "genescore-edyears.png"),
 ggsave(file.path(figures.folder, "genescore-edyears-wider.png"),
     plot = genescore_edyears.plot,
     units = "cm", width = presentation.width, height = 0.85 * presentation.height)
+
+# Generate a version with the (implied) causal design.
+genescore_edyears_causal.plot <- hrs.data %>%
+    filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
+    binscatter.plot(data = ., "genescore_educ_euro", "indiv_edyears",
+        colour.list[2], option = "half-line") +
+    annotate("text", colour = colour.list[2],
+        x = 0.875, y = 10.5,
+        fontface = "bold",
+        label = ("Slope = +0.61 (0.02) Ed years"),
+        size = 4.25, hjust = 0.5, vjust = 0) +
+    # Add on the part with a lower slope.
+    annotate("text", colour = "orange",
+        x = 1.125, y = 11.25,
+        fontface = "bold",
+        label = ("Slope = +0.30 (Young et al., 2022)"),
+        size = 4.25, hjust = 0.5, vjust = 0) +
+    annotate("curve", colour = "orange",
+        x = 1.75, y = 14.75,
+        xend = 2, yend = 14.00,
+        linewidth = 1,
+        curvature = -0.25,
+        arrow = arrow(length = unit(0.25, 'cm'))) +
+    theme_bw() +
+    scale_x_continuous(expand = c(0, 0),
+        name = "Ed PGI, s.d. units",
+        breaks = seq(-5, 5, by = 1),
+        limits = c(-3, 3)) +
+    scale_y_continuous(expand = c(0, 0.1),
+        name = "",
+        limits = c(10, 17),
+        breaks = seq(0, 20, by = 1)) +
+    ggtitle("Education Years") +
+    theme(plot.title = element_text(size = rel(1), hjust = 0),
+        plot.title.position = "plot",
+        plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
+# Save this plot.
+ggsave(file.path(figures.folder, "genescore-edyears-causal.png"),
+    plot = genescore_edyears_causal.plot,
+    units = "cm", width = presentation.width, height = 0.85 * presentation.height)
+
 # Show correlation between gene score and income
 # Reduced-form OLS no controls 0.100560
 # First-stage OLS no controls 0.66519
@@ -406,10 +453,10 @@ genescore_earnings.plot <- hrs.data %>%
     binscatter.plot(data = ., "genescore_educ_euro", "indiv_earnings_real",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
-        x = 1.5, y = 20,
+        x = 1.5, y = 15,
         fontface = "bold",
-        label = ("Slope = +8.0%"),
-        size = 4.25,  hjust = 0.5, vjust = 0) +
+        label = ("Slope = +8.8% (0.008)"),
+        size = 4.25, hjust = 0.5, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0),
         name = "Ed PGI, s.d. units",
@@ -431,6 +478,47 @@ ggsave(file.path(figures.folder, "genescore-earnings.png"),
 ggsave(file.path(figures.folder, "genescore-earnings-wider.png"),
     plot = genescore_earnings.plot,
     units = "cm", width = presentation.width, height = 0.85 * presentation.height)
+
+# Generate a version with the (implied) causal design.
+genescore_earnings_causal.plot <- hrs.data %>%
+    mutate(indiv_earnings_real = indiv_earnings_real / 1000) %>%
+    binscatter.plot(data = ., "genescore_educ_euro", "indiv_earnings_real",
+        colour.list[3]) +
+    annotate("text", colour = colour.list[3],
+        x = 1.5, y = 15,
+        fontface = "bold",
+        label = ("Slope = +8.8% (0.008)"),
+        size = 4.25, hjust = 0.5, vjust = 0) +
+    # Add on the part with a lower slope.
+    annotate("text", colour = "orange",
+        x = 0.875, y = 40,
+        fontface = "bold",
+        label = ("Slope = ?"),
+        size = 4.25, hjust = 0.5, vjust = 0) +
+    annotate("curve", colour = "orange",
+        x = 0.5, y = 75,
+        xend = 1.1, yend = 47.5,
+        linewidth = 1,
+        curvature = -0.25,
+        arrow = arrow(length = unit(0.25, 'cm'))) +
+    theme_bw() +
+    scale_x_continuous(expand = c(0, 0),
+        name = "Ed PGI, s.d. units",
+        limits = c(-3, 3),
+        breaks = seq(-5, 5, by = 1)) +
+    scale_y_continuous(expand = c(0, 1),
+        name = "",
+        limits = c(0, 150),
+        breaks = seq(0, 300, by = 25)) +
+    ggtitle("Annual Earnings, $ thousands") +
+    theme(plot.title = element_text(size = rel(1), hjust = 0),
+        plot.title.position = "plot",
+        plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
+# Save this plot
+ggsave(file.path(figures.folder, "genescore-earnings-causal.png"),
+    plot = genescore_earnings_causal.plot,
+    units = "cm", width = presentation.width, height = 0.85 * presentation.height)
+
 
 # Correlation between gene score and cognitive measures later in life
 # Example of a direct effect.

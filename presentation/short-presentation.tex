@@ -1,4 +1,4 @@
-\documentclass[dvipsnames,handout]{beamer} % Use handout option to remove pauses.
+\documentclass[dvipsnames]{beamer} % Use handout option to remove pauses.
 \usetheme{default}
 \usefonttheme{structurebold}
 \usepackage[UKenglish,cleanlook]{isodate}                                  % Set default date and date display
@@ -291,15 +291,15 @@
                 \node[state,ForestGreen] (treatment) at (0,0) {$D$};
                 \node[state,blue] (instrument) [left=1.5cm of treatment] {$Z$};
                 \node[state,red] (outcome) [right=1.5cm of treatment] {$Y$};
-                %\path[->] (instrument) edge (treatment);
-                %\path[->] (treatment) edge (outcome);
+                %\path[->,thick] (instrument) edge (treatment);
+                %\path[->,thick] (treatment) edge (outcome);
                 % Label the nodes with econ examples
                 \node[color=blue, left=0.1cm of instrument] {Ed Genes};
                 \node[color=red, right=0.1cm of outcome] {Earnings};
                 \pause
                 \node[color=ForestGreen, above=0.1cm of treatment] {Education};
                 % Add in direct + indirect effects.
-                %\path[->] (instrument) edge[bend right=45] (outcome);
+                %\path[->,thick] (instrument) edge[bend right=45] (outcome);
                 % Label the pathways with the colours
                 \path[->, very thick, color=ForestGreen] (instrument) edge (treatment);
                 \path[->, very thick, color=ForestGreen] (treatment) edge (outcome);
@@ -880,14 +880,14 @@
             \node[state,ForestGreen] (treatment) at (0,0) {$D$};
             \node[state,blue] (instrument) [left=1.5cm of treatment] {$Z$};
             \node[state,red] (outcome) [right=1.5cm of treatment] {$Y$};
-            %\path[->] (instrument) edge (treatment);
-            %\path[->] (treatment) edge (outcome);
+            %\path[->,thick] (instrument) edge (treatment);
+            %\path[->,thick] (treatment) edge (outcome);
             % Label the nodes with econ examples
             \node[color=blue, left=0.1cm of instrument] {Ed PGI};
             \node[color=red, right=0.1cm of outcome] {Earnings};
             \node[color=ForestGreen, above=0.1cm of treatment] {Education};
             % Add in direct effects.
-            %\path[->] (instrument) edge[bend right=45] (outcome);
+            %\path[->,thick] (instrument) edge[bend right=45] (outcome);
             % Label the pathways with the colours
             \path[->, very thick, color=ForestGreen] (instrument) edge (treatment);
             \path[->, very thick, color=ForestGreen] (treatment) edge (outcome);
@@ -928,7 +928,7 @@
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}
-    \frametitle{Data: \sout{UK Biobank} Health \& Retirement Study (HRS)}
+    \frametitle{Data: \sout{UK Biobank} Health \& Retirement Study}
     A representative panel of retirement-age Americans 1990--2021.
     \vspace{-0.5cm}
 
@@ -952,7 +952,7 @@
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
-    \frametitle{Data: Health \& Retirement Study}
+    \frametitle{Data: Health \& Retirement Study (HRS)}
     A representative panel of retirement-age Americans 1990--2021.
     \vspace{-0.5cm}
 
@@ -976,7 +976,7 @@
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
-    \frametitle{Data: Health \& Retirement Study}
+    \frametitle{Data: Health \& Retirement Study (HRS)}
     A representative panel of retirement-age Americans 1990--2021.
     \begin{figure}
         \centering
@@ -1448,7 +1448,7 @@
         \begin{tikzpicture}
             \node[state,blue] (instrument) at (0,0) {$Z$};
             \node[state,ForestGreen] (outcome) [right=1.5cm of instrument] {$D$};
-            \path[->] (instrument) edge (outcome);
+            \path[->,thick] (instrument) edge (outcome);
             % Label the nodes with econ examples
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text width=0.1cm, color=ForestGreen] [right=-0.01cm of outcome] {Education};
@@ -1468,6 +1468,34 @@
 \begin{frame}[noframenumbering]
     \frametitle{Genetic Associations: Outcomes}
     \textbf{Question:} Is Ed PGI related to labour market outcomes?
+    
+    \vspace{-0.5cm}
+    \begin{figure}
+        \centering
+        \singlespacing
+        \begin{tikzpicture}
+            \node[state,blue] (instrument) at (0,0) {$Z$};
+            \node[state,ForestGreen] (outcome) [right=1.5cm of instrument] {$D$};
+            \path[->,thick] (instrument) edge (outcome);
+            % Label the nodes with econ examples
+            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+            \node[text width=0.1cm, color=ForestGreen] [right=-0.01cm of outcome] {Education};
+        \end{tikzpicture}
+    \end{figure}
+    \vspace{-0.25cm}
+    \begin{figure}
+        \centering
+        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+            $+$ \textcolor{ForestGreen}{Education Years}.}
+        \makebox[\textwidth][c]{
+            \includegraphics[width=0.8\textwidth]{
+                ../text/sections/figures/genescore-edyears-causal.png}}
+    \end{figure}
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}[noframenumbering]
+    \frametitle{Genetic Associations: Outcomes}
+    \textbf{Question:} Is Ed PGI related to labour market outcomes?
 
     \vspace{-0.5cm}
     \begin{figure}
@@ -1476,7 +1504,7 @@
         \begin{tikzpicture}
             \node[state,blue] (instrument) at (0,0) {$Z$};
             \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-            \path[->] (instrument) edge (outcome);
+            \path[->,thick] (instrument) edge (outcome);
             % Label the nodes with econ examples
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
@@ -1489,7 +1517,35 @@
             $+$ \textcolor{red}{Annual Earnings.}}
         \makebox[\textwidth][c]{
             \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-earnings-wider}}
+                ../text/sections/figures/genescore-earnings-wider.png}}
+    \end{figure}
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}[noframenumbering]
+    \frametitle{Genetic Associations: Outcomes}
+    \textbf{Question:} Is Ed PGI related to labour market outcomes?
+
+    \vspace{-0.5cm}
+    \begin{figure}
+        \centering
+        \singlespacing
+        \begin{tikzpicture}
+            \node[state,blue] (instrument) at (0,0) {$Z$};
+            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
+            \path[->,thick] (instrument) edge (outcome);
+            % Label the nodes with econ examples
+            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+        \end{tikzpicture}
+    \end{figure}
+    \vspace{-0.25cm}
+    \begin{figure}
+        \centering
+        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+            $+$ \textcolor{red}{Annual Earnings.}}
+        \makebox[\textwidth][c]{
+            \includegraphics[width=0.8\textwidth]{
+                ../text/sections/figures/genescore-earnings-causal.png}}
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1508,22 +1564,22 @@
         \begin{tikzpicture}
             \node[state,ForestGreen] (treatment) at (0,0) {$D$};
             \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
-            \path[->] (instrument) edge (treatment);
+            \path[->,thick] (instrument) edge (treatment);
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text width=1.675cm, color=ForestGreen] [above=0.15cm of treatment] (education) {Education};
             \node[text height=0.5cm, color=orange] [above left=-0.25cm and 0.2cm of treatment] {First-stage};
             % Label where Ed PGI is computed
-            \path[->, color=orange] (-2.5, 1.5) edge[bend left=40] (-1.5, 0.75);
+            \path[->, color=orange] (-3.0, 1.5) edge[bend left=40] (-1.5, 0.75);
             \node[text width=2cm, color=orange] at (-2.75, 1.25) {PGI\\calculated};
             % Add in direct effects.
             \pause
             \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-            \path[->] (instrument) edge[bend right=45] (outcome);
-            \node[text height=0.25cm, color=orange] [below=0.35cm of treatment] {Direct};
+            \path[->,thick] (instrument) edge[bend right=45] (outcome);
+            \node[text height=0.25cm, color=orange] [below=0.35cm of treatment] {Direct Effect};
             % Add on returns to education.
             \pause
-            \path[->] (treatment) edge (outcome);
+            \path[->,thick] (treatment) edge (outcome);
             \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
         \end{tikzpicture}
     \end{figure}
@@ -1555,7 +1611,7 @@
 %-------------------------------------------------------------------------------
 \begin{frame}
     \frametitle{Direct and Indirect Effects}
-    Mediation methods are a general-purpose tool to decompose total treatment effect: \textcolor{blue}{Direct} $+$ \textcolor{ForestGreen}{Indirect} effects.
+    Mediation methods are a general-purpose tool to decompose total treatment effect: \textcolor{blue}{Direct Effect} $+$ \textcolor{ForestGreen}{Indirect} effects.
     \vspace{-0.5cm}
     \begin{figure}
         \centering
@@ -1575,7 +1631,7 @@
             % Label direct and indirect effect
             \node[color=orange] [above left=-0.35cm and 0.2cm of treatment] {First-stage};
             \node[color=orange] [above right=-0.3cm and 0.4cm of treatment] {Returns};
-            \node[color=orange] [below=0.35cm of treatment] {Direct};
+            \node[color=orange] [below=0.35cm of treatment] {Direct Effect};
         \end{tikzpicture}
     \end{figure}
     \pause
@@ -1585,7 +1641,6 @@
             &= \underbrace{
                 \Egiven{Y_i}{Z_i = 1, D_i} - \Egiven{Y_i}{Z_i = 0, D_i}}_{
                     \text{\textcolor{orange}{Effect $Z\to Y$, holding $D$ constant}}} \\
-        \pause
         \text{\textcolor{ForestGreen}{Indirect Effect}}
             &= \text{\textcolor{orange}{First-stage}} \times
                 \underbrace{
@@ -1615,15 +1670,15 @@
         \text{\textcolor{purple}{Estimand, Direct}}
             &= \text{\textcolor{blue}{Direct Effect}}
                 &+ \;\; \Big(\text{\textcolor{red}{Selection Bias}}
-                &+ \;\; \text{\textcolor{orange}{Complier Bias}}\Big) \\
+                &+ \, \text{\textcolor{orange}{Complier Bias}}\Big) \\
         \text{\textcolor{purple}{Estimand, Indirect}}
             &= \text{\textcolor{ForestGreen}{Indirect Effect}}
                 &+ \;\; \Big(\text{\textcolor{red}{Selection Bias}}
-                &+ \;\; \text{\textcolor{orange}{Non-complier Bias}}\Big)
+                &+ \, \text{\textcolor{orange}{Non-complier Bias}}\Big)
     \end{align*}
     \vfill
     \pause
-    \textcolor{red}{Bias terms persist}, regardless of how random \textcolor{blue}{$Z_i$} is, with any selection-on-observables estimand (i.e., identification result).
+    \textcolor{red}{Bias terms persist}, regardless of how random \textcolor{blue}{Ed PGI, $Z_i$} is, with any selection-on-observables estimand (i.e., identification result).
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
@@ -1639,7 +1694,7 @@
             % First nodes, Z, D, Y
             \node[state,ForestGreen] (treatment) at (0,0) {$D$};
             \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
-            \path[->] (instrument) edge (treatment);
+            \path[->,thick] (instrument) edge (treatment);
             % Labels for Z, D, Y
             \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
@@ -1647,11 +1702,12 @@
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
             % Label the effects of interest.
             \node[text height=0.5cm, color=orange] [above left=-0.3cm and 0.2cm of treatment] {First-stage};
-            \path[->] (treatment) edge (outcome);
+            \path[->,thick] (treatment) edge (outcome);
             \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
-            \path[->] (instrument) edge[bend right=45] (outcome);
+            \path[->,thick] (instrument) edge[bend right=45] (outcome);
             \node[color=orange] [below=1cm of treatment] {Average Direct Effect};
             % Add on the unobserved confounder.
+            \pause
             \node[state,purple] (confounder) [above right=1.5cm of treatment] {$U$};
             \path[->,dashed,color=purple] (confounder) edge (treatment);
             \path[->,dashed,color=purple] (confounder) edge (outcome);
@@ -1659,6 +1715,7 @@
             \node[color=purple] [below right=-0.2cm and 0.2cm of confounder] {e.g., private schooling};
         \end{tikzpicture}
     \end{figure}
+    \pause
     \vspace{-0.125cm}
     UKB has no info on private schooling\ldots
     \begin{itemize}
@@ -1700,7 +1757,7 @@
             % First nodes, Z, D, Y
             \node[state,ForestGreen] (treatment) at (0,0) {$D$};
             \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
-            \path[->] (instrument) edge (treatment);
+            \path[->,thick] (instrument) edge (treatment);
             % Labels for Z, D, Y
             \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
@@ -1708,9 +1765,9 @@
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
             % Label the effects of interest.
             \node[text height=0.5cm, color=orange] [above left=-0.3cm and 0.2cm of treatment] {First-stage};
-            \path[->] (treatment) edge (outcome);
+            \path[->,thick] (treatment) edge (outcome);
             \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
-            \path[->] (instrument) edge[bend right=45] (outcome);
+            \path[->,thick] (instrument) edge[bend right=45] (outcome);
             \node[color=orange] [below=1cm of treatment] {Average Direct Effect};
             % Add on the overlapping research design
             % For Ed PGI
@@ -1772,7 +1829,7 @@
         \begin{tikzpicture}
             \node[state,blue] (instrument) at (0,0) {$Z$};
             \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-            \path[->] (instrument) edge (outcome);
+            \path[->,thick] (instrument) edge (outcome);
             % Label the nodes with econ examples
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
@@ -1799,7 +1856,7 @@
         \begin{tikzpicture}
             \node[state,blue] (instrument) at (0,0) {$Z$};
             \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-            \path[->] (instrument) edge (outcome);
+            \path[->,thick] (instrument) edge (outcome);
             % Label the nodes with econ examples
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
@@ -1826,18 +1883,18 @@
             \node[state,ForestGreen] (treatment) at (0,0) {$D$};
             \node[state,blue] (instrument) [left=1.25cm of treatment] {$Z$};
             \node[state,red] (outcome) [right=1.25cm of treatment] {$Y$};
-            %\path[->] (instrument) edge (treatment);
-            %\path[->] (treatment) edge (outcome);
+            %\path[->,thick] (instrument) edge (treatment);
+            %\path[->,thick] (treatment) edge (outcome);
             % Label the nodes with econ examples
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text height=0.5cm, color=ForestGreen] [above right=-0.3cm and -0.1cm of treatment] {Indirect};
             % Add in direct effects.
-            %\path[->] (instrument) edge[bend right=45] (outcome);
+            %\path[->,thick] (instrument) edge[bend right=45] (outcome);
             % Label the pathways with the colours
             \path[->, very thick, color=ForestGreen] (instrument) edge (treatment);
             \path[->, very thick, color=ForestGreen] (treatment) edge (outcome);
             \path[->, very thick, color=blue] (instrument) edge[bend right=35] (outcome);
-            \node[text height=0.25cm, color=blue] [below=-0.1cm of treatment] {Direct};
+            \node[text height=0.25cm, color=blue] [below=-0.1cm of treatment] {Direct Effect};
         \end{tikzpicture}
     \end{figure}
     \vspace{-1cm}
@@ -1914,7 +1971,7 @@
     \vfill
 
     \hrulefill
-    
+
     Thank you for your listening to my presentation.
     \vspace{0.25cm}
     
@@ -1967,17 +2024,17 @@
         \begin{tikzpicture}
             \node[state,ForestGreen] (treatment) at (0,0) {$D$};
             \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
-            \path[->] (instrument) edge (treatment);
+            \path[->,thick] (instrument) edge (treatment);
             \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
             \node[text width=1.675cm, color=ForestGreen] [above=0.15cm of treatment] (education) {Education};
             \node[color=orange] [above left=-0.3cm and 0.2cm of treatment] {First-stage};
             \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
-            \path[->] (treatment) edge (outcome);
+            \path[->,thick] (treatment) edge (outcome);
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
             \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
             % Add in direct effects.
-            \path[->] (instrument) edge[bend right=45] (outcome);
-            \node[text height=0.25cm, color=orange] [below=0.4cm of treatment] {Direct};
+            \path[->,thick] (instrument) edge[bend right=45] (outcome);
+            \node[text height=0.25cm, color=orange] [below=0.4cm of treatment] {Direct Effect};
         \end{tikzpicture}
     \end{figure}
 \end{frame}
