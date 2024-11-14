@@ -257,7 +257,8 @@
             \includegraphics[width=\textwidth]{presentation-files/headlines/nature-2012-uneasy.png}
         \end{subfigure}
     \end{figure}
-\end{frame}%-------------------------------------------------------------------------------
+\end{frame}
+%-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
     \frametitle{Introduction}
     \textbf{How do genes associated with education affect labour outcomes?}
@@ -311,7 +312,53 @@
         \pause
         \item Finding that genes associated with education do/not affect outcomes \textbf{directly or indirectly,} inferring they do/not measure intelligence, aptitude, or other factors.
     \end{enumerate}
-\end{frame}%-------------------------------------------------------------------------------
+\end{frame}
+%-------------------------------------------------------------------------------
+\begin{frame}[noframenumbering]
+    \frametitle{Introduction}
+    \textbf{How do genes associated with education affect labour outcomes?}
+    \vspace{0.25cm}
+    
+    \begin{beamercolorbox}{postit}
+        \raggedright
+        \vspace{0.01cm} \\
+        ``The evidence suggests fluid intelligence and self-control partly mediate the relationship between the PGI [genetic measure] and education.
+        Genetic effects are economically meaningful, comparable in size to effects of family environment.''
+        \hfill
+        \underline{\textit{Abstract, Carvalho (2024, JPE Micro).}}
+        \vspace{0.02cm}
+    \end{beamercolorbox}
+
+    \vspace{-0.25cm}
+    \begin{figure}
+        \centering
+        \singlespacing
+        \begin{tikzpicture}
+            % First nodes, Z, D, Y
+            \node[state,ForestGreen] (treatment) at (0,0) {$D$};
+            \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
+            % Labels for Z, D, Y
+            \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
+            \node[color=blue] [left=0.1cm of instrument] {Ed Genes};
+            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+            %% Label the direct effect
+            \path[->,very thick,color=blue] (instrument) edge[bend right=45] (outcome);
+            \node[color=MidnightBlue] [below=1cm of treatment] {Direct Genetic Effect};
+            \pause
+            \path[->,very thick, color=ForestGreen] (instrument) edge (treatment);
+            \node[color=ForestGreen] [above=0.1cm of treatment] (education) {Education};
+            \path[->,very thick, color=ForestGreen] (treatment) edge (outcome);
+        \end{tikzpicture}
+    \end{figure}
+    \pause
+    \vspace{-0.25cm}
+    \begin{itemize}
+        \item Genetic effects could be entirely returns to education
+        \item Disputing claims that genetic measures pick up ``fluid intelligence.''
+        \item Ratio, direct / indirect, is unclear
+    \end{itemize}
+\end{frame}
+%-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
     \frametitle{Introduction}
     \textbf{How do genes associated with education affect labour outcomes?}
@@ -818,7 +865,6 @@
     =   \textcolor{red}{w_1} +
         \textcolor{red}{w_2} +
         \textcolor{red}{w_3} \]
-    \pause
     \textbf{Note:} Humans have two copies of each chromosome, so indicator is 0, 1, 2 corresponding to how many copies one has.
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -934,7 +980,7 @@
         \begin{subfigure}[c]{0.525\textwidth}
             \textbf{The first ``Biobank''}
             \begin{itemize}
-                \item Tissue (e.g., DNA) samples from 500,000 Britons
+                \item Tissue samples (e.g., DNA) from 500,000 Britons
                 \item Large-scale population study started in 2004, to investigate biological $+$ genetic basis of low-frequency diseases
                 \item Includes surveys for social outcomes, including education, occupation, etc.
             \end{itemize}
@@ -961,7 +1007,7 @@
         \begin{subfigure}[c]{0.525\textwidth}
             \textbf{The first ``Biobank''}
             \begin{itemize}
-                \item Tissue (e.g., DNA) samples from 500,000 Britons
+                \item Tissue samples (e.g., DNA) from 500,000 Britons
                 \item Large-scale population study started in 2004, to investigate biological $+$ genetic basis of low-frequency diseases
                 \item Includes surveys for social outcomes, including education, occupation, etc.
             \end{itemize}
@@ -1039,7 +1085,7 @@
 %-------------------------------------------------------------------------------
 \begin{frame}
     \frametitle{Genetic Associations: Independent Assortment}
-    \textbf{Question:} Is Ed PGI randomly assigned?
+    \textbf{Question:} Is Ed PGI correlated with demographics?
     \vspace{-0.25cm}
     \begin{figure}
         \centering
@@ -1136,7 +1182,7 @@
                 presentation-files/headlines/mendels-pnas-1.png}}
     \end{figure}
     \vfill
-    Abbot Mendel (1886) worked through principles of genetic inheritance 
+    Gregor Mendel (1886) worked through principles of genetic inheritance 
     (Stenseth Andersson Hoekstra, 2022 PNAS).
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1150,7 +1196,7 @@
     \end{figure}
     \vspace{0.25cm}
 
-    Abbot Mendel (1886) worked through principles of genetic inheritance 
+    Gregor Mendel (1886) worked through principles of genetic inheritance 
     (Stenseth Andersson Hoekstra, 2022 PNAS).
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1163,7 +1209,7 @@
                 presentation-files/headlines/mendels-peas.png}}
     \end{figure}
     \vfill
-    Abbot Mendel (1886) worked through principles of genetic inheritance 
+    Gregor Mendel (1886) worked through principles of genetic inheritance 
     (Stenseth Andersson Hoekstra, 2022 PNAS).
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1223,7 +1269,7 @@
                 \text{\textcolor{ForestGreen}{Child} inherits} \; \big| \;
                 \text{\textcolor{blue}{Father} one copy} \big)
                 = \frac 12 \]
-            I.e., inheritance prop. score identified.
+            I.e., inheritance prop. score depends only on parents' genetics.
 
             \vspace{0.5cm}
             \begin{colormixin}{15!bg}
@@ -1297,11 +1343,11 @@
                 \text{\textcolor{ForestGreen}{Child} inherits} \; \big| \;
                 \text{\textcolor{blue}{Father} one copy} \big)
                 = \frac 12 \]
-            I.e., inheritance prop. score identified.
+            I.e., inheritance prop. score depends only on parents' genetics.
 
             \vspace{0.5cm}
             \pause
-            Propagate this reasoning across all \textcolor{red}{1,271 single-letter changes} in the Ed PGI, and both parents:
+            Propagate this reasoning across all \textcolor{red}{1,271 single-letter gene changes} in the Ed PGI, and both parents:
     \end{columns}
     \[ Z_i^\text{\textcolor{ForestGreen}{Child}}
         - \Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
@@ -1511,34 +1557,34 @@
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
-%\begin{frame}[noframenumbering]
-%    \frametitle{Genetic Associations: Outcomes}
-%    \textbf{Question:} Is Ed PGI related to labour market outcomes?
-%    
-%    \vspace{-0.5cm}
-%    \begin{figure}
-%        \centering
-%        \singlespacing
-%        \begin{tikzpicture}
-%            \node[state,blue] (instrument) at (0,0) {$Z$};
-%            \node[state,ForestGreen] (outcome) [right=1.5cm of instrument] {$D$};
-%            \path[->,thick] (instrument) edge (outcome);
-%            % Label the nodes with econ examples
-%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-%            \node[text width=0.1cm, color=ForestGreen] [right=-0.01cm of outcome] {Education};
-%        \end{tikzpicture}
-%    \end{figure}
-%    \vspace{-0.25cm}
-%    \begin{figure}
-%        \centering
-%        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
-%            $+$ \textcolor{ForestGreen}{Education Years}.}
-%        \makebox[\textwidth][c]{
-%            \includegraphics[width=0.8\textwidth]{
-%               ../text/sections/figures/genescore-edyears-causal.png}
-%            }
-%    \end{figure}
-%\end{frame}
+\begin{frame}[noframenumbering]
+    \frametitle{Genetic Associations: Outcomes}
+    \textbf{Question:} Is Ed PGI related to labour market outcomes?
+    
+    \vspace{-0.5cm}
+    \begin{figure}
+        \centering
+        \singlespacing
+        \begin{tikzpicture}
+            \node[state,blue] (instrument) at (0,0) {$Z$};
+            \node[state,ForestGreen] (outcome) [right=1.5cm of instrument] {$D$};
+            \path[->,thick] (instrument) edge (outcome);
+            % Label the nodes with econ examples
+            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+            \node[text width=0.1cm, color=ForestGreen] [right=-0.01cm of outcome] {Education};
+        \end{tikzpicture}
+    \end{figure}
+    \vspace{-0.25cm}
+    \begin{figure}
+        \centering
+        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+            $+$ \textcolor{ForestGreen}{Education Years}.}
+        \makebox[\textwidth][c]{
+            \includegraphics[width=0.8\textwidth]{
+                ../text/sections/figures/genescore-edyears-causal.png}
+            }
+    \end{figure}
+\end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
     \frametitle{Genetic Associations: Outcomes}
@@ -1568,34 +1614,34 @@
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
-%\begin{frame}[noframenumbering]
-%    \frametitle{Genetic Associations: Outcomes}
-%    \textbf{Question:} Is Ed PGI related to labour market outcomes?
-%
-%    \vspace{-0.5cm}
-%    \begin{figure}
-%        \centering
-%        \singlespacing
-%        \begin{tikzpicture}
-%            \node[state,blue] (instrument) at (0,0) {$Z$};
-%            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-%            \path[->,thick] (instrument) edge (outcome);
-%            % Label the nodes with econ examples
-%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-%            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-%        \end{tikzpicture}
-%    \end{figure}
-%    \vspace{-0.25cm}
-%    \begin{figure}
-%        \centering
-%        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
-%            $+$ \textcolor{red}{Annual Earnings.}}
-%        \makebox[\textwidth][c]{
-%            \includegraphics[width=0.8\textwidth]{
-%                ../text/sections/figures/genescore-earnings-causal.png}
-%                }
-%    \end{figure}
-%\end{frame}
+\begin{frame}[noframenumbering]
+    \frametitle{Genetic Associations: Outcomes}
+    \textbf{Question:} Is Ed PGI related to labour market outcomes?
+
+    \vspace{-0.5cm}
+    \begin{figure}
+        \centering
+        \singlespacing
+        \begin{tikzpicture}
+            \node[state,blue] (instrument) at (0,0) {$Z$};
+            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
+            \path[->,thick] (instrument) edge (outcome);
+            % Label the nodes with econ examples
+            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+        \end{tikzpicture}
+    \end{figure}
+    \vspace{-0.25cm}
+    \begin{figure}
+        \centering
+        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+            $+$ \textcolor{red}{Annual Earnings.}}
+        \makebox[\textwidth][c]{
+            \includegraphics[width=0.8\textwidth]{
+                ../text/sections/figures/genescore-earnings-causal.png}
+                }
+    \end{figure}
+\end{frame}
 %-------------------------------------------------------------------------------
 \section{3. Direct and Indirect Effects}
 %-------------------------------------------------------------------------------
@@ -1726,7 +1772,7 @@
     \end{align*}
     \vfill
     \pause
-    \textcolor{red}{Bias terms persist}, regardless of how random \textcolor{blue}{Ed PGI, $Z_i$} is, with any selection-on-observables estimand (i.e., identification result).
+    \textcolor{red}{Bias terms persist}, regardless of how random \textcolor{blue}{Ed PGI, $Z_i$} is, with any selection-on-observables estimand (i.e., negative identification result).
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
