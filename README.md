@@ -1,7 +1,7 @@
 # direct-selection-education
 
-Senan Hogan-Hennessy, 10 August 2023
+Senan Hogan-Hennessy, most recent update 15 November 2024
 
 ## Explanation
 
-This folder contains all files related to my approach to causal mediation, applied to Mendellian Randomisation minus the exclusion restriction.
+This folder contains all relevant files (not data files) for my academic project ``The Direct and Indirect Effects of Genetics and Education.''
