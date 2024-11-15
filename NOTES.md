@@ -34,11 +34,10 @@ This could be fruitful if it is plausibly different from Cavhalo's work; at the 
 Figure out if the formula instrument leads to meaningful differences; it could be the case that OLS with linear controls for mother and father relies heavily on the extrapolation argument, while the instrument is a purer design-based proposition.
 
 4. From Senan:
-It feels like the metrics work for mediation methods is shoe-horned in here.
-Likely it should be spun into a different paper, ``causal mediation under selection'' with a Roy model and control function solution.
+If the parental deviation formula IV yields distinct results from Cavhalo (2024), then this paper should focus more on total effects, and a spun out version on the metrics of mediation becomes a different project, ``causal mediation under selection'' with a Roy model and control function solution.
+It feels like the metrics work for mediation methods is shoe-horned into this paper.
 Using the UK Biobank data in a section of that paper is still possible, too.
 This could then accompany a paper singling out the Vietnam draft IV, too.
-
 
 ## General notes from faculty meetings.
 
@@ -46,7 +45,7 @@ This could then accompany a paper singling out the Vietnam draft IV, too.
 
 - Be very clear and precise about the research question: what am I asking, which has a clear answers?  What is the ideal experiment?
 - What is important, in economic terms, about learning the decomposition of direct and indirect effects of education genetics?
-    How would this influence policy, understanding, our view of society, etc.?
+How would this influence policy, understanding, our view of society, etc.?
 - Be very precise on estimand of interest, and show in a presentation a simple version of this.
 - A very open question on what role genetic analyses do when genes are only important up to their interactions with environment.
 For example, a genetic disability in the 1950s may hinder education take-up (despite high returns to education) leading to high direct genetic effect estimates; this is levelled out after the passage of the ADA in 1970s, despite nothing changing about genetics.
