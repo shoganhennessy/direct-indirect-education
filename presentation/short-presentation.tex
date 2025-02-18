@@ -1520,13 +1520,15 @@
             (e.g., formula instrument).
     \end{columns}
     \pause
-    \vspace{0.5cm}
-
-    \textbf{LWIPS Note:} UK Biobank has data on a few thousand people linked to parent/siblings.
-    Look forward to results using these data $+$ design in 2025.
-    % Put a figure which shows the further apart parents are, then more room to get a random choice.
-    % Normal dist between Min{Z father, Z Mother} and Max{Z father, Z Mother}, with mean at the half-way point.
-    % And perhaps fat tails above/below maxi/min, respectively.
+    \[ Z_i^\text{\textcolor{ForestGreen}{Child}} = 
+    Z_i^\text{\textcolor{MidnightBlue}{Random}}
+    + \frac 12 \left( Z^\text{\textcolor{orange}{Mother}}_i +
+        Z^\text{\textcolor{blue}{Father}}_i \right) \]
+    \[ Y_i = \alpha + \beta Z_i^\text{\textcolor{MidnightBlue}{Random}}
+    \neq \alpha + \beta Z_i^\text{\textcolor{ForestGreen}{Child}}
+    + \phi^M Z^\text{\textcolor{orange}{Mother}}_i +
+    \phi^F Z^\text{\textcolor{blue}{Father}}_i \]
+    %\textbf{LWIPS Note:} UK Biobank has data on a few thousand people linked to parent/siblings.
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}
