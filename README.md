@@ -1,4 +1,4 @@
-# direct-selection-education
+# direct-indirect-education
 
 Senan Hogan-Hennessy, most recent update 15 November 2024
 
