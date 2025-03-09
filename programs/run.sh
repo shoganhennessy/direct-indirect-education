@@ -34,4 +34,4 @@ cd ..
 cd ../text
 latexmk -pdf paper.tex
 latexmk -c
-cp paper.pdf ../mr-education.pdf
+cp paper.pdf ../direct-indirect-education.pdf

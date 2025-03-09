@@ -1,0 +1,25 @@
+# UKB variable names.
+
+sex,                    p31,        https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=31
+birthyear,              p34,        https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=34
+birthmonth,             p52,        https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=52
+recruitedage,           p21022,     https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=21022
+datelastcontact,        p20143,     http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=20143
+edquals,                p6138_i0,   https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=6138
+agefinishededuc,        p845_i0,    https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=845
+ethnicity,              p21000_i0,  https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=21000
+jobcode,                p20277_i0,  https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=20277
+numjobs,                p22599,     http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22599
+numjobgaps,             p22661,     https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22661
+jobcode_online,         p22601_a0,  https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22601
+jobcode_onlineSOC2000,  p22617_a0,  https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22617
+jobyearstarted_online,  p22602_a0,  http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22602
+jobhoursworked_online,  p22604_a0,  http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22604
+jobhoursperweek_online, p22605_a0,  http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22605
+yearendededuc_online,   p22501,     http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=22501
+datedeath,              p40000_i0,  http://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=40000
+
+
+
+
+example,       pYYYYYYYY, https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=YYY
