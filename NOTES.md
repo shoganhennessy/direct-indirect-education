@@ -9,6 +9,7 @@ Based on recent meetings with Professors
 - Use the school law change birth cohorts as an instrument for education, and/or use another instrument (distance to college, etc.).
 
 3. Write my results into the document as I go.
+- Muslimnova+ (2025) and Nina  (2025) control for the PCA in their analyses.  Look into why.
 
 4. Take the code for parental imputation of EA PGI, and apply it to the 3 mental health scores, starting that project document as I go with the code from this one.
 
@@ -38,6 +39,11 @@ If the parental deviation formula IV yields distinct results from Cavhalo (2024)
 It feels like the metrics work for mediation methods is shoe-horned into this paper.
 Using the UK Biobank data in a section of that paper is still possible, too.
 This could then accompany a paper singling out the Vietnam draft IV, too.
+
+5. From Doug Miller, March 2025.
+- External literature on returns to education show that OLS estimates are, in fact, not far off real (despite concerns for Roy-style ability selection).  A slide showing the CM results OLS + selection model, with a button for OLS vs selection-model education returns (to illustrate how I am over-coming the identification problem).
+- Consider a whisker plot, summarising correlation of Ed PGI with other PGIs, then parent differenced one no longer correlated with Ed PGI.
+- Recommends eventually controlling for other PGIs, in the analysis. 
 
 ## General notes from faculty meetings.
 
