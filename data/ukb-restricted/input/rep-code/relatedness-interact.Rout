@@ -1,0 +1,77 @@
+
+R version 4.4.0 (2024-04-24) -- "Puppy Cup"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/R
+> ## Senan Hogan-Hennessy, 28 Feb 2025
+> ## Extract the UKB relatedness file, on UKB platform.
+> 
+> # Get the relatedness file.
+> system('dx download -f "Bulk/Genotype Results/Genotype calls/ukb_rel.dat"')
+> # Show what we are dealing with.
+> readLines("ukb_rel.dat", n = 10)
+ [1] "ID1 ID2 HetHet IBS0 Kinship"         "2530276 2616679 0.07 0.0056 0.2213" 
+ [3] "2530276 3660169 0.083 0.0041 0.2787" "2640412 1368042 0.066 0 0.2492"     
+ [5] "5645351 4364691 0.044 0.0145 0.0541" "4593836 1821383 0.048 0.0136 0.0709"
+ [7] "4593836 5920366 0.076 0.0051 0.244"  "1986269 3238888 0.046 0.0147 0.0612"
+ [9] "1986269 5126244 0.047 0.0128 0.076"  "3469376 6016885 0.045 0.0148 0.0571"
+> 
+> # Load the relatedness file.
+> relatedness.data <- read.table("ukb_rel.dat", header = TRUE)
+> 
+> # Show format of the file.
+> print(relatedness.data[1:10, ])
+       ID1     ID2 HetHet   IBS0 Kinship
+1  2530276 2616679  0.070 0.0056  0.2213
+2  2530276 3660169  0.083 0.0041  0.2787
+3  2640412 1368042  0.066 0.0000  0.2492
+4  5645351 4364691  0.044 0.0145  0.0541
+5  4593836 1821383  0.048 0.0136  0.0709
+6  4593836 5920366  0.076 0.0051  0.2440
+7  1986269 3238888  0.046 0.0147  0.0612
+8  1986269 5126244  0.047 0.0128  0.0760
+9  3469376 6016885  0.045 0.0148  0.0571
+10 1137118 1797267  0.046 0.0138  0.0644
+> 
+> # Export usable data file.
+> write.table(relatedness.data, "relatedness-extract.tsv",
++     row.names = FALSE, sep = "\t")
+> system(paste('dx upload relatedness-extract.tsv --path',
++     '"data-clean/relatedness-extract.tsv"'))
+ID                                file-Gz0yg6QJB6zxBJQ30B3yx0yv
+Class                             file
+Project                           project-GyVy1B8JB6zgBg7vXgfk5QVG
+Folder                            /data-clean
+Name                              relatedness-extract.tsv
+State                             closing
+Visibility                        visible
+Types                             -
+Properties                        -
+Tags                              -
+Outgoing links                    -
+Created                           Fri Feb 28 17:00:10 2025
+Created by                        seh325
+ via the job                      job-Gz0y7q0JB6zY934FgY6748QJ
+Last modified                     Fri Feb 28 17:00:11 2025
+Media type                        
+archivalState                     "live"
+cloudAccount                      "cloudaccount-dnanexus"
+> 
+> proc.time()
+   user  system elapsed 
+  1.174   0.227   2.334 
