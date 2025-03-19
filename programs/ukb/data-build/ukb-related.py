@@ -46,38 +46,48 @@ relatedBaseData = pd.read_csv(
 ################################################################################
 ## Clean and extract the phenotype  education data (Python lists comprehension).
 
+# Define function edQual -> Edyears Following ISCED (see Mulsimnova+ 2024, p14)
+# https://github.com/DilnozaM/Rank-Concordance-of-PGI/blob/main/GWAS%26PGS/EA_GWAS/Preparing_residual_EA_new_nosibrel_fastgwas.do
+def edQualsConvert(edQual) :
+    """ Input: edQual, a number representing ed qual from UKB
+    Output: edYears, a number representing num years of ed from that qual.
+    """
+    edYears = np.nan
+    if edQual == -7   : edYears =  7      # None of above, given mandatory min.
+    elif edQual == -3 : edYears =  np.nan # Prefer not to answer.
+    elif edQual == 1  : edYears =  20     # Uni degree.
+    elif edQual == 2  : edYears =  13     # A Levels.
+    elif edQual == 3  : edYears =  10     # CSEs (old version of exams age 16)
+    elif edQual == 4  : edYears =  10     # GCSEs (new version of exams age 16)
+    elif edQual == 5  : edYears =  19     # Vocational degree (one year higher).
+    elif edQual == 6  : edYears =  15     # Professional qual (teach, nurse).
+    return(edYears)
 # extract the column of lists.
 from ast import literal_eval
-edqualsLists = [literal_eval(row)
+edQualsLists = [literal_eval(row)
     for row in phenoData["edquals"].fillna("[]").tolist()]
-# Get the maximum qualification.
+# Get years of education for each qualification they have obtained.
+edYearsLists = [
+    [edQualsConvert(edQual) for edQual in edQualsList]
+    for edQualsList in edQualsLists]
+# Get the maximum edyears.
 maxEdList = [max(edList)
     if len(edList) > 0
     else np.nan
     for edList in edqualsLists]
-# Convert ed quals -> edyears, Following ISCED (see Mulsimnova+ 2024, p14)
-# https://github.com/DilnozaM/Rank-Concordance-of-PGI/blob/main/GWAS%26PGS/EA_GWAS/Preparing_residual_EA_new_nosibrel_fastgwas.do
-edyearsList = [
-    np.nan      if maxEdQual == np.nan
-    else 7      if maxEdQual == -7 # None of above, so code mandatory minimum.
-    else np.nan if maxEdQual == -3 # Prefer not to answer.
-    else 20     if maxEdQual == 1  # Uni degree.
-    else 13     if maxEdQual == 2  # A Levels.
-    else 10     if maxEdQual == 3  # CSEs (old version of exams at age 16)
-    else 10     if maxEdQual == 4  # GCSEs (new version of exams at age 16)
-    else 19     if maxEdQual == 5  # Vocational degree (one year of tertiary).
-    else 15     if maxEdQual == 6  # Professional qualification (teach, nurse).
-    else np.nan
-    for maxEdQual in maxEdList]
 # Put onto the phenotype dataframe.
-phenoData["edyears"] = edyearsList
+phenoData["edyears"] = maxEdList
 
 
 ################################################################################
 ## Identify relatives from UKB relatedness file.
 
 # King manual threshold for 1st degree related (sibling or parent), >= 0.1770.
-relatedData = relatedBaseData[relatedBaseData["Kinship"] >= 0.1770]
+print(relatedBaseData)
+firstDegreeThreshold = [0.1770, 0.3540]
+relatedData = relatedBaseData[
+    (firstDegreeThreshold[0] < relatedBaseData["Kinship"]) & 
+    (relatedBaseData["Kinship"] <= firstDegreeThreshold[1])]
 
 # Sort within each person (ID1) in descending relatedness, and set index
 relatedData = relatedData.sort_values(
@@ -89,9 +99,7 @@ relatedData.set_index(relatedData["eid"], drop=True, inplace=True)
 # Note: list of relatives is in descending relatedness order, i.e. [1st, 2nd, .]
 relatedDict = {}
 for id1 in relatedData["ID1"].tolist() :
-    if id1 in relatedDict :
-        continue
-    else :
+    if id1 not in relatedDict :
         relatedDict[id1] = relatedData[
             relatedData["ID1"] == id1]["ID2"].tolist()
 
@@ -102,7 +110,7 @@ parentData["eid"] = list(relatedDict.keys())
 parentData.set_index(parentData["eid"], drop=False, inplace=True)
 
 # Identify each relative, by gender + age difference, and add to parentData.
-for id1 in list(relatedDict.keys()) :
+for id1 in parentData["eid"].tolist() :
     ownData = phenoData.loc[id1]
     for relativeEid in relatedDict[id1] :
         relativeData = phenoData.loc[relativeEid]
@@ -115,10 +123,8 @@ for id1 in list(relatedDict.keys()) :
             # Parent, who is female, is mother.
             elif relativeData["sex_male"] == 0 :
                 parentData.loc[id1, "eid_mother"] = relativeEid
-            # Then exit this loop
-            continue
         # If not child-parent, then siblings
-        elif ageGap <= 15 :
+        else :
             if pd.isna(parentData.loc[id1, "eid_sibling1"]) :
                 parentData.loc[id1, "eid_sibling1"] = relativeEid
             elif pd.isna(parentData.loc[id1, "eid_sibling2"]) :
@@ -127,13 +133,62 @@ for id1 in list(relatedDict.keys()) :
                 parentData.loc[id1, "eid_sibling3"] = relativeEid
 
 # Show how many people have any 1st degree relatives -> all in the Kinship file.
+print(parentData)
 print(parentData[pd.notna(parentData["eid_father"])
     | pd.notna(parentData["eid_mother"])
     | pd.notna(parentData["eid_sibling1"])])
+# Show how many people have any parent + sibling degree relatives.
+print(parentData[pd.notna(parentData["eid_father"])
+    | pd.notna(parentData["eid_mother"])])
+print(parentData[(pd.notna(parentData["eid_father"])
+    | pd.notna(parentData["eid_mother"]))
+    & pd.notna(parentData["eid_sibling1"])])
+
+#TODO: Muslimnova (2024) uses IBS_0 < 0.0012 to define first-degree parents.
+#TODO  and in so doing get a higher obs count. 
+#TODO  Carvalho (2024) get higher match by another approach too.
+#TODO  -> Needs refining, to get the most amount of parents.
 
 
 ################################################################################
 ## Merge relative EIDs onto the phenotype file.
 
-#! Todo:
-#! Also figure out the imputation steps.
+# Define variables to take over
+relativeVars = ["eid", "edpgi_norm"]
+fatherVars   = {var : var + "_father"   for var in relativeVars}
+motherVars   = {var : var + "_mother"   for var in relativeVars}
+sibling1Vars = {var : var + "_sibling1" for var in relativeVars}
+sibling2Vars = {var : var + "_sibling2" for var in relativeVars}
+sibling3Vars = {var : var + "_sibling3" for var in relativeVars}
+
+# Merge father Ed PGI onto the parentData.
+edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
+    columns=fatherVars)
+parentData = parentData.merge(edpgiData, how="left", on="eid_father")
+# Merge mother Ed PGI onto the parentData.
+edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
+    columns=motherVars)
+parentData = parentData.merge(edpgiData, how="left", on="eid_mother")
+# Merge sibling1 Ed PGI onto the parentData.
+edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
+    columns=sibling1Vars)
+parentData = parentData.merge(edpgiData, how="left", on="eid_sibling1")
+# Merge sibling2 Ed PGI onto the parentData.
+edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
+    columns=sibling2Vars)
+parentData = parentData.merge(edpgiData, how="left", on="eid_sibling2")
+# Merge sibling3 Ed PGI onto the parentData.
+edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
+    columns=sibling3Vars)
+parentData = parentData.merge(edpgiData, how="left", on="eid_sibling3")
+
+# Add on the relative variables to the phenotype data.
+phenoData = phenoData.reset_index(drop=True).merge(
+    parentData, how="left", on="eid")
+
+
+################################################################################
+## Save resulting data file.
+
+
+df.to_csv(index=False)
