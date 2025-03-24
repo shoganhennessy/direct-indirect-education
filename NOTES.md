@@ -2,16 +2,77 @@
 
 Based on recent meetings with Professors
 
-## To-DO:
+## Current work plan:
 
-2. Work with UK Biobank data, for causal PGI analysis
-- Use the relatedness file to get parents, and use the imputation package https://github.com/AlexTISYoung/snipar
-- Use the school law change birth cohorts as an instrument for education, and/or use another instrument (distance to college, etc.).
+1. Use the observed PGI, mean(parents, siblings), to infer causal effects with sample size I currently have.
+Over summer, increase sample size by imputing from {parents, siblings} genotype data.
+(1) Operationalise the Young Snipar imputation to increase sample size. https://github.com/AlexTISYoung/snipar
+(2) Code which finds the genes inherited randomly, because a parent had only one copy (and not 2), and generate a PGI from these value.
+This second option is meaningfully different from the first, and might have different results in the causal estimates if so.  Indeed, it may not be centred around zero either.
 
-3. Write my results into the document as I go.
-- Muslimnova+ (2025) and Nina  (2025) control for the PCA in their analyses.  Look into why.
+2. 
 
-4. Take the code for parental imputation of EA PGI, and apply it to the 3 mental health scores, starting that project document as I go with the code from this one.
+## Current to-do list in writing the paper:
+
+1. Connect the OCC score wages in pheno data, provided by Kweon+ (2025).
+
+2. Data section
+
+- Summary tables as follows:
+
+      | UKB sibling sample | UKB entire sample
+----------------------------------------------
+Var 1 | Mean               | Mean             
+      | (SD)               | (SD)             
+...                                            
+Var N | Mean               | Mean             
+      | (SD)               | (SD)             
+      |                    |                  
+      | Obs                | Obs              
+
+- Keep the HRS side-by-side figures, and update to new UKB data.
+
+3. Write the randomisation design section, with figures for the new differences measure
+- Connect to the formula instrument (Z - E{Z | parents} ~ Z_i) idea, showing ``first-stage'' results with estimates ~ 1.
+- (summer) eventually to be rewritten with the one copy inheritance measure to replace the Z - mean{parents, siblings} measure.
+
+Get a figure showing Ed PGI is correlated with other things (including other PGIs), but the differences measure is not.
+
+4. Write the total effect estimates, Z -> Ed years, Income.
+
+Table 2: total genetic effects.
+- Raw OLS
+- Raw OLS + controls
+- OLS with differenced measure
+- 2SLS with differences measure instrumenting the Ed PGI
+
+Figures which show the OLS slope vs causal slope for Ed Years + Income.
+
+5. Write the causal framework for mediation (draw heavily from my other paper), noting the non-identification of direct/indirect effects if selection-into-education.
+
+Write one table of the first-stage IV, School leaving year change + education tuition fees for ed years (note: these are both year of birth-based).
+
+6. Show the mediation results, side-by-side in a table:
+- OLS
+- OLS + controls
+- Heckman selection model
+- Semi-parametric selection model
+
+2-3 paragraphs writing on what the mediation results actually mean.
+
+### Newest Abstract Ideas.
+
+I use Mendelian independent inheritance, where a child inherits some genes from parents and not other due to chance, to estimate causal effects.
+This approach weights heavily children with greater differences from their parents, similar to a formula instrument approach.
+RESULTS ON WAGES.
+Next, I use a selection model approach
+
+
+a formula instrument for resulting 
+
+
+natural variation in the Ed PGI.
+This approach is 
 
 ### Comments from Labour Seminar
 

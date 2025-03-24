@@ -16,12 +16,21 @@ R CMD BATCH --no-save hrs-collapse.R
 # Build the cross-section of phenotype data, with PGIs.
 R CMD BATCH --no-save ukb-build.R
 # Identify relatives in UKB data, based on genetic similarity.
-python3 ukb-related.py
+python3 ukb-related.py --config-from-file >> ukb-related.py
 # Go back to base folder.
 cd ..
 
 ## Statistical analysis.
 cd data-analyse
+# Summarise UKB data.
+R CMD BATCH --no-save ukb-summarise.R
+# Analsyse HRS data, with the invalid instrument educ score.
+R CMD BATCH --no-save hrs-educ-iv.R
+
+
+
+
+
 # Summarise HRS data.
 R CMD BATCH --no-save hrs-summarise.R
 # Analsyse HRS data, with the invalid instrument educ score.

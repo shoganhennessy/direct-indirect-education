@@ -25,6 +25,7 @@ print(time.strftime("%H:%M:%S, %d %B %Y"))
 dataFolder = os.path.join("..", "..", "..", "data", "ukb-restricted")
 inputFolder = os.path.join(dataFolder, "input")
 intermedFolder = os.path.join(dataFolder, "intermediate-files")
+outputFolder = os.path.join(dataFolder, "cleaned")
 
 
 ################################################################################
@@ -80,74 +81,149 @@ phenoData["edyears"] = maxEdList
 
 
 ################################################################################
-## Identify relatives from UKB relatedness file.
+## Validate UKB relatedness file.
 
-# King manual threshold for 1st degree related (sibling or parent), >= 0.1770.
-print(relatedBaseData)
+# Compare the observation count to Muslimnova+ (2024) Table A1.
+relatedData = relatedBaseData.copy()
+print(relatedData)
+# Define 1st degree sibling/parents. (lower bound to take out identical twins).
 firstDegreeThreshold = [0.1770, 0.3540]
-relatedData = relatedBaseData[
-    (firstDegreeThreshold[0] < relatedBaseData["Kinship"]) & 
-    (relatedBaseData["Kinship"] <= firstDegreeThreshold[1])]
+relatedData["relative_1stdegree"] = (
+    firstDegreeThreshold[0] < relatedBaseData["Kinship"]) & (
+        relatedBaseData["Kinship"] <= firstDegreeThreshold[1])
+# Define aprent child by IBS_0 threshold, 0.0012 (above siblings, below parent).
+parentThreshold = 0.0012
+relatedData["relative_parent"] = (
+    relatedBaseData["IBS0"] < parentThreshold)
+# SHow the number of pairs in the sample.
+print(relatedData[relatedData["relative_1stdegree"] == True].groupby(
+    ["relative_1stdegree", "relative_parent"]).size())
+# WANT:
+#                 |  1st degree /   |  1st degree
+#                 |  Parent-child   |  siblings
+# Kinship coef    |  0.1770- 0.3540 |  0.1770 -0.3540
+# IBS 0           |  <0.0012        |  >0.0012
+# N (pairs)       |  6,271          |  22,659
+
+
+################################################################################
+## Identify parents from UKB relatedness file.
+
+# Separately define the parents
+relatedParentData = relatedData[(relatedData["relative_1stdegree"] == True) &
+    (relatedData["relative_parent"] == True)].copy()
 
 # Sort within each person (ID1) in descending relatedness, and set index
-relatedData = relatedData.sort_values(
-    by=["ID1", "Kinship"], ascending=[True, False])
-relatedData["eid"] = relatedData["ID1"]
-relatedData.set_index(relatedData["eid"], drop=True, inplace=True)
+relatedParentData = relatedParentData.sort_values(
+    by=["ID1", "relative_parent", "Kinship"], ascending=[True, True, False])
+relatedParentData["eid"] = relatedParentData["ID1"]
+relatedParentData.set_index(relatedParentData["eid"], drop=True, inplace=True)
 
 # For each individual (ID1), get the list of 1st degree relatives (ID2).
 # Note: list of relatives is in descending relatedness order, i.e. [1st, 2nd, .]
 relatedDict = {}
-for id1 in relatedData["ID1"].tolist() :
+for id1 in relatedParentData["ID1"].tolist() :
     if id1 not in relatedDict :
-        relatedDict[id1] = relatedData[
-            relatedData["ID1"] == id1]["ID2"].tolist()
+        relatedDict[id1] = relatedParentData[
+            relatedParentData["ID1"] == id1]["ID2"].tolist()
 
 # Get an empty data frame, to fill, and return.
-parentData = pd.DataFrame({}, columns=["eid", "eid_mother", "eid_father",
-    "eid_sibling1", "eid_sibling2", "eid_sibling3"])
+parentData = pd.DataFrame({}, columns=["eid", "eid_mother", "eid_father"])
 parentData["eid"] = list(relatedDict.keys())
 parentData.set_index(parentData["eid"], drop=False, inplace=True)
 
-# Identify each relative, by gender + age difference, and add to parentData.
+# Identify each parent, by gender, and add to parentData.
 for id1 in parentData["eid"].tolist() :
     ownData = phenoData.loc[id1]
     for relativeEid in relatedDict[id1] :
         relativeData = phenoData.loc[relativeEid]
-        # Test if they could be child-parent, 15 <= age gap <= 60
-        ageGap = ownData["birthyear"] - relativeData["birthyear"]
-        if 15 <= ageGap & ageGap <= 60 :
-            # Parent, who is male, is father.
-            if relativeData["sex_male"] == 1 :
-                parentData.loc[id1, "eid_father"] = relativeEid
-            # Parent, who is female, is mother.
-            elif relativeData["sex_male"] == 0 :
-                parentData.loc[id1, "eid_mother"] = relativeEid
-        # If not child-parent, then siblings
+        # Parent, who is male, is father.
+        if relativeData["sex_male"] == 1 :
+            parentData.loc[id1, "eid_father"] = relativeEid
+        # Parent, who is female, is mother.
+        elif relativeData["sex_male"] == 0 :
+            parentData.loc[id1, "eid_mother"] = relativeEid
+        # If not mother or father, raise an error 
         else :
-            if pd.isna(parentData.loc[id1, "eid_sibling1"]) :
-                parentData.loc[id1, "eid_sibling1"] = relativeEid
-            elif pd.isna(parentData.loc[id1, "eid_sibling2"]) :
-                parentData.loc[id1, "eid_sibling2"] = relativeEid
-            elif pd.isna(parentData.loc[id1, "eid_sibling3"]) :
-                parentData.loc[id1, "eid_sibling3"] = relativeEid
+            raise ValueError("Cannot tell if EID " + str(relativeEid
+                ) + " is mother or father.")
 
-# Show how many people have any 1st degree relatives -> all in the Kinship file.
+
+################################################################################
+## Identify siblings from UKB relatedness file.
+
+# Separately define the parents
+relatedSiblingData = relatedData[(relatedData["relative_1stdegree"] == True) &
+    (relatedData["relative_parent"] == False)].copy()
+
+# Sort within each person (ID1) in descending relatedness, and set index
+relatedSiblingData = relatedSiblingData.sort_values(
+    by=["ID1", "Kinship"], ascending=[True, False])
+relatedSiblingData["eid"] = relatedSiblingData["ID1"]
+relatedSiblingData.set_index(relatedSiblingData["eid"], drop=True, inplace=True)
+
+# For each individual (ID1), get the list of 1st degree relatives (ID2).
+# Note: list of relatives is in descending relatedness order, i.e. [1st, 2nd, .]
+relatedDict = {}
+for id1 in relatedSiblingData["ID1"].tolist() :
+    if id1 not in relatedDict :
+        relatedDict[id1] = relatedSiblingData[
+            relatedSiblingData["ID1"] == id1]["ID2"].tolist()
+
+# Get an empty data frame, to fill, and return.
+siblingData = pd.DataFrame({}, columns=["eid",
+    "eid_sibling1", "eid_sibling2", "eid_sibling3"])
+siblingData["eid"] = list(relatedDict.keys())
+siblingData.set_index(siblingData["eid"], drop=False, inplace=True)
+
+# Identify each sibling, and add to siblingData.
+for id1 in siblingData["eid"].tolist() :
+    ownData = phenoData.loc[id1]
+    for relativeEid in relatedDict[id1] :
+        relativeData = phenoData.loc[relativeEid]
+        # Add up to 3 siblings EID (sorted by genetic similarity).
+        if pd.isna(siblingData.loc[id1, "eid_sibling1"]) :
+            siblingData.loc[id1, "eid_sibling1"] = relativeEid
+        elif pd.isna(siblingData.loc[id1, "eid_sibling2"]) :
+            siblingData.loc[id1, "eid_sibling2"] = relativeEid
+        elif pd.isna(siblingData.loc[id1, "eid_sibling3"]) :
+            siblingData.loc[id1, "eid_sibling3"] = relativeEid
+        # If more siblings, let's see if there are any. 
+        else :
+            print("EID " + str(relativeEid) + " has more than 3 siblings!")
+
+# Put the sibling data into the parent connections.
+parentData = parentData.set_index("eid").join(siblingData.set_index("eid"),
+    how="outer", validate="1:1")
+
+
+################################################################################
+## Show how many people have any parents or siblings.
+
+# Everyone:
 print(parentData)
+
+# With a parent
+print(parentData[(pd.notna(parentData["eid_father"])
+    | pd.notna(parentData["eid_mother"]))])
+
+# WIth a sibling
+print(parentData[pd.notna(parentData["eid_sibling1"])])
+
+# With either a parent or sibling
 print(parentData[pd.notna(parentData["eid_father"])
     | pd.notna(parentData["eid_mother"])
     | pd.notna(parentData["eid_sibling1"])])
-# Show how many people have any parent + sibling degree relatives.
-print(parentData[pd.notna(parentData["eid_father"])
-    | pd.notna(parentData["eid_mother"])])
-print(parentData[(pd.notna(parentData["eid_father"])
-    | pd.notna(parentData["eid_mother"]))
-    & pd.notna(parentData["eid_sibling1"])])
 
-#TODO: Muslimnova (2024) uses IBS_0 < 0.0012 to define first-degree parents.
-#TODO  and in so doing get a higher obs count. 
-#TODO  Carvalho (2024) get higher match by another approach too.
-#TODO  -> Needs refining, to get the most amount of parents.
+# With a parent and a sibling
+print(parentData[(pd.notna(parentData["eid_father"])
+    | pd.notna(parentData["eid_mother"])) & 
+    (pd.notna(parentData["eid_sibling1"]))])
+
+# Note: Carvalho (2024) fills in [PGI weights | given parents, siblings]
+#       by genotype imputation.
+#       I should look into how to implement it on the UKB server, with the
+#       huge dosage file, now I have EID relative linkages + dosage file.
 
 
 ################################################################################
@@ -188,7 +264,12 @@ phenoData = phenoData.reset_index(drop=True).merge(
 
 
 ################################################################################
-## Save resulting data file.
+## Save resulting data files.
 
+# Save the relatedness indices.
+parentData.to_csv(
+    os.path.join(outputFolder, "ukb-relatives-indicies.csv"), index=False)
 
-df.to_csv(index=False)
+# Save the phenotype file (which includes the indices, and relative PGIs).
+phenoData.to_csv(
+    os.path.join(outputFolder, "ukb-cleaned-pheno.csv"), index=False)
