@@ -171,12 +171,11 @@ for ID1 in ID1List :
                 (relatedKinData["ID2"] == famConnection)) & (
                     pd.isna(relatedKinData["FID"])), "FID"] = ID1
 
-#!Test: are all FIDs filled in?
+# Test: are all FIDs filled in?
 print(relatedKinData[pd.isna(relatedKinData["FID"])])
 ID1 = np.random.choice(ID1List + ID2List)
 print(ID1)
 print(relatedKinData[(relatedKinData["ID1"] == ID1) | (relatedKinData["ID2"] == ID1)])
-
 # Make family ID have no decimals
 relatedKinData["FID"] = pd.to_numeric(
     relatedKinData["FID"], downcast="integer", errors="coerce")
@@ -201,7 +200,7 @@ print(Counter(relatedKinData["InfType"]))
 
 # Export usable format, for PRS impute.
 relatedKinData[["FID", "ID1", "ID2", "InfType"]].to_csv(
-    "kinship-adjusted.dat", sep=" ", index=False)
+    "kinship-adjusted.dat", sep="\t", index=False)
 
 
 ################################################################################
@@ -224,10 +223,22 @@ phenoKinData["sex"] = ["M" if line == 1
 phenoKinData["age"] = phenoKinData["participant.p21022"]
 
 # Get the FAMID from the above clustering
-phenoKinData["FID"] = phenoKinData["participant.eid"]
-
+famidData = pd.concat(
+    [relatedKinData[["ID1", "FID"]].rename(columns={"ID1" : "IID"}),
+        relatedKinData[["ID2", "FID"]].rename(columns={"ID2" : "IID"})],
+            ignore_index=True).groupby(by=["IID", "FID"], as_index=False).size()
+# Merge onto these data.
+phenoKinData = phenoKinData.merge(famidData[["IID", "FID"]],
+    how="left", on="IID")
+# Missing values are people not even in the related data, because no relatives.
+phenoKinData.loc[pd.isna(phenoKinData["FID"]), "FID"] = phenoKinData.loc[
+    pd.isna(phenoKinData["FID"]), "IID"]
+phenoKinData.loc[pd.isna(phenoKinData["FID"]), ]#, "IID"]
+# Make family ID have no decimals
+phenoKinData["FID"] = pd.to_numeric(
+    phenoKinData["FID"], downcast="integer", errors="coerce")
 
 # Export for Snipar
 phenoKinData[["FID", "IID", "sex", "age"]].to_csv(
     "phenotype-agesex.dat",
-    index=False, sep=" ")
+    index=False, sep="\t")

@@ -47,10 +47,12 @@ do
     cmd=$cmd"chr_${i}.bgen "
 done
 
-# Combine the .bgen files for each chromosome into one
+# Combine the .bgen files for each chromosome into one BGEN file
 bgen.tgz/build/apps/cat-bgen -g $cmd -og initial_chr.bgen
 # Write index file .bgen.bgi
 bgen.tgz/build/apps/bgenix -g initial_chr.bgen -index -clobber
+# Save the initial_chr.bgen for use in next script.
+dx upload initial_chr* --path data-clean/initial_chr*
 
 # Import the GWAS estimates into the sqlite database as a table called Betas.
 apt-get install sqlite3
