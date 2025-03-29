@@ -39,7 +39,10 @@ for i in {1..22}
 do
     echo $i
     # Extract the SNP relevant sections from Bulk imputation BGEN
-    bgen.tgz/build/apps/bgenix -g "/mnt/project/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${i}_b0_v3.bgen" -incl-rsids rsidlist.txt -incl-range chrposlist.txt > chr_${i}.bgen
+    bgen.tgz/build/apps/bgenix -g \
+        "/mnt/project/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${i}_b0_v3.bgen" \
+        -incl-rsids rsidlist.txt \
+        -incl-range chrposlist.txt > chr_${i}.bgen
     # Concatenate names of completed files.
     cmd=$cmd"chr_${i}.bgen "
 done
@@ -111,14 +114,11 @@ plink2 --pfile raw \
     --make-pgen \
     --out snpQC
 
-# Remove people tagged as poor quality geno-data.
-#! TODO: Get IDs for people tagged as poor quality geno data, in usedinpca.txt
-#!       https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=22020
+# Write the samples.
 plink2 --pfile raw \
     --extract snpQC.snplist \
-    #--keep-fam usedinpca.txt \
     --write-samples \
-    --out sampleQC 
+    --out sampleQC
 
 
 ########################################################

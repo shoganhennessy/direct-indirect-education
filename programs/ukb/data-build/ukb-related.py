@@ -13,8 +13,8 @@ import os
 ## Set up environment.
 #! Temporary ->
 #! Change to file location (VSCode makes this impossible to automate locally...)
-os.chdir(os.path.join(
-    "/home", "s", "Dropbox", "direct-indirect-education", "programs", "ukb", "data-build"))
+os.chdir(os.path.join("/home", "s", "Dropbox",
+    "direct-indirect-education", "programs", "ukb", "data-build"))
 # Local NP seed set
 rng = np.random.default_rng(47)
 # Show operational time, date.
@@ -75,7 +75,7 @@ edYearsLists = [
 maxEdList = [max(edList)
     if len(edList) > 0
     else np.nan
-    for edList in edqualsLists]
+    for edList in edYearsLists]
 # Put onto the phenotype dataframe.
 phenoData["edyears"] = maxEdList
 
@@ -83,9 +83,57 @@ phenoData["edyears"] = maxEdList
 ################################################################################
 ## Validate UKB relatedness file.
 
-# Compare the observation count to Muslimnova+ (2024) Table A1.
+# Get relatedness data.
 relatedData = relatedBaseData.copy()
 print(relatedData)
+
+# Get the Kinship file, only among those with Euro + PC credible geno data.
+geneticVarRestricts = ["eid", "inPCA", "genetic_euroancest"]
+# Get the restrictions for ref person
+relatedRestrictedData = relatedData.merge(
+    phenoData[geneticVarRestricts].reset_index(drop=True),
+    how="left", left_on="ID1", right_on="eid", validate="many_to_one").rename(
+        columns={varName : "ID1_" + varName for varName in geneticVarRestricts})
+# Get the restrictions for potential relative.
+relatedRestrictedData = relatedRestrictedData.merge(
+    phenoData[geneticVarRestricts].reset_index(drop=True),
+    how="left", left_on="ID2", right_on="eid", validate="many_to_one").rename(
+        columns={varName : "ID2_" + varName for varName in geneticVarRestricts})
+# SHow the match has worked (Id1 and ID2 have non-missings).
+print(relatedRestrictedData[["ID1_" + varName for varName in geneticVarRestricts]])
+print(relatedRestrictedData[["ID2_" + varName for varName in geneticVarRestricts]])
+
+# Restrict to only those with credible geno data, on both IDs
+
+
+relatedRestrictedData[
+    (relatedRestrictedData["ID1_inPCA"] == 1)
+    & (relatedRestrictedData["ID2_inPCA"] == 1)]
+
+
+
+
+
+relatedRestrictedData.drop(
+    relatedRestrictedData[relatedRestrictedData["ID1_inPCA"] != 1].index, inplace=True)
+relatedRestrictedData.drop(
+    relatedRestrictedData[relatedRestrictedData["ID1_genetic_euroancest"] != 1].index, inplace=True)
+relatedRestrictedData.drop(
+    relatedRestrictedData[relatedRestrictedData["ID2_inPCA"] == 1].index, inplace=True)
+relatedRestrictedData.drop(
+    relatedRestrictedData[relatedRestrictedData["ID2_genetic_euroancest"] != 1].index, inplace=True)
+# Export this restricted kinship file, for Young+ (2022) imputation.
+relatedRestrictedData.drop(columns=[
+    "ID1_" + varName for varName in geneticVarRestricts] + [
+        "ID2_" + varName for varName in geneticVarRestricts],
+    inplace=True)
+relatedRestrictedData.to_csv(
+    os.path.join(intermedFolder, "relatedness-extract.tsv"),
+    sep="\t", index=False)
+
+
+
+## Compare the observation count to Muslimnova+ (2024) Table A1.
 # Define 1st degree sibling/parents. (lower bound to take out identical twins).
 firstDegreeThreshold = [0.1770, 0.3540]
 relatedData["relative_1stdegree"] = (
@@ -98,12 +146,12 @@ relatedData["relative_parent"] = (
 # SHow the number of pairs in the sample.
 print(relatedData[relatedData["relative_1stdegree"] == True].groupby(
     ["relative_1stdegree", "relative_parent"]).size())
-# WANT:
+# WANT, from Muslimnova+ (2024):
 #                 |  1st degree /   |  1st degree
 #                 |  Parent-child   |  siblings
 # Kinship coef    |  0.1770- 0.3540 |  0.1770 -0.3540
 # IBS 0           |  <0.0012        |  >0.0012
-# N (pairs)       |  6,271          |  22,659
+# N (pairs)       |  6,271          |  22,
 
 
 ################################################################################
@@ -115,7 +163,7 @@ relatedParentData = relatedData[(relatedData["relative_1stdegree"] == True) &
 
 # Sort within each person (ID1) in descending relatedness, and set index
 relatedParentData = relatedParentData.sort_values(
-    by=["ID1", "relative_parent", "Kinship"], ascending=[True, True, False])
+    by=["ID1", "Kinship"], ascending=[True, False])
 relatedParentData["eid"] = relatedParentData["ID1"]
 relatedParentData.set_index(relatedParentData["eid"], drop=True, inplace=True)
 
@@ -193,8 +241,11 @@ for id1 in siblingData["eid"].tolist() :
             print("EID " + str(relativeEid) + " has more than 3 siblings!")
 
 # Put the sibling data into the parent connections.
-parentData = parentData.set_index("eid").join(siblingData.set_index("eid"),
+parentData = parentData.set_index("eid").join(
+    siblingData.set_index("eid"),
     how="outer", validate="1:1")
+# Keep the index as a column
+parentData["eid"] = parentData.index
 
 
 ################################################################################
@@ -237,30 +288,50 @@ sibling1Vars = {var : var + "_sibling1" for var in relativeVars}
 sibling2Vars = {var : var + "_sibling2" for var in relativeVars}
 sibling3Vars = {var : var + "_sibling3" for var in relativeVars}
 
+
+#! There something very wrong here, as no one has both self Ed PGI and sibling
+#! or parent Ed PGI.
+
+#todo: rewrite to just put EID onto the phenotype file, and then merge Ed PGI there.
+
+
 # Merge father Ed PGI onto the parentData.
-edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
-    columns=fatherVars)
-parentData = parentData.merge(edpgiData, how="left", on="eid_father")
+fatherEdpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
+    columns=fatherVars).copy()
+parentData = parentData.merge(fatherEdpgiData, how="left", on="eid_father").copy()
+
+print(parentData[pd.notna(parentData["edpgi_norm_father"])])
+
+
+
+
 # Merge mother Ed PGI onto the parentData.
 edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
-    columns=motherVars)
-parentData = parentData.merge(edpgiData, how="left", on="eid_mother")
+    columns=motherVars).copy()
+parentData = parentData.merge(edpgiData, how="left", on="eid_mother").copy()
 # Merge sibling1 Ed PGI onto the parentData.
 edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
-    columns=sibling1Vars)
-parentData = parentData.merge(edpgiData, how="left", on="eid_sibling1")
+    columns=sibling1Vars).copy()
+parentData = parentData.merge(edpgiData, how="left", on="eid_sibling1").copy()
 # Merge sibling2 Ed PGI onto the parentData.
 edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
-    columns=sibling2Vars)
-parentData = parentData.merge(edpgiData, how="left", on="eid_sibling2")
+    columns=sibling2Vars).copy()
+parentData = parentData.merge(edpgiData, how="left", on="eid_sibling2").copy()
 # Merge sibling3 Ed PGI onto the parentData.
 edpgiData = phenoData[relativeVars].reset_index(drop=True).rename(
-    columns=sibling3Vars)
-parentData = parentData.merge(edpgiData, how="left", on="eid_sibling3")
+    columns=sibling3Vars).copy()
+parentData = parentData.merge(edpgiData, how="left", on="eid_sibling3").copy()
 
 # Add on the relative variables to the phenotype data.
 phenoData = phenoData.reset_index(drop=True).merge(
-    parentData, how="left", on="eid")
+    parentData, how="left", on="eid").copy()
+
+#! Test -> not getting the sibling PGI merge.
+print(phenoData[
+    pd.notna(phenoData["edpgi_norm"]) &
+    (pd.notna(phenoData["edpgi_norm_father"]) |
+    pd.notna(phenoData["edpgi_norm_father"]) |
+    pd.notna(phenoData["edpgi_norm_sibling1"]))])
 
 
 ################################################################################
@@ -271,5 +342,7 @@ parentData.to_csv(
     os.path.join(outputFolder, "ukb-relatives-indicies.csv"), index=False)
 
 # Save the phenotype file (which includes the indices, and relative PGIs).
+# only the relevant columns
+phenoData = phenoData #[]
 phenoData.to_csv(
     os.path.join(outputFolder, "ukb-cleaned-pheno.csv"), index=False)

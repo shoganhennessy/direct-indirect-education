@@ -5,7 +5,7 @@
 # Get the relatedness file.
 source('dx download "Bulk/Genotype Results/Genotype calls/ukb_rel.dat"')
 # Show what we are dealing with.
-readLines("ukb_rel.dat", n = 10)
+print(readLines("ukb_rel.dat", n = 10))
 
 # Load the relatedness file.
 relatedness.data <- read.table("ukb_rel.dat", header = TRUE)

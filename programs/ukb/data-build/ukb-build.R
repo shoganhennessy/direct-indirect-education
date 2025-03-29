@@ -68,7 +68,7 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         jobhoursperweek_online = as.numeric(participant.p22605_a0),
         yearendededuc_online   = as.integer(participant.p22501),
         datedeath              = date(participant.p40000_i0),
-        inPCA                  = as.integer(participant.p22020)) %>%
+        PCA                    = as.integer(participant.p22020)) %>%
     # Clean the resulting columns
     mutate(
         # householdincome_cat,    p738_i0,    https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=738
@@ -81,8 +81,9 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         # Missing values to missing.
         agefinishededuc    = ifelse(agefinishededuc < 0, NA, agefinishededuc),
         # Replace missing values with bianry values.
-        genetic_euroancest = ifelse(genetic_race == 1, genetic_race, 0),
-        inPCA              = ifelse(inPCA == 1, 1, 0))
+        genetic_euroancest = ifelse(
+            is.na(genetic_race), 0, ifelse(genetic_race == 1, 1, 0)),
+        inPCA = ifelse(is.na(PCA), 0, ifelse(PCA == 1, 1, 0)))
 
 
 ################################################################################

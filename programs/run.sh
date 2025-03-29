@@ -3,22 +3,43 @@
 ## Master bash script, for scripts showing IV without exclusion estimator.
 # Note "R CMD BATCH" generates .Rout files showing consol output of each script.
 
+################################################################################
+## Scripts to be run on the UKB server, in "data/ukb-restricted/input/rep-code"
+# Extract the relevant data files, from raw formats.
+python3 data-extract.py
+# Get the relatedness data
+#Todo -> this is getting superceded by PRS_impute.
+R CMD BATCH --no-save relatedness-interact.R
+# Get the Ed PGI, using Okbay+ (2022) weights.
+cd ../pgi-okbay-2022
+R CMD BATCH --no-save tsv-convert.R
+cd ..
+bash prs-pipeline.sh
+# Impute the parents Ed PGI, using sibling data (Snipar, Young+ 2022).
+bash prs-impute.sh
+# TODO
+
+
+################################################################################
 ## Build data sets of relevance
-cd data-build
 
 # 1. HRS
+cd hrs/data-build
 # Combine panel of HRS data with genetic educ scores
 R CMD BATCH --no-save hrs-build.R
 # Collapse the panel of HRS data, keeping genetic educ scores
 R CMD BATCH --no-save hrs-collapse.R
+cd ../..
 
 # 2. UKB
+cd ukb/data-build
 # Build the cross-section of phenotype data, with PGIs.
 R CMD BATCH --no-save ukb-build.R
 # Identify relatives in UKB data, based on genetic similarity.
-python3 ukb-related.py --config-from-file >> ukb-related.py
+#TODO -> this is becoming redundant with the Snipar imputing...
+python3 -u ukb-related.py > ukb-related.log
 # Go back to base folder.
-cd ..
+cd ../..
 
 ## Statistical analysis.
 cd data-analyse
