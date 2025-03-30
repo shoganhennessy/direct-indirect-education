@@ -62,7 +62,7 @@ desiredFieldsStr = [f"participant.{f}" for f in desiredFields]
 fieldNames = ",".join(desiredFieldsStr)
 print(fieldNames)
 
-# Test if each are in the data, by testing the dictionary.
+# Test if each are in the data, by testing data dictionary.
 path = os.getcwd()
 dictCsv = glob.glob(os.path.join(path, "*.data_dictionary.csv"))[0]
 dictData = pd.read_csv(dictCsv)
@@ -118,7 +118,7 @@ firstDegreeThreshold = [0.1770, 0.3540]
 relatedData["relative_1stdegree"] = (
     firstDegreeThreshold[0] < relatedData["Kinship"]) & (
         relatedData["Kinship"] <= firstDegreeThreshold[1])
-# Define aprent child by IBS_0 threshold, 0.0012 (above siblings, below parent).
+# Define parent, child by IBS_0 threshold, 0.0012 (above siblings, below parent).
 parentThreshold = 0.0012
 relatedData["relative_parent"] = (
     relatedData["IBS0"] < parentThreshold)
@@ -140,7 +140,7 @@ print(relatedData[relatedData["relative_1stdegree"] == True].groupby(
 # Get a copy of the base data.
 relatedKinData = relatedData.copy()
 
-# Get FID family identifier, by clustering on family networks.
+# Get FID family identifier, by components on a family related network.
 import networkx as nx
 famGraph = nx.Graph()
 ID1List = relatedKinData["ID1"].tolist()
@@ -148,7 +148,7 @@ ID2List = relatedKinData["ID2"].tolist()
 kinshipList = relatedKinData["Kinship"].tolist()
 famEdges = [[ID1List[i], ID2List[i]] for i in range(0, len(relatedKinData))]
     #if kinshipList <= firstDegreeThreshold[1]]
-# Add nodes to network (duplicates do not matter here), and their edge connections.
+# Add nodes to network (duplicates do not matter here), + edge connections.
 famGraph.add_nodes_from(ID1List)
 famGraph.add_nodes_from(ID2List)
 famGraph.add_edges_from(famEdges)
@@ -165,7 +165,7 @@ for ID1 in ID1List :
     elif pd.notna(relatedKinData.loc[(relatedKinData["ID1"] == ID1), "FID"]).all() :
         continue
     elif len(famConnections) > 1 :
-        # Define the family ID as the lowest ID of the family members.
+        # Define the family ID as the lowest ID among connected family.
         for famConnection in famConnections :
             relatedKinData.loc[((relatedKinData["ID1"] == famConnection) |
                 (relatedKinData["ID2"] == famConnection)) & (
@@ -175,13 +175,14 @@ for ID1 in ID1List :
 print(relatedKinData[pd.isna(relatedKinData["FID"])])
 ID1 = np.random.choice(ID1List + ID2List)
 print(ID1)
-print(relatedKinData[(relatedKinData["ID1"] == ID1) | (relatedKinData["ID2"] == ID1)])
+print(relatedKinData[(relatedKinData["ID1"] == ID1) | (
+    relatedKinData["ID2"] == ID1)])
 # Make family ID have no decimals
 relatedKinData["FID"] = pd.to_numeric(
     relatedKinData["FID"], downcast="integer", errors="coerce")
 
 # Get the parent/sibling identifier.
-# InfType: Inferred relationship type, such as Dup/MZTwin, PO, FS, 2nd, 3rd, 4th, UN
+# InfType: Inferred relationship type, such as Dup/MZTwin, PO, FS, 2nd, ...
 relatedChoices = ["Dup/MZ", "PO", "FS"]
 relatedConditions = [
     (firstDegreeThreshold[1] < relatedKinData["Kinship"]),
@@ -201,6 +202,9 @@ print(Counter(relatedKinData["InfType"]))
 # Export usable format, for PRS impute.
 relatedKinData[["FID", "ID1", "ID2", "InfType"]].to_csv(
     "kinship-adjusted.dat", sep="\t", index=False)
+# Upload to workspace
+subprocess.check_call(["dx", "upload", "kinship-adjusted.dat", "--path",
+    '"data-clean/kinship-adjusted.dat"'])
 
 
 ################################################################################
@@ -212,10 +216,10 @@ subprocess.check_call(["dx", "download", "data-clean/phenotype-extract.csv"])
 phenoData = pd.read_csv("phenotype-extract.csv")
 phenoKinData = phenoData.copy()
 
+# https://snipar.readthedocs.io/en/latest/input%20files.html#agesex-file
 # A white-space delimited text file with header “FID”, “IID”, “sex”, “age”.
 # Each row contains the family-ID, individual-ID, age, and sex of one individual.
 # Male and Female sex should be represented with ‘M’ and ‘F’ respectively. 
-# https://snipar.readthedocs.io/en/latest/input%20files.html#agesex-file
 phenoKinData["IID"] = phenoKinData["participant.eid"]
 phenoKinData["sex"] = ["M" if line == 1
     else "F"
@@ -233,7 +237,7 @@ phenoKinData = phenoKinData.merge(famidData[["IID", "FID"]],
 # Missing values are people not even in the related data, because no relatives.
 phenoKinData.loc[pd.isna(phenoKinData["FID"]), "FID"] = phenoKinData.loc[
     pd.isna(phenoKinData["FID"]), "IID"]
-phenoKinData.loc[pd.isna(phenoKinData["FID"]), ]#, "IID"]
+print(phenoKinData.loc[pd.isna(phenoKinData["FID"]), ])
 # Make family ID have no decimals
 phenoKinData["FID"] = pd.to_numeric(
     phenoKinData["FID"], downcast="integer", errors="coerce")
@@ -242,3 +246,6 @@ phenoKinData["FID"] = pd.to_numeric(
 phenoKinData[["FID", "IID", "sex", "age"]].to_csv(
     "phenotype-agesex.dat",
     index=False, sep="\t")
+# Upload to workspace
+subprocess.check_call(["dx", "upload", "phenotype-agesex.dat", "--path",
+    '"data-clean/phenotype-agesex.dat"'])

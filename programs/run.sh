@@ -5,12 +5,15 @@
 
 ################################################################################
 ## Scripts to be run on the UKB server, in "data/ukb-restricted/input/rep-code"
+
 # Extract the relevant data files, from raw formats.
-python3 data-extract.py
+python3 -u data-extract.py > data-extract.log
+
 # Get the relatedness data
 #Todo -> this is getting superceded by PRS_impute.
 R CMD BATCH --no-save relatedness-interact.R
-# Get the Ed PGI, using Okbay+ (2022) weights.
+
+# Calculate the Ed PGI, using Okbay+ (2022) weights and prs-pipeline.
 cd ../pgi-okbay-2022
 R CMD BATCH --no-save tsv-convert.R
 cd ..
@@ -33,24 +36,24 @@ cd ../..
 
 # 2. UKB
 cd ukb/data-build
-# Build the cross-section of phenotype data, with PGIs.
+# Build the cross-section of phenotype data, with PGIs (base + parent imputed).
 R CMD BATCH --no-save ukb-build.R
-# Identify relatives in UKB data, based on genetic similarity.
-#TODO -> this is becoming redundant with the Snipar imputing...
-python3 -u ukb-related.py > ukb-related.log
 # Go back to base folder.
 cd ../..
 
-## Statistical analysis.
-cd data-analyse
+## Statistical analysis, UKB
+cd ukb/data-analyse
 # Summarise UKB data.
 R CMD BATCH --no-save ukb-summarise.R
-# Analsyse HRS data, with the invalid instrument educ score.
-R CMD BATCH --no-save hrs-educ-iv.R
+# First-stage effects, justifying the imputation research design.
+R CMD BATCH --no-save ukb-first-stage.R
+# Total genetic effects estimates.
+R CMD BATCH --no-save ukb-direct-indirect.R
+# Go back to base folder.
+cd ../..
 
-
-
-
+## Statistical analysis, hrs
+cd hrs/data-analyse
 
 # Summarise HRS data.
 R CMD BATCH --no-save hrs-summarise.R
@@ -63,4 +66,4 @@ cd ..
 cd ../text
 latexmk -pdf paper.tex
 latexmk -c
-# cp paper.pdf ../direct-indirect-education-2025.pdf
+cp paper.pdf ../shoganhennessy-jmp-2025.pdf

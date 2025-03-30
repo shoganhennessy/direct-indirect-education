@@ -45,6 +45,8 @@ do
         -incl-range chrposlist.txt > chr_${i}.bgen
     # Concatenate names of completed files.
     cmd=$cmd"chr_${i}.bgen "
+    # Save each ngen file for the chromosomes.
+    dx upload chr_$i.bgen --path data-clean/chr_$i.bgen
 done
 
 # Combine the .bgen files for each chromosome into one BGEN file
@@ -52,7 +54,8 @@ bgen.tgz/build/apps/cat-bgen -g $cmd -og initial_chr.bgen
 # Write index file .bgen.bgi
 bgen.tgz/build/apps/bgenix -g initial_chr.bgen -index -clobber
 # Save the initial_chr.bgen for use in next script.
-dx upload initial_chr* --path data-clean/initial_chr*
+dx upload initial_chr.bgen --path data-clean/initial_chr.bgen
+
 
 # Import the GWAS estimates into the sqlite database as a table called Betas.
 apt-get install sqlite3
@@ -77,7 +80,7 @@ sqlite3 -header -csv initial_chr.bgen.bgi \
             AND Variant.allele1 = Betas.effect_allele AND 
             Variant.allele2 = Betas.noneffect_allele;"
 
-# Filter the .bgen file to include only the alleles specified in the Betas for each SNP.
+# Filter the .bgen file to include only alleles specified in Betas for each SNP.
 bgen.tgz/build/apps/bgenix -g initial_chr.bgen -table Joined > single_allelic.bgen
 # Produce an index file for the new .bgen
 bgen.tgz/build/apps/bgenix -g single_allelic.bgen -index
