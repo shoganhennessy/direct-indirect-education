@@ -141,10 +141,10 @@ plink2 --pfile raw                              \
     --extract  snpQC.snplist                    \
     --keep     sampleQC.id                      \
     --score    score.txt     no-mean-imputation \
-    --out      PRS
+    --out      ed-pgi-score
 
 # Save the calculated PRS.
-dx upload PRS.sscore --path data-clean/ed-pgi-score.sscore
+dx upload ed-pgi-score.sscore --path data-clean/ed-pgi-score.sscore
 # Export the dosage file, too.
 plink2 --pfile raw           \
     --extract  snpQC.snplist \
