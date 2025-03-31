@@ -12,7 +12,7 @@ library(data.table)
 # Define folder paths (1) where data are (2) input data (3) intermed files.
 data.folder <- file.path("..", "..", "..", "data", "ukb-restricted")
 input.folder <- file.path(data.folder, "input")
-output.folder <- file.path(data.folder, "intermediate-files")
+output.folder <- file.path(data.folder, "cleaned")
 
 
 ################################################################################
@@ -28,16 +28,13 @@ ukb_edpgi.data <- input.folder %>%
     file.path("ed-pgi-score.sscore") %>%
     read_tsv()
 
-#TODO:
 # Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
 ukb_imputed.data <- input.folder %>%
-    file.path("ed-pgi-score.sscore") %>%
-    read_tsv()
+    file.path("imputed-ed-pgi.pgs.txt") %>%
+    read_table()
 
 # Load the occupation-coded income data (thanks to Kweon Koellinger+ 2025).
 load(file.path(input.folder, "earnings-imputed", "data_input.Rdata"))
-
-
 
 # CPI-U from (WHERE?)
 #! Placeholder.
@@ -94,14 +91,16 @@ cleaned_pheno.data <- ukb_pheno.data %>%
 cleaned_edpgi.data <- ukb_edpgi.data %>%
     transmute(
         eid = IID,
-        edpgi_raw = SCORE1_AVG)
+        edpgi_all_raw = SCORE1_AVG)
 
 # Restrict imputed variables identifiers, and the score
 cleaned_imputed.data <- ukb_imputed.data %>%
     transmute(
-        #TODO: adjust to output of PRS impute
-        eid = IID,
-        edpgi_raw = SCORE1_AVG)
+        eid                        = IID,
+        edpgi_imputed_self_raw     = proband,
+        edpgi_imputed_sibling_raw  = sibling,
+        edpgi_imputed_paternal_raw = paternal,
+        edpgi_imputed_maternal_raw = maternal)
 
 
 ################################################################################
@@ -120,30 +119,83 @@ cleaned_pheno.data <- cleaned_pheno.data %>%
 
 # Merge the Phenotype data with parental imputed Ed PGI.
 cleaned_pheno.data <- cleaned_pheno.data %>%
-    left_join(cleaned_edpgi.data, by = "eid")
-
+    left_join(cleaned_imputed.data, by = "eid")
 
 
 ################################################################################
 ## Clean the Ed PGI data fields.
 
-
-
 # Standardise the Ed PGI.
 cleaned_pheno.data <- cleaned_pheno.data %>%
-    # PGI reliable for EUro ancestry, and reliable PCA data.
-    mutate(edpgi_norm = edpgi_raw * inPCA * genetic_euroancest) %>%
+    # PGI reliable for Euro ancestry, and reliable PCA data.
+    mutate(
+        edpgi_all_norm =
+            ifelse(genetic_euroancest == 0, NA, edpgi_all_raw),
+        edpgi_imputed_self_norm =
+            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_self_raw),
+        edpgi_imputed_sibling_norm =
+            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_sibling_raw),
+        edpgi_imputed_paternal_norm =
+            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_paternal_raw),
+        edpgi_imputed_maternal_norm =
+            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_maternal_raw)
+    ) %>%
     # Normalise to have 0 mean, 1 SD.
-    mutate(edpgi_norm = (edpgi_norm - mean(edpgi_norm, na.rm = TRUE)
-        ) / sd(edpgi_norm, na.rm = TRUE))
+    # The parent/sibling values are centred around proband mean, sd
+    mutate(
+        edpgi_all_norm = (edpgi_all_norm -
+            mean(edpgi_all_norm, na.rm = TRUE)) / sd(edpgi_all_norm, na.rm = TRUE),
+        edpgi_imputed_self_norm = (edpgi_imputed_self_norm -
+            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
+        edpgi_imputed_sibling_norm = (edpgi_imputed_sibling_norm -
+            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
+        edpgi_imputed_paternal_norm = (edpgi_imputed_paternal_norm -
+            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
+        edpgi_imputed_maternal_norm = (edpgi_imputed_maternal_norm -
+            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE))
 
-# Ensure outliers in PGI do not persist.
-hist(cleaned_pheno.data$edpgi_raw)
-hist(cleaned_pheno.data$edpgi_norm)
+# Ensure outliers in PGIs do not persist.
+hist(cleaned_pheno.data$edpgi_all_raw)
+hist(cleaned_pheno.data$edpgi_all_norm)
+# Similarly for imputed version.
+hist(cleaned_pheno.data$edpgi_imputed_self_raw)
+hist(cleaned_pheno.data$edpgi_imputed_self_norm)
+
+# Show observation counts by both methods.
+cleaned_pheno.data %>%
+    filter(!is.na(edpgi_imputed_self_norm))
+cleaned_pheno.data %>%
+    filter(!is.na(edpgi_all_norm))
+
+# Validate the correlation between two different packages for computing Ed PGI.
+print(cor(cleaned_pheno.data$edpgi_all_norm,
+    cleaned_pheno.data$edpgi_imputed_self_norm,
+    use = "pairwise.complete.obs"))
 
 
 ################################################################################
 ## Save workable data file.
 
+# Rename and restrict to necessary columns.
+cleaned_pheno.data <- cleaned_pheno.data %>%
+    mutate(
+        # Ed PGI among entire sample
+        edpgi_all     = edpgi_all_norm,
+        # Ed PGI among sample with siblings -> main PGI in my analysis
+        edpgi_self    = edpgi_imputed_self_norm,
+        # PArental imputed Ed PGI among sample with siblings
+        edpgi_parents = mean(
+            edpgi_imputed_paternal_norm, edpgi_imputed_maternal_norm)) %>%
+    select(eid,
+        sex_male,
+        birthyear,
+        birthmonth,
+        recruitedage,
+        genetic_race,
+        edpgi_all,
+        edpgi_self,
+        edpgi_parents)
+
+# Save the file.
 cleaned_pheno.data %>%
-    write_csv(file.path(output.folder, "ukb-intermed-pheno.csv"))
+    write_csv(file.path(output.folder, "ukb-cleaned-pheno.csv"))

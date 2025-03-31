@@ -8,11 +8,6 @@
 
 # Extract the relevant data files, from raw formats.
 python3 -u data-extract.py > data-extract.log
-
-# Get the relatedness data
-#Todo -> this is getting superceded by PRS_impute.
-R CMD BATCH --no-save relatedness-interact.R
-
 # Calculate the Ed PGI, using Okbay+ (2022) weights and prs-pipeline.
 cd ../pgi-okbay-2022
 R CMD BATCH --no-save tsv-convert.R
@@ -20,7 +15,6 @@ cd ..
 bash prs-pipeline.sh
 # Impute the parents Ed PGI, using sibling data (Snipar, Young+ 2022).
 bash prs-impute.sh
-# TODO
 
 
 ################################################################################

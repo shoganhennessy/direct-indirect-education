@@ -46,7 +46,7 @@ do
     # Concatenate names of completed files.
     cmd=$cmd"chr_${i}.bgen "
     # Save each ngen file for the chromosomes.
-    dx upload chr_$i.bgen --path data-clean/chr_$i.bgen
+    dx upload chr_$i.bgen --path data-input/chr_$i.bgen
 done
 
 # Combine the .bgen files for each chromosome into one BGEN file
@@ -54,7 +54,8 @@ bgen.tgz/build/apps/cat-bgen -g $cmd -og initial_chr.bgen
 # Write index file .bgen.bgi
 bgen.tgz/build/apps/bgenix -g initial_chr.bgen -index -clobber
 # Save the initial_chr.bgen for use in next script.
-dx upload initial_chr.bgen --path data-clean/initial_chr.bgen
+dx upload initial_chr.bgen --path data-input/initial_chr.bgen
+dx upload initial_chr.bgen --path data-input/initial_chr.bgen.bgi
 
 
 # Import the GWAS estimates into the sqlite database as a table called Betas.
@@ -132,23 +133,24 @@ plink2 --pfile raw \
 
 # Put a file of the effect scores.
 sqlite3 -separator " " -list initial_chr.bgen.bgi \
-    "SELECT chr_name || ':' || position || '_' ||allele1 || '_' || allele2, allele2, Beta FROM Joined;" > score.txt
+    "SELECT chr_name || ':' || position || '_' ||allele1 || '_' || allele2, allele2, Beta FROM Joined;" \
+    > score.txt
 
 # Calculate the weighted sum for each individual.
-plink2 --pfile raw \
-    --extract snpQC.snplist \
-    --keep sampleQC.id \
-    --score score.txt no-mean-imputation \
-    --out PRS
+plink2 --pfile raw                              \
+    --extract  snpQC.snplist                    \
+    --keep     sampleQC.id                      \
+    --score    score.txt     no-mean-imputation \
+    --out      PRS
 
 # Save the calculated PRS.
 dx upload PRS.sscore --path data-clean/ed-pgi-score.sscore
 # Export the dosage file, too.
-plink2 --pfile raw \
-    --extract snpQC.snplist \
-    --keep sampleQC.id \
-    --recode A \
-    --out ed-pgi-dosage
+plink2 --pfile raw           \
+    --extract  snpQC.snplist \
+    --keep     sampleQC.id   \
+    --recode   A             \
+    --out      ed-pgi-dosage
 tar --totals=USR1 -czvf ed-pgi-dosage.tar.gz ed-pgi-dosage.raw
 # dx upload ed-pgi-dosage.raw --path data-clean/ed-pgi-dosage.raw
 dx upload ed-pgi-dosage.tar.gz --path data-clean/ed-pgi-dosage.tar.gz
