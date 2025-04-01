@@ -21,7 +21,7 @@ Type 'q()' to quit R.
 > ## Senan Hogan-Hennessy, 11 March 2025.
 > ## Script to ingest raw UKB data, output familiar tabular format.
 > print(Sys.time())
-[1] "2025-03-27 12:18:51 EDT"
+[1] "2025-04-01 15:33:24 EDT"
 > set.seed(47)
 > ## Packages:
 > # functions for data manipulation and visualisation
@@ -36,10 +36,29 @@ Type 'q()' to quit R.
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()
 ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+> # Functions for fast data manipulation (adapting to data.table code from Kweon+)
+> library(data.table)
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:lubridate’:
+
+    hour, isoweek, mday, minute, month, quarter, second, wday, week,
+    yday, year
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+The following object is masked from ‘package:purrr’:
+
+    transpose
+
+> 
 > # Define folder paths (1) where data are (2) input data (3) intermed files.
 > data.folder <- file.path("..", "..", "..", "data", "ukb-restricted")
 > input.folder <- file.path(data.folder, "input")
-> output.folder <- file.path(data.folder, "intermediate-files")
+> output.folder <- file.path(data.folder, "cleaned")
 > 
 > 
 > ################################################################################
@@ -49,17 +68,31 @@ Type 'q()' to quit R.
 > ukb_pheno.data <- input.folder %>%
 +     file.path("phenotype-extract.csv") %>%
 +     read_csv()
-Rows: 502129 Columns: 23
+New names:
+• `` -> `...1`
+Rows: 502129 Columns: 25
 ── Column specification ────────────────────────────────────────────────────────
 Delimiter: ","
-chr   (1): participant.p6138_i0
-dbl  (19): participant.eid, participant.p31, participant.p34, participant.p5...
+dbl  (22): ...1, participant.eid, participant.p31, participant.p34, particip...
 date  (3): participant.p53_i0, participant.p20143, participant.p40000_i0
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 > 
-> # Load the Ed PGI (Okbay+ 2022) data (raw format from UKB RAP servers).
+> # Load the relative connections data
+> ukb_relatives.data <- input.folder %>%
++     file.path("kinship-adjusted.dat") %>%
++     read_tsv()
+Rows: 106983 Columns: 4
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: "\t"
+chr (1): InfType
+dbl (3): FID, ID1, ID2
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+> 
+> # Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
 > ukb_edpgi.data <- input.folder %>%
 +     file.path("ed-pgi-score.sscore") %>%
 +     read_tsv()
@@ -71,22 +104,44 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 > 
-> # Load the occupation-coded income data (thanks to Kweon Koellinger 2025).
-> #! Placeholder.
+> # Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
+> ukb_imputed.data <- input.folder %>%
++     file.path("imputed-ed-pgi.pgs.txt") %>%
++     read_table()
+
+── Column specification ────────────────────────────────────────────────────────
+cols(
+  FID = col_double(),
+  IID = col_double(),
+  FATHER_ID = col_double(),
+  MOTHER_ID = col_double(),
+  proband = col_double(),
+  sibling = col_double(),
+  paternal = col_double(),
+  maternal = col_double()
+)
+
 > 
-> # CPI-U from (WHERE?)
-> #! Placeholder.
+> # Load the occupation-coded income data (thanks to Kweon Koellinger+ 2025).
+> load(file.path(input.folder, "earnings-imputed", "data_input.Rdata"))
+> 
+> # CPI-H (including housing costs) for the UK (2015 == 100).
+> # https://www.ons.gov.uk/economy/inflationandpriceindices/datasets/consumerpriceindices
+> cpi.data <- input.folder %>%
++     file.path("cpih-uk.csv") %>%
++     read_csv()
+Rows: 37 Columns: 2
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+dbl (2): year, cpi2015
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 > 
 > 
 > ################################################################################
-> ## Clean Pheno + PGI files.
+> ## Clean Pheno file.
 > 
-> # Restrict Ed PGI to identifiers, and the score
-> cleaned_edpgi.data <- ukb_edpgi.data %>%
-+     transmute(
-+         eid = IID,
-+         edpgi_raw = SCORE1_AVG)
->         
 > # Clean the phenotype data.
 > cleaned_pheno.data <- ukb_pheno.data %>%
 +     # Restrict data types
@@ -95,16 +150,17 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 +         sex_male               = as.integer(participant.p31),
 +         birthyear              = as.integer(participant.p34),
 +         birthmonth             = as.integer(participant.p52),
-+         datevisit              = date(participant.p53_i0),
++         visitdate              = date(participant.p53_i0),
 +         # Income categories,
 +         householdincome_cat    = as.integer(participant.p738_i0),
 +         recruitedage           = as.integer(participant.p21022),
 +         datelastcontact        = date(participant.p20143),
-+         edquals                = as.character(participant.p6138_i0),
++         edquals                = as.integer(participant.p6138_i0),
++         edyears                = as.integer(participant.edyears),
 +         agefinishededuc        = as.integer(participant.p845_i0),
 +         ethnicity              = as.integer(participant.p21000_i0),
 +         genetic_race           = as.integer(participant.p22006),
-+         jobcode                = as.integer(participant.p20277_i0),
++         jobcode_soc            = as.integer(participant.p20277_i0),
 +         numjobs                = as.integer(participant.p22599),
 +         numjobgaps             = as.integer(participant.p22661),
 +         jobcode_online         = as.integer(participant.p22601_a0),
@@ -113,52 +169,312 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 +         jobhoursworked_online  = as.integer(participant.p22604_a0),
 +         jobhoursperweek_online = as.numeric(participant.p22605_a0),
 +         yearendededuc_online   = as.integer(participant.p22501),
-+         datedeath              = date(participant.p40000_i0),
-+         inPCA                  = as.integer(participant.p22020)) %>%
++         deathdate              = date(participant.p40000_i0),
++         PCA                    = as.integer(participant.p22020)) %>%
 +     # Clean the resulting columns
 +     mutate(
 +         # householdincome_cat,    p738_i0,    https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=738
-+         householdincome_string = 
-+             ifelse(householdincome_cat == 1, "< 18k",
-+             ifelse(householdincome_cat == 2, "18 - 40k",
-+             ifelse(householdincome_cat == 3, "31 - 60k",
-+             ifelse(householdincome_cat == 4, "52 - 100k",
-+             ifelse(householdincome_cat == 5, "100k < ", "Unknown"))))),
++         householdincome_less18k   = ifelse(is.na(householdincome_cat), NA,
++             as.integer(householdincome_cat == 1)),
++         householdincome_18to31k   = ifelse(is.na(householdincome_cat), NA,
++             as.integer(householdincome_cat == 2)),
++         householdincome_31to52k   = ifelse(is.na(householdincome_cat), NA,
++             as.integer(householdincome_cat == 3)),
++         householdincome_52to100k  = ifelse(is.na(householdincome_cat), NA,
++             as.integer(householdincome_cat == 4)),
++         householdincome_above100k = ifelse(is.na(householdincome_cat), NA,
++             as.integer(householdincome_cat == 5)),
 +         # Missing values to missing.
 +         agefinishededuc    = ifelse(agefinishededuc < 0, NA, agefinishededuc),
-+         # Replace missing values with bianry values.
-+         genetic_euroancest = ifelse(
-+             is.na(genetic_race), 0, ifelse(genetic_race == 1, 1, 0)),
-+         inPCA = ifelse(
-+             is.na(inPCA), 0, ifelse(inPCA == 1, 1, 0)))
++         # Replace missing values with binary values.
++         genetic_euroancest = ifelse(is.na(genetic_race), 0, genetic_race),
++         inPCA = ifelse(is.na(PCA), 0, PCA),
++         # death date variables
++         deathyear = as.integer(format(deathdate, "%Y")),
++         visityear = as.integer(format(visitdate, "%Y")),
++         hasdied = as.integer(!is.na(deathdate)))
 > 
 > 
 > ################################################################################
-> ## Merge UKB data files.
+> ## Clean PGI data files.
+> 
+> # Restrict Ed PGI to identifiers, and the score
+> cleaned_edpgi.data <- ukb_edpgi.data %>%
++     transmute(
++         eid = IID,
++         edpgi_all_raw = SCORE1_AVG)
+> 
+> # Restrict imputed variables identifiers, and the score
+> cleaned_imputed.data <- ukb_imputed.data %>%
++     transmute(
++         eid                        = IID,
++         edpgi_imputed_self_raw     = proband,
++         edpgi_imputed_sibling_raw  = sibling,
++         edpgi_imputed_paternal_raw = paternal,
++         edpgi_imputed_maternal_raw = maternal)
+> 
+> 
+> ################################################################################
+> ## Calculate count of family members', and whether their parents are in data.
+> 
+> # Note: relative connections are by-directional, so need to append to self. 
+> count_relatives.data <- ukb_relatives.data %>%
++     # Note: relative data are one-directional,
++     #       -> need to append to self to count second column, too. 
++     rename(ID1 = ID2, ID2 = ID1) %>%
++     bind_rows(ukb_relatives.data) %>%
++     mutate(
++         eid = ID1,
++         sibling = as.integer(InfType == "FS"),
++         parent = as.integer(InfType == "PO")) %>%
++     # Count parent + sibling connections in these data.
++     group_by(eid) %>%
++     summarise(
++         sibling_count = sum(sibling, na.rm = TRUE),
++         parent_count = sum(parent, na.rm = TRUE)) %>%
++     ungroup()
+> 
+> # Column to show whether mother + father are in the data.
+> relatives_present.data <- ukb_imputed.data %>%
++     transmute(
++         eid = IID,
++         father_present  = as.integer(!is.na(FATHER_ID)),
++         mother_present  = as.integer(!is.na(MOTHER_ID)),
++         sibling_present = as.integer(!is.na(sibling)))
+> 
+> # Show how many parents there are in the total data.
+> print(sum(relatives_present.data$father_present))
+[1] 120
+> print(sum(relatives_present.data$mother_present))
+[1] 385
+> print(sum(relatives_present.data$father_present) +
++     sum(relatives_present.data$mother_present))
+[1] 505
+> 
+> 
+> ################################################################################
+> ## Calculate OCC coded wages, thanks to Kweon Koellinger provided code.
+> 
+> # Get the data file to merge with OCC coded wage data.
+> ukb_soc.data <- cleaned_pheno.data %>%
++     #TODO: fill in empty SOC with past values, or values from second questionnaire.
++     filter(!is.na(jobcode_soc)) %>%
++     # Get the variables needed for income-impute.R
++     transmute(eid = eid,
++         SOC  = as.integer(jobcode_soc),
++         male = as.integer(sex_male),
++         age  = as.integer(recruitedage),
++         year = as.integer(visityear))
+> 
+> # Use the Kweon Koellinger script for SOC occ wages.
+> source("income-impute.R")
+> ukb_soc.data <- GET_INCOME(ukb_soc.data)
+> 
+> # Update to 2024 (income-impute gives 2015 GBP, so update to year specified.)
+> year.base <- 2015
+> cpi.base <- cpi.data %>% filter(year == year.base) %>% pull(cpi2015)
+> year.update <- 2024
+> cpi.update <- cpi.data %>% filter(year == year.update) %>% pull(cpi2015)
+> cpi.factor <- cpi.update / cpi.base
+> # Adjust the columns.
+> ukb_soc.data <- ukb_soc.data %>%
++     transmute(
++         eid = eid,
++         soc_mean_hourly       = cpi.factor * soc_mean_hourly,
++         soc_median_hourly     = cpi.factor * soc_median_hourly,
++         soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
++         soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
++         soc_2d_hourly         = exp(log_y_hourly))
+> 
+> 
+> ################################################################################
+> ## Merge data files.
 > 
 > # Merge the Phenotype data with Ed PGI.
 > cleaned_pheno.data <- cleaned_pheno.data %>%
 +     left_join(cleaned_edpgi.data, by = "eid")
 > 
+> # Merge the Phenotype data with parental imputed Ed PGI.
+> cleaned_pheno.data <- cleaned_pheno.data %>%
++     left_join(cleaned_imputed.data, by = "eid")
+> 
+> # Get counts of relatives onto phenotype data.
+> cleaned_pheno.data <- cleaned_pheno.data %>%
++     left_join(count_relatives.data,   by = "eid") %>%
++     left_join(relatives_present.data, by = "eid") %>%
++     # Missings are zeros.
++     mutate(
++         sibling_count   = ifelse(is.na(sibling_count),   0, sibling_count),
++         parent_count    = ifelse(is.na(parent_count),    0, parent_count),
++         father_present  = ifelse(is.na(father_present),  0, father_present),
++         mother_present  = ifelse(is.na(mother_present),  0, mother_present),
++         sibling_present = ifelse(is.na(sibling_present), 0, sibling_present))
+> 
+> # Wage data onto phenotype data.
+> cleaned_pheno.data <- cleaned_pheno.data %>%
++     left_join(ukb_soc.data, by = "eid")
+> 
+> 
+> ################################################################################
+> ## Clean the Ed PGI data fields, within entire sample.
+> 
 > # Standardise the Ed PGI.
 > cleaned_pheno.data <- cleaned_pheno.data %>%
-+     # PGI reliable for EUro ancestry, and reliable PCA data.
-+     mutate(edpgi_norm = edpgi_raw * inPCA * genetic_euroancest) %>%
++     # PGI reliable for Euro ancestry, and reliable PCA data.
++     mutate(
++         edpgi_all_norm =
++             ifelse(genetic_euroancest == 0, NA, edpgi_all_raw),
++         edpgi_imputed_self_norm =
++             ifelse(genetic_euroancest == 0, NA, edpgi_imputed_self_raw),
++         edpgi_imputed_sibling_norm =
++             ifelse(genetic_euroancest == 0, NA, edpgi_imputed_sibling_raw),
++         edpgi_imputed_paternal_norm =
++             ifelse(genetic_euroancest == 0, NA, edpgi_imputed_paternal_raw),
++         edpgi_imputed_maternal_norm =
++             ifelse(genetic_euroancest == 0, NA, edpgi_imputed_maternal_raw)
++     ) %>%
 +     # Normalise to have 0 mean, 1 SD.
-+     mutate(edpgi_norm = (edpgi_norm - mean(edpgi_norm, na.rm = TRUE)
-+         ) / sd(edpgi_norm, na.rm = TRUE))
++     # The parent/sibling values are centred around proband mean, sd
++     mutate(
++         edpgi_all_norm = (edpgi_all_norm -
++             mean(edpgi_all_norm, na.rm = TRUE)) / sd(edpgi_all_norm, na.rm = TRUE),
++         edpgi_imputed_self_norm = (edpgi_imputed_self_norm -
++             mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
++         edpgi_imputed_sibling_norm = (edpgi_imputed_sibling_norm -
++             mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
++         edpgi_imputed_paternal_norm = (edpgi_imputed_paternal_norm -
++             mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
++         edpgi_imputed_maternal_norm = (edpgi_imputed_maternal_norm -
++             mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE))
 > 
-> # Ensure outliers in PGI do not persist.
-> hist(cleaned_pheno.data$edpgi_raw)
-> hist(cleaned_pheno.data$edpgi_norm)
+> # Ensure outliers in PGIs do not persist.
+> hist(cleaned_pheno.data$edpgi_all_raw)
+> hist(cleaned_pheno.data$edpgi_all_norm)
+> # Similarly for imputed version.
+> hist(cleaned_pheno.data$edpgi_imputed_self_raw)
+> hist(cleaned_pheno.data$edpgi_imputed_self_norm)
+> 
+> # Show observation counts by both methods.
+> cleaned_pheno.data %>% filter(!is.na(edpgi_imputed_self_norm)) %>% print()
+# A tibble: 36,456 × 54
+       eid sex_male birthyear birthmonth visitdate  householdincome_cat
+     <dbl>    <int>     <int>      <int> <date>                   <int>
+ 1 1000061        0      1951          7 2010-01-09                   4
+ 2 1001059        0      1946          4 2008-08-07                  -3
+ 3 1001713        1      1946          1 2008-01-14                   2
+ 4 1002442        1      1966         11 2010-02-22                  -3
+ 5 1002773        1      1958          5 2007-07-11                  -1
+ 6 1003004        1      1961          6 2009-07-20                   3
+ 7 1004438        0      1945          5 2009-12-03                   2
+ 8 1004734        1      1947          1 2007-06-26                   4
+ 9 1005599        0      1949          4 2008-06-14                  -3
+10 1008723        0      1949          4 2008-12-15                   4
+# ℹ 36,446 more rows
+# ℹ 48 more variables: recruitedage <int>, datelastcontact <date>,
+#   edquals <int>, edyears <int>, agefinishededuc <int>, ethnicity <int>,
+#   genetic_race <int>, jobcode_soc <int>, numjobs <int>, numjobgaps <int>,
+#   jobcode_online <int>, jobcode_onlineSOC2000 <int>,
+#   jobyearstarted_online <int>, jobhoursworked_online <int>,
+#   jobhoursperweek_online <dbl>, yearendededuc_online <int>, …
+> cleaned_pheno.data %>% filter(!is.na(edpgi_all_norm)) %>% print()
+# A tibble: 408,625 × 54
+       eid sex_male birthyear birthmonth visitdate  householdincome_cat
+     <dbl>    <int>     <int>      <int> <date>                   <int>
+ 1 1000061        0      1951          7 2010-01-09                   4
+ 2 1000087        0      1944          4 2010-02-02                   2
+ 3 1000113        0      1939          1 2008-06-25                   1
+ 4 1000152        1      1961         12 2007-10-27                   3
+ 5 1000264        1      1946          6 2009-06-17                   1
+ 6 1000374        0      1951         12 2009-12-01                   2
+ 7 1000634        0      1966         12 2008-08-12                   3
+ 8 1001003        0      1960          2 2008-01-15                   2
+ 9 1001059        0      1946          4 2008-08-07                  -3
+10 1001075        0      1941         12 2009-11-06                   2
+# ℹ 408,615 more rows
+# ℹ 48 more variables: recruitedage <int>, datelastcontact <date>,
+#   edquals <int>, edyears <int>, agefinishededuc <int>, ethnicity <int>,
+#   genetic_race <int>, jobcode_soc <int>, numjobs <int>, numjobgaps <int>,
+#   jobcode_online <int>, jobcode_onlineSOC2000 <int>,
+#   jobyearstarted_online <int>, jobhoursworked_online <int>,
+#   jobhoursperweek_online <dbl>, yearendededuc_online <int>, …
+> 
+> # Validate the correlation between two different packages for computing Ed PGI.
+> print(cor(cleaned_pheno.data$edpgi_all_norm,
++     cleaned_pheno.data$edpgi_imputed_self_norm,
++     use = "pairwise.complete.obs"))
+[1] 0.9896629
 > 
 > 
 > ################################################################################
 > ## Save workable data file.
 > 
-> cleaned_pheno.data %>%
-+     write_csv(file.path(output.folder, "ukb-intermed-pheno.csv"))
+> # Rename and restrict to necessary columns.
+> final_pheno.data <- cleaned_pheno.data %>%
++     mutate(
++         # Ed PGI among entire sample
++         edpgi_all     = edpgi_all_norm,
++         # Ed PGI among sample with siblings -> main PGI in my analysis
++         edpgi_self    = edpgi_imputed_self_norm,
++         edpgi_father = edpgi_imputed_paternal_norm,
++         edpgi_mother = edpgi_imputed_maternal_norm) %>%
++     # Mean parental Ed PGI
++     rowwise() %>%
++     mutate(edpgi_parents = mean(
++         c(edpgi_imputed_paternal_norm, edpgi_imputed_maternal_norm),
++         na.rm = TRUE)) %>%
++     tibble() %>%
++     # Mark the analysis sample, those with imputed Ed PGI.
++     mutate(analysis_sample = as.integer(
++         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
++     # Select the relevant columns.
++     select(eid,
++         # Demographic variables.
++         sex_male,
++         visityear,
++         birthyear,
++         birthmonth,
++         recruitedage,
++         genetic_euroancest,
++         # Genetic variables.
++         edpgi_all,
++         edpgi_self,
++         edpgi_parents,
++         # Education variables
++         edyears,
++         # Income variables
++         jobcode_soc,
++         soc_mean_hourly,
++         soc_median_hourly,
++         soc_mean_hourly_all,
++         soc_median_hourly_all,
++         soc_2d_hourly,
++         starts_with("householdincome"),
++         # Health & Death variables
++         deathyear,
++         # Designators
++         sibling_count,
++         parent_count,
++         father_present,
++         mother_present,
++         sibling_present,
++         analysis_sample)
+> 
+> # Show how large the relevant data fields are.
+> final_pheno.data %>% NROW()
+[1] 502129
+> final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
+[1] 23202
+> 
+> # Similarly, for with SOC occ wage data.
+> final_pheno.data %>% filter(!is.na(soc_mean_hourly)) %>% NROW()
+[1] 324776
+> final_pheno.data %>% filter(!is.na(edpgi_parents) & !is.na(edyears), !is.na(soc_mean_hourly)) %>% NROW()
+[1] 23202
+> 
+> # Save the file.
+> final_pheno.data %>%
++     write_csv(file.path(output.folder, "ukb-cleaned-pheno.csv"))
 > 
 > proc.time()
    user  system elapsed 
-  8.733   0.877   8.810 
+ 21.581   2.036  21.186 

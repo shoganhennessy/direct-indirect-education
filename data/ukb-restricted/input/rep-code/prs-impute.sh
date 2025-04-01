@@ -13,9 +13,8 @@
 ################################################################################
 ## IMport necessary files.
 
-# Snipar required kinship + agesex file, computed in data-extract.py
-#                         and BGEN files computed in prs-pipeline.sh.
-
+# Snipar requires kinship + agesex file, computed in data-extract.py
+#                     + chr_i BGEN files computed in prs-pipeline.sh.
 
 # Get the pre-computed BGEN files, limited to Ed PGI relevant SNPs.
 for i in {1..22}
@@ -105,4 +104,4 @@ pgs.py imputed-ed-pgi                          \
     --threads   4
 
 # Save the parental imputed Ed PGI file.
-dx upload imputed-pgi.pgs.txt --path data-clean/imputed-pgi.pgs.txt
+dx upload imputed-ed-pgi.pgs.txt --path data-clean/imputed-ed-pgi.pgs.txt

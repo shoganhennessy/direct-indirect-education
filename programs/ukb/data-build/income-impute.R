@@ -117,19 +117,23 @@ GET_INCOME <- function(D){
                 is.na(soc_median_hourly), soc_median_hourly_all,
                     soc_median_hourly)]
         #convert to 2015 currency  (this syntax works for data.frame only, cpi)
-        D[year==i, soc_mean_hourly:=soc_mean_hourly  / cpi[i-2001, 2] ]
-        D[year==i, soc_median_hourly:=soc_median_hourly  / cpi[i-2001, 2] ]
-}
-
-D[, `:=`(
-    soc_2d = factor(substr(SOC, 1, 2)), 
-    year = factor(year, levels = c(2002:2016)), 
-    age = factor(age, levels = c(35:64)) 
-)]
-
-X = model.matrix(~ ( age  + soc_2d + year ) *log(soc_mean_hourly)*log(soc_median_hourly)*male, data=D)
-
-D[!is.na(SOC), log_y_hourly :=  X %*% coef] 
-return(D)
-
+        # D[year==i, soc_mean_hourly:=soc_mean_hourly  / cpi[i-2001, 2] ]
+        # D[year==i, soc_median_hourly:=soc_median_hourly  / cpi[i-2001, 2] ]
+    }
+    D[, `:=`(
+        soc_2d = factor(substr(SOC, 1, 2)), 
+        year = factor(year, levels = c(2002:2016)), 
+        age = factor(age, levels = c(35:64)) 
+    )]
+    X = model.matrix(~ (age + soc_2d + year
+        ) * log(soc_mean_hourly) * log(soc_median_hourly) * male,
+            data = D)
+    D[!is.na(age) &
+        !is.na(soc_2d) &
+        !is.na(year) &
+        !is.na(soc_mean_hourly) &
+        !is.na(soc_median_hourly) &
+        !is.na(male),
+        log_y_hourly := (X %*% coef)]
+    return(D)
 }

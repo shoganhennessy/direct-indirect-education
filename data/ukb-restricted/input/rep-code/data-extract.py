@@ -63,8 +63,8 @@ fieldNames = ",".join(desiredFieldsStr)
 print(fieldNames)
 
 # Test if each are in the data, by testing data dictionary.
-path = os.getcwd()
-dictCsv = glob.glob(os.path.join(path, "*.data_dictionary.csv"))[0]
+dataPath = os.getcwd()
+dictCsv = glob.glob(os.path.join(dataPath, "*.data_dictionary.csv"))[0]
 dictData = pd.read_csv(dictCsv)
 print([field + " not included." for field in desiredFields
     if field not in dictData["name"].tolist()])
@@ -86,6 +86,59 @@ cmd = ["dx",
 ]
 subprocess.check_call(cmd)
 
+os.chdir("/home/s/Dropbox/direct-indirect-education/data/ukb-restricted/input")
+
+# Add on a column for Ed Years, to phenotype file.
+phenoData = pd.read_csv("phenotype-extract.csv")
+
+# Define function edQual -> Edyears Following ISCED (see Mulsimnova+ 2024, p14)
+# https://github.com/DilnozaM/Rank-Concordance-of-PGI/blob/main/GWAS%26PGS/EA_GWAS/Preparing_residual_EA_new_nosibrel_fastgwas.do
+def edQualsConvert(edQual) :
+    """ Input: edQual, a number representing ed qual from UKB
+    Output: edYears, a number representing num years of ed from that qual.
+    """
+    edYears = np.nan
+    if edQual == -7   : edYears =  7      # None of above, given mandatory min.
+    elif edQual == -3 : edYears =  np.nan # Prefer not to answer.
+    elif edQual == 1  : edYears =  20     # Uni degree.
+    elif edQual == 2  : edYears =  13     # A Levels.
+    elif edQual == 3  : edYears =  10     # CSEs (old version of exams age 16)
+    elif edQual == 4  : edYears =  10     # GCSEs (new version of exams age 16)
+    elif edQual == 5  : edYears =  19     # Vocational degree (one year higher).
+    elif edQual == 6  : edYears =  15     # Professional qual (teach, nurse).
+    return(edYears)
+
+# extract the column of lists.
+from ast import literal_eval
+edQualsLists = [literal_eval(row)
+    for row in phenoData["participant.p6138_i0"].fillna("[]").tolist()]
+# Get years of education for each qualification they have obtained.
+edYearsLists = [
+    [edQualsConvert(edQual) for edQual in edQualsList]
+    for edQualsList in edQualsLists]
+# Get the maximum edyears.
+maxEdList = [
+    max(edList)
+    if len(edList) > 0
+    else np.nan
+    for edList in edYearsLists]
+# Put onto the phenotype dataframe.
+phenoData["participant.edyears"] = maxEdList
+# Get the qualification corresponding to max Ed Years.
+maxEdqualList = [
+    edQualsLists[i][np.argmax(max(edYearsLists[i]))]
+    if len(edQualsLists[i]) > 0
+    else np.nan
+    for i in range(0, len(edQualsLists))]
+# Put onto the phenotype dataframe.
+phenoData["participant.p6138_i0"] = maxEdqualList
+
+# SHow that it worked.abs
+print(phenoData[
+    ["participant.eid", "participant.p6138_i0", "participant.edyears"]])
+
+# Save (with the adjusted columns).
+phenoData.to_csv("phenotype-extract.csv")
 # Upload to clean data output.
 uploadCall = ["dx", "upload", "phenotype-extract.csv",
     "--path", "data-clean/phenotype-extract.csv"]

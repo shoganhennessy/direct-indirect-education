@@ -6,13 +6,8 @@ print(Sys.time())
 
 # Functions for data manipulation and visualisation
 library(tidyverse)
-# Generalised Random Forests, https://grf-labs.github.io/grf/
-library(grf)
-# The standard, linear, IV estimator package.
-library(ivreg)
-# My custom flavour of Stargazer TeX tables:
-# devtools::install_github("shoganhennessy/stargazer")
-library(stargazer)
+# Functions for tables into TeX
+library(xtable)
 # Library for better colour choice.
 library(ggthemes)
 # Library for equations in plots
@@ -35,8 +30,8 @@ colour.list <- c(
 data.folder <- file.path("..", "..", "..", "data", "ukb-restricted", "cleaned")
 # Graphics output folder
 presentation.folder <- file.path("..", "..", "..", "text", "presentation-files")
-figures.folder <- file.path("..", "..", "text", "..", "sections", "figures")
-tables.folder <- file.path("..", "..", "text", "..", "sections", "tables")
+figures.folder <- file.path("..", "..", "..", "text", "sections", "figures")
+tables.folder <- file.path("..", "..", "..", "text", "sections", "tables")
 
 
 ################################################################################
@@ -84,24 +79,9 @@ ukb.data <- data.folder %>%
     file.path("ukb-cleaned-pheno.csv") %>%
     read_csv()
 
-
-################################################################################
-## Adjust/clean UKB data file.
-
-# Get the family expected Ed PGI.
-ukb.data <- ukb.data %>%
-    mutate(edpgi_diff =
-        rowMeans(pick(starts_with("edpgi_norm_")), na.rm = TRUE))
-
-ukb.data %>%
-    filter(!is.na(edpgi_norm)) %>%
-    filter(!is.na(edpgi_norm_sibling1))
-
-
-# Define the sibling sample as those with non-missing family expected Ed PGI.
-ukb_analysis.data <- ukb.data %>%
-    filter(!is.na(edpgi_norm), !is.na(edpgi_diff))
-ukb_analysis.data
+# Get the sibling imputed analysis sample.
+analysis.data <- ukb.data %>%
+    filter(analysis_sample == 1)
 
 
 ################################################################################
@@ -118,111 +98,87 @@ ukb_analysis.data
 #        |                    |                  
 #        | Obs                | Obs.
 
-# Restrict to the sample with
+summary.table <- function(given.data){
+    # Generate summary data, for analysis sample (MEAN)
+    summary.mean <- given.data %>%
+        summarise_all(mean, na.rm = TRUE) %>%
+        pivot_longer(cols = everything(),
+            names_to = "variable", values_to = "mean")
+    summary.sd <- given.data %>%
+        summarise_all(sd, na.rm = TRUE) %>%
+        pivot_longer(cols = everything(),
+            names_to = "variable", values_to = "sd")
+    summary.mean$sd <- summary.sd$sd
+    return(summary.mean)
+}
 
-
-# Restrict to individuals with earnings data.
-ukb.data <- ukb.data %>%
-    filter(!is.na(indiv_earnings_real),
-        10000 < indiv_earnings_real, indiv_earnings_real < 300000)
-
-# Restrict to individuals with ed years + parents ed years data.
-ukb.data <- ukb.data %>%
-    filter(!is.na(indiv_edyears)) %>%
-    filter(!is.na(parent_edyears))
-
-# Restrict to individuals with ed years + parents ed years data.
-ukb.data <- ukb.data %>%
-    filter(!is.na(genescore_educ_euro))
-
-# Clean num of children data
-ukb.data <- ukb.data %>%
-    mutate(child = ifelse(is.na(child), 0, child))
-
-# Summary Table
-ukb.data %>%
+# Summarise analysis sample
+analysis_summary.data <- analysis.data %>%
     transmute(
-        genescore_educ_cont = genescore_educ_euro,
-        genescore_educ_binary = as.integer(genescore_educ_euro >= 0),
-        indiv_edyears = indiv_edyears,
-        college_degree = as.integer(degree_reported >= 5),
-        indiv_earnings_real = indiv_earnings_real / 1000,
-        indiv_income_real = indiv_income_real / 1000,
-        gender_female = gender_female,
-        hhres = hhres,
-        child = child,
-        parent_edyears = parent_edyears,
-        indiv_agey = indiv_agey,
-        survey_year = survey_year,
-        survey_year_1990s = as.integer(survey_year %in% 1990:1999),
-        survey_year_2000s = as.integer(survey_year %in% 2000:2009),
-        survey_year_2010s = as.integer(survey_year %in% 2010:2020),
-        cendiv_newengland = as.integer(cendiv %in% c(1)),
-        cendiv_atlantic = as.integer(cendiv %in% c(2, 5)),
-        cendiv_central = as.integer(cendiv %in% c(3, 4, 6, 7)),
-        cendiv_mountain = as.integer(cendiv %in% c(8)),
-        cendiv_pacific = as.integer(cendiv %in% c(9)),
-        observed_count = observed_count,
-        family_poor = family_poor,
-        family_move = family_move,
-        family_finhelp = family_finhelp,
-        father_missing = father_missing,
-        father_unemp = father_unemp,
-        father_manualjob = father_manualjob,
-        child_badhealth = child_badhealth,
-        parents_smoke = parents_smoke,
-        child_headinjury = child_headinjury        
-        ) %>%
-    as.data.frame() %>%
-    stargazer(summary = TRUE,
-        summary.stat = c("mean", "sd", "n"),
-        digits = 2,
-        digits.extra = 2,
-        covariate.labels = c(
-            "Ed PGI, continuous",
-            "Ed PGI, binary > 0",
-            "Education Years",
-            "Higher Education Degree?",
-            "Annual Labour Earnings, \\$ thousands",
-            "Annual Total Income, \\$ thousands",
-            "Gender -- Female",
-            "Household size",
-            "Count of Children",
-            "Parents' Education Years",
-            "Age During Survey",
-            "Survey Year",
-            "Survey Year, in 1990s?",
-            "Survey Year, in 2000s?",
-            "Survey Year, in 2010s?",
-            "USA Region -- New England",
-            "USA Region -- Atlantic",
-            "USA Region -- Central",
-            "USA Region -- Mountain",
-            "USA Region -- Pacific",
-            "Years in Survey",
-            "Childhood SES: Family poor",
-            "Childhood SES: Family moved",
-            "Childhood SES: Family financial help",
-            "Childhood SES: Father missing",
-            "Childhood SES: Father unemployed",
-            "Childhood SES: Father manual labourer",
-            "Childhood SES: Bad childhood health",
-            "Childhood SES: Parents smoked",
-            "Childhood SES: Childhood head injury"),
-        omit.table.layout = "n",
-        header = FALSE, float = FALSE, no.space = TRUE,
-        type = "text",
+        `Male` = sex_male,
+        `Age`  = recruitedage,
+        `Race $=$ White` = genetic_euroancest,
+        # Genetic variables.
+        `Ed PGI` = edpgi_self,
+        `Ed PGI, parental mean` = edpgi_parents,
+        # Education variables
+        `Education years` = edyears,
+        # Income variables
+        `Occ. hourly wage` = soc_mean_hourly,
+        `Household income < 18k` = householdincome_less18k,
+        `Household income 18--31k` = householdincome_18to31k,
+        `Household income 31--52k` = householdincome_31to52k,
+        `Household income 52--100k` = householdincome_52to100k,
+        `Household income 100k <` = householdincome_above100k,
+        # Designators
+        `Any siblings` = sibling_present,
+        `Count siblings` = sibling_count) %>%
+    summary.table() %>%
+    transmute(variable = variable,
+        mean_analysis = mean,
+        sd_analysis = sd)
+# Summarise entire sample
+all_summary.data <- ukb.data %>%
+    # Make Ed PGI for parents missing in the entire data file summary table.
+    mutate(edpgi_parents = NA) %>%
+    transmute(
+        `Male` = sex_male,
+        `Age`  = recruitedage,
+        `Race $=$ White` = genetic_euroancest,
+        # Genetic variables.
+        `Ed PGI` = edpgi_self,
+        `Ed PGI, parental mean` = edpgi_parents,
+        # Education variables
+        `Education years` = edyears,
+        # Income variables
+        `Occ. hourly wage` = soc_mean_hourly,
+        `Household income < 18k` = householdincome_less18k,
+        `Household income 18--31k` = householdincome_18to31k,
+        `Household income 31--52k` = householdincome_31to52k,
+        `Household income 52--100k` = householdincome_52to100k,
+        `Household income 100k <` = householdincome_above100k,
+        # Designators
+        `Any siblings` = sibling_present,
+        `Count siblings` = sibling_count) %>%
+    summary.table()
+
+# Combine into one file.
+summary.data <- analysis_summary.data
+summary.data$mean_all <- all_summary.data$mean
+summary.data$sd_all <- all_summary.data$sd
+
+# Save the summary table as LaTeX.
+summary.data %>%
+    xtable(rownames = FALSE,
         out = file.path(tables.folder, "ukb-summary.tex"))
 
-# Show names of columns.
-names(ukb.data)
-
 # Save the observation count, to host in files.
+analysis.data %>%
+    nrow() %>%
+    writeLines(file.path(tables.folder, "ukb-analysis-count.txt"))
 ukb.data %>%
     nrow() %>%
-    format(big.mark = ",", scientific = FALSE) %>%
-    #as.character() %>%
-    writeLines(file.path(tables.folder, "ukb-obs-count.txt"))
+    writeLines(file.path(tables.folder, "ukb-total-count.txt"))
 
 
 ################################################################################

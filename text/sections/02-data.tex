@@ -3,40 +3,57 @@
 \section{Data and Genetic Context}
 \label{sec:data}
 
-\subsection{Health and Retirement Study (HRS)}
-\label{sec:data-hrs}
+\subsection{UK Biobank (UKB)}
+\label{sec:data-UKB}
 
-The Health and Retirement Study (HRS) is a longitudinal survey that studies the households of American adults over 50 years old, measuring health and economic outcomes for individuals and their family every second year from 1992, with most recent data available in 2020.\footnote{
-    The \cite{hrs2020} is sponsored by the National Institute on Ageing (grant number NIA U01AG009740) and is conducted by the University of Michigan.
-    I use the RAND corporation's compilation of HRS data.
+The UK Biobank (UKB) is a longitudinal survey that studies the households of American adults over 50 years old, measuring health and economic outcomes for individuals and their family every second year from 1992, with most recent data available in 2020.\footnote{
+    The \cite{UKB2020} is sponsored by the National Institute on Ageing (grant number NIA U01AG009740) and is conducted by the University of Michigan.
+    I use the RAND corporation's compilation of UKB data.
 }
 I define the main analysis sample as household heads who provided genetic information, and who have non-missing measures on education attainment, and self-reported measures of annual income.
 These data form a panel for individuals, where each row is a household-head-year; from this panel, I take the maximum self-reported annual earnings at ages 50--65 (among those working), record the year this is reported in, the maximum years of education reported, and use this as the main analysis sample.
-I then restrict to individuals with race defined as ``White,'' as the genetic measures are calculated among populations of European ancestry (see \cite{hrs2020genes} for further details).
+I then restrict to individuals with race defined as ``White,'' as the genetic measures are calculated among populations of European ancestry (see \cite{UKB2020genes} for further details).
 
-\begin{table}[h!]
+
+\begin{table}[H]
     \singlespacing
     \centering
-    \caption{HRS Summary Statistics.}
-    \makebox[\textwidth][c]{\input{sections/tables/hrs-summary.tex}}
-    \label{tab:hrs-summary}
+    \caption{Descriptive Statistics, UK Biobank (UKB).}
+    % Load CSV data into memory once
+    \begin{tabular}{l c c c c}
+        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+            & \multicolumn{2}{c}{Analysis sample}
+            & \multicolumn{2}{c}{Entire sample} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+        & Mean & (SD) & Mean & (SD) \\
+        \midrule \\
+        \input{sections/tables/ukb-summary.tex} \\
+        \hline \\
+            Observations
+                & \input{../text/sections/tables/ukb-analysis-count.txt} &
+                & \input{../text/sections/tables/ukb-total-count.txt} & \\
+        \\[-1.8ex]\hline \\[-1.8ex] \\
+    \end{tabular}
+    \vspace{-0.25cm}
+    \label{tab:ukb-summary}
     \justify
     \footnotesize
-    \textbf{Note}:
-    This table shows the summary statistics for the HRS analysis sample, household heads with sample restrictions described above.
+    \textbf{Note:}
+    This table shows summary statistics for the UKB analysis subsample, compared to the entire UKB sample.
+    The analysis sample refers to any individual with at least one sibling in the UKB data.
 \end{table}
 
-There are $\input{../text/sections/tables/hrs-obs-count.txt}$ individuals in this sample, a representative sample of retirement age, American household heads.
-Additionally, the HRS data include additional characteristics, including count of children, education years of their parents,\footnote{
+%There are $\input{../text/sections/tables/ukb-obs-count.txt}$ individuals in this sample, a representative sample of retirement age, American household heads.
+Additionally, the UKB data include additional characteristics, including count of children, education years of their parents,\footnote{
     I take the maximum between mother and father's years of education, and report this value thanks to missing values.
 } and the US region they reside in.
 I include these values in the analysis sample, taking values reported in the same year of the maximum annual earnings.
-\autoref{tab:hrs-summary} reports summary statistics for this sample, and \autoref{fig:hrs-edyears-hist} summarises the correlation between education years and my measure of later-life labour earnings.
+\autoref{tab:ukb-summary} reports summary statistics for this sample, and \autoref{fig:ukb-edyears-hist} summarises the correlation between education years and my measure of later-life labour earnings.
 
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Distribution of HRS Education Measures.}
+    \caption{Distribution of UKB Education Measures.}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Education Years.}
@@ -49,31 +66,31 @@ I include these values in the analysis sample, taking values reported in the sam
         \includegraphics[width=\textwidth]{sections/figures/edyears-earnings.png}
         \label{fig:edyears-earnings}
     \end{subfigure}
-    \label{fig:hrs-edyears-hist}
+    \label{fig:ukb-edyears-hist}
     \vspace{-1cm}
     \justify
     \footnotesize
     \textbf{Note}:
-    This figure shows the marginal distribution of education years in the HRS analysis sample, and the correlation between years of education and resulting earnings.
+    This figure shows the marginal distribution of education years in the UKB analysis sample, and the correlation between years of education and resulting earnings.
     Earnings represent the annual income of household heads, adjusted to 2022 by the CPI-U. 
 \end{figure}
 
 \subsection{Education Polygenic Score (Ed PGI)}
 \label{sec:data-genescore}
 
-The HRS collected genetic information from survey respondents in the survey years 2006, 2008, 2010, 2012.
+The UKB collected genetic information from survey respondents in the survey years 2006, 2008, 2010, 2012.
 This involves collecting respondents' saliva, and then measuring the respondent's genotype.
-From these genetic data, HRS then calculates genetic score for a number of individual outcomes \citep{hrs2020genes}.
+From these genetic data, UKB then calculates genetic score for a number of individual outcomes \citep{UKB2020genes}.
 A genetic score is a measure of genetic predisposition for a certain trait (e.g., years of education, height, bipolar disorder, etc.), calculated from a complicated process.
 To summarise this process, biostatisticians measure outcomes and the full genome of thousands of people (mostly from biobank data), and identify the locations of single-letter changes on the human genome that predict (out-of-sample) the outcome of interest, calculating a set of weights for the gene locations.
-The gene score is then calculated (out-of-sample) for the HRS participants, as the weighted sum of gene mutations that each HRS participant exhibits.
+The gene score is then calculated (out-of-sample) for the UKB participants, as the weighted sum of gene mutations that each UKB participant exhibits.
 Notably, most gene scores (and all included in this analysis) are calculated from populations of European ancestry, and are only applicable this population.
 See \cite{uffelmann2021genome} for a full explanation of the approach to calculating polygenic scores.
 
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Distribution of HRS Ed PGI.}
+    \caption{Distribution of UKB Ed PGI.}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Ed PGI.}
@@ -86,30 +103,30 @@ See \cite{uffelmann2021genome} for a full explanation of the approach to calcula
         \includegraphics[width=\textwidth]{sections/figures/genescore-edyears.png}
         \label{fig:genescore-edyears}
     \end{subfigure}
-    \label{fig:hrs-hist}
+    \label{fig:ukb-hist}
     \vspace{-1cm}
     \justify
     \footnotesize
     \textbf{Note}:
-    This figure shows the marginal distribution of Ed PGI and education years among HRS household heads, in the analysis sample defined above.
-    Ed PGI is normalised within-in sample by the HRS to have mean 0, and standard deviation 1; the distribution shape is unaffected by the normalisation --- i.e., it is roughly normally distributed regardless.
+    This figure shows the marginal distribution of Ed PGI and education years among UKB household heads, in the analysis sample defined above.
+    Ed PGI is normalised within-in sample by the UKB to have mean 0, and standard deviation 1; the distribution shape is unaffected by the normalisation --- i.e., it is roughly normally distributed regardless.
     3.4\% of the analysis sample reports education years less than 10 years (not included in panel b).
 \end{figure}
 
-The HRS includes a gene score for education attainment (Ed PGI), a measure of genetic predisposition to years of education.
+The UKB includes a gene score for education attainment (Ed PGI), a measure of genetic predisposition to years of education.
 The Ed PGI is calculated from weights developed by \cite{lee2018gene} from genetic and education data from over a million individuals' genetic data, from the UK Biobank and other biobanks.
-\autoref{fig:hrs-hist} shows the marginal distributions of the Ed PGI and education years among the sample of $\input{../text/sections/tables/hrs-obs-count.txt}$ HRS household heads.
-Ed PGI is normalised with mean 0 and standard deviation 1, and is roughly normally distributed among the HRS sample; years of education is bunched, with around 40\% of the sample having achieved at most high school (12 years), while 32\% achieve a college degree.
+\autoref{fig:ukb-hist} shows the marginal distributions of the Ed PGI and education years among the sample of% $\input{../text/sections/tables/ukb-obs-count.txt}$ UKB household heads.
+Ed PGI is normalised with mean 0 and standard deviation 1, and is roughly normally distributed among the UKB sample; years of education is bunched, with around 40\% of the sample having achieved at most high school (12 years), while 32\% achieve a college degree.
 
 Epidemiology has a recent history of using these gene scores as instruments for health conditions, an approach known as Mendelian Randomisation (MR, \citealt{lawlor2008mendelian}).
 The key reasoning is that at meiosis there is a random assortment of parents genes mixing (Mendelian independent assortment), so that a child inherits a random mix of genes from their parents and not a pre-determined 50-50 mix of genes from each parent.
-The HRS does not have measures of parents' genotype, or many siblings, so following \cite{papageorge2020genes} I condition on the measure of parents' education through-out.
+The UKB does not have measures of parents' genotype, or many siblings, so following \cite{papageorge2020genes} I condition on the measure of parents' education through-out.
 This means that the approach in this version of the paper is decomposing genetic \textit{associations}, and future work will exploit the causal framework to decompose \textit{causal effects}.
 
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Distribution of HRS Earnings.}
+    \caption{Distribution of UKB Earnings.}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Earnings.}
@@ -122,19 +139,19 @@ This means that the approach in this version of the paper is decomposing genetic
         \includegraphics[width=\textwidth]{sections/figures/genescore-earnings.png}
         \label{fig:genescore-earnings}
     \end{subfigure}
-    \label{fig:hrs-genescore-earnings}
+    \label{fig:ukb-genescore-earnings}
     \vspace{-1cm}
     \justify
     \footnotesize
     \textbf{Note}:
-    This figure shows the marginal distribution of Ed PGI and education years among HRS household heads, in the analysis sample defined above.
-    Ed PGI is normalised within-in sample by the HRS to have mean 0, and standard deviation 1; the distribution shape is unaffected by the normalisation --- i.e., it is roughly normally distributed regardless.
+    This figure shows the marginal distribution of Ed PGI and education years among UKB household heads, in the analysis sample defined above.
+    Ed PGI is normalised within-in sample by the UKB to have mean 0, and standard deviation 1; the distribution shape is unaffected by the normalisation --- i.e., it is roughly normally distributed regardless.
     3.4\% of the analysis sample reports education years less than 10 years (not included in panel b).
 \end{figure}
 
-The key \cite{lee2018gene} finding is replicated in \autoref{fig:hrs-genescore-earnings}: Ed PGI predicts 10--12\% of the variation in education years.
+The key \cite{lee2018gene} finding is replicated in \autoref{fig:ukb-genescore-earnings}: Ed PGI predicts 10--12\% of the variation in education years.
 This graphically represents the first-stage estimates crucial in MR studies, where the first-stage is very strong.\footnote{
-	Note that the Ed PGI was constructed from UK Biobank data, yet predicts 10--12\% variation in years of education in the the HRS data, out-of-sample.
+	Note that the Ed PGI was constructed from UK Biobank data, yet predicts 10--12\% variation in years of education in the the UKB data, out-of-sample.
 }
 
 The Ed PGI is calculated from 1,271 different genes \citep{lee2018gene}, each of which are found to significantly predict year of education.
