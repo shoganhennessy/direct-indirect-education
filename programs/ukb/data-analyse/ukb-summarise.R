@@ -124,15 +124,15 @@ analysis_summary.data <- analysis.data %>%
         # Education variables
         `Education years` = edyears,
         # Income variables
-        `Occ. hourly wage` = soc_mean_hourly,
-        `Household income < 18k` = householdincome_less18k,
-        `Household income 18--31k` = householdincome_18to31k,
-        `Household income 31--52k` = householdincome_31to52k,
+        `Occupation hourly wage`    = soc_mean_hourly,
+        `Household income < 18k`    = householdincome_less18k,
+        `Household income 18--31k`  = householdincome_18to31k,
+        `Household income 31--52k`  = householdincome_31to52k,
         `Household income 52--100k` = householdincome_52to100k,
-        `Household income 100k <` = householdincome_above100k,
+        `Household income 100k <`   = householdincome_above100k,
         # Designators
-        `Any siblings` = sibling_present,
-        `Count siblings` = sibling_count) %>%
+        `Any siblings?`  = sibling_present,
+        `Count of siblings` = sibling_count) %>%
     summary.table() %>%
     transmute(variable = variable,
         mean_analysis = mean,
@@ -152,11 +152,11 @@ all_summary.data <- ukb.data %>%
         `Education years` = edyears,
         # Income variables
         `Occ. hourly wage` = soc_mean_hourly,
-        `Household income < 18k` = householdincome_less18k,
+        `Household income $<$ 18k` = householdincome_less18k,
         `Household income 18--31k` = householdincome_18to31k,
         `Household income 31--52k` = householdincome_31to52k,
         `Household income 52--100k` = householdincome_52to100k,
-        `Household income 100k <` = householdincome_above100k,
+        `Household income 100k $<$` = householdincome_above100k,
         # Designators
         `Any siblings` = sibling_present,
         `Count siblings` = sibling_count) %>%
@@ -169,24 +169,65 @@ summary.data$sd_all <- all_summary.data$sd
 
 # Save the summary table as LaTeX.
 summary.data %>%
-    xtable(rownames = FALSE,
-        out = file.path(tables.folder, "ukb-summary.tex"))
+    xtable() %>%
+    print(
+        sanitize.colnames.function = identity,
+        sanitize.text.function = identity,
+        NA.string = " ",
+        include.colnames = FALSE,
+        include.rownames = FALSE,
+        only.contents = TRUE,
+        hline.after = NULL,
+        format.args = list(big.mark = ","),
+        file = file.path(tables.folder, "ukb-summary.tex"))
 
 # Save the observation count, to host in files.
 analysis.data %>%
     nrow() %>%
+    prettyNum(big.mark = ",", scientific = FALSE) %>%
     writeLines(file.path(tables.folder, "ukb-analysis-count.txt"))
 ukb.data %>%
     nrow() %>%
+    prettyNum(big.mark = ",", scientific = FALSE) %>%
     writeLines(file.path(tables.folder, "ukb-total-count.txt"))
+
+#TODO: funtionalise the above, and then make 4 panels.
+analysis.data %>%
+    transmute(
+        # Panel A. Genetic measures.
+        `Ed PGI` = edpgi_self,
+        `Ed PGI, parental mean` = edpgi_parents,
+        #TODO:
+        # Panel B. Education.
+        `Education years` = edyears,
+        #TODO: `No education qualification` = as.integer(edyears >= 10)
+        #TODO: `GCSEs $+$`                  = as.integer(edyears >= 10)
+        #TODO: `A Levels $+$`               = as.integer(edyears >= 13)
+        #TODO: `Professional degree`        = as.integer(edyears == 15)
+        #TODO: `Vocational degree`          = as.integer(edyears == 19)
+        #TODO: `University degree`          = as.integer(edyears == 20)
+        # Panel C. Income and labour market outcomes
+        `Occupation hourly wage`    = soc_mean_hourly,
+        #TODO -> `Occupation hourly wage`    = soc_mean_hourly,
+        `Household income < 18k`    = householdincome_less18k,
+        `Household income 18--31k`  = householdincome_18to31k,
+        `Household income 31--52k`  = householdincome_31to52k,
+        `Household income 52--100k` = householdincome_52to100k,
+        `Household income 100k <`   = householdincome_above100k,
+        # Panel D. Demographics
+        `Male`                    = sex_male,
+        `Age`                     = recruitedage,
+        `Ethnicity $=$ Caucasian` = genetic_euroancest,
+        `Any siblings?`           = sibling_present,
+        `Count of siblings`       = sibling_count)
 
 
 ################################################################################
 ## Plot summaries of these data.
 
 # Show the histogram of gene scores.
-genescore.plot <- ukb.data %>%
-    ggplot(aes(x = genescore_educ_euro)) +
+edpgi.plot <- ukb.data %>%
+    ggplot(aes(x = edpgi_self)) +
     geom_density(aes(y = after_stat(count)), fill = colour.list[1]) +
     theme_bw() +
     geom_vline(xintercept = 0, linetype = "dashed") +
@@ -205,12 +246,12 @@ genescore.plot <- ukb.data %>%
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-hist.png"),
-    plot = genescore.plot,
+ggsave(file.path(figures.folder, "edpgi-hist.png"),
+    plot = edpgi.plot,
     units = "cm", width = fig.width, height = fig.height)
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-hist-presentation.png"),
-    plot = genescore.plot,
+ggsave(file.path(figures.folder, "edpgi-hist-presentation.png"),
+    plot = edpgi.plot,
     units = "cm", width = presentation.width, height = presentation.height)
 
 # Show the histogram of ed years.
@@ -353,13 +394,13 @@ ggsave(file.path(figures.folder, "college-earnings.png"),
 # First-stage OLS no controls 0.66519
 ukb.data %>%
     filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    lm(indiv_edyears ~ 1 + genescore_educ_euro, data = .) %>%
+    lm(indiv_edyears ~ 1 + edpgi_self, data = .) %>%
     summary() %>%
     print()
 # Show in a Bin-scatter plot.
-genescore_edyears.plot <- ukb.data %>%
+edpgi_edyears.plot <- ukb.data %>%
     filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    binscatter.plot(data = ., "genescore_educ_euro", "indiv_edyears",
+    binscatter.plot(data = ., "edpgi_self", "indiv_edyears",
         colour.list[2]) +
     annotate("text", colour = colour.list[2],
         x = 0.875, y = 10.5,
@@ -380,18 +421,18 @@ genescore_edyears.plot <- ukb.data %>%
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-edyears.png"),
-    plot = genescore_edyears.plot,
+ggsave(file.path(figures.folder, "edpgi-edyears.png"),
+    plot = edpgi_edyears.plot,
     units = "cm", width = fig.width, height = fig.height)
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-edyears-wider.png"),
-    plot = genescore_edyears.plot,
+ggsave(file.path(figures.folder, "edpgi-edyears-wider.png"),
+    plot = edpgi_edyears.plot,
     units = "cm", width = presentation.width, height = 0.85 * presentation.height)
 
 # Generate a version with the (implied) causal design.
-genescore_edyears_causal.plot <- ukb.data %>%
+edpgi_edyears_causal.plot <- ukb.data %>%
     filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    binscatter.plot(data = ., "genescore_educ_euro", "indiv_edyears",
+    binscatter.plot(data = ., "edpgi_self", "indiv_edyears",
         colour.list[2], option = "half-line") +
     annotate("text", colour = colour.list[2],
         x = 0.875, y = 10.5,
@@ -424,8 +465,8 @@ genescore_edyears_causal.plot <- ukb.data %>%
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
 # Save this plot.
-ggsave(file.path(figures.folder, "genescore-edyears-causal.png"),
-    plot = genescore_edyears_causal.plot,
+ggsave(file.path(figures.folder, "edpgi-edyears-causal.png"),
+    plot = edpgi_edyears_causal.plot,
     units = "cm", width = presentation.width, height = 0.85 * presentation.height)
 
 # Show correlation between gene score and income
@@ -433,13 +474,13 @@ ggsave(file.path(figures.folder, "genescore-edyears-causal.png"),
 # First-stage OLS no controls 0.66519
 ukb.data %>%
     filter(indiv_earnings_real <= 250000) %>%
-    lm(log(indiv_earnings_real) ~ 1 + genescore_educ_euro, data = .) %>%
+    lm(log(indiv_earnings_real) ~ 1 + edpgi_self, data = .) %>%
     summary() %>%
     print()
 # Reduced-form OLS with controls 0.056507
-genescore_earnings.plot <- ukb.data %>%
+edpgi_earnings.plot <- ukb.data %>%
     mutate(indiv_earnings_real = indiv_earnings_real / 1000) %>%
-    binscatter.plot(data = ., "genescore_educ_euro", "indiv_earnings_real",
+    binscatter.plot(data = ., "edpgi_self", "indiv_earnings_real",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 1.5, y = 15,
@@ -460,18 +501,18 @@ genescore_earnings.plot <- ukb.data %>%
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-earnings.png"),
-    plot = genescore_earnings.plot,
+ggsave(file.path(figures.folder, "edpgi-earnings.png"),
+    plot = edpgi_earnings.plot,
     units = "cm", width = fig.width, height = fig.height)
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-earnings-wider.png"),
-    plot = genescore_earnings.plot,
+ggsave(file.path(figures.folder, "edpgi-earnings-wider.png"),
+    plot = edpgi_earnings.plot,
     units = "cm", width = presentation.width, height = 0.85 * presentation.height)
 
 # Generate a version with the (implied) causal design.
-genescore_earnings_causal.plot <- ukb.data %>%
+edpgi_earnings_causal.plot <- ukb.data %>%
     mutate(indiv_earnings_real = indiv_earnings_real / 1000) %>%
-    binscatter.plot(data = ., "genescore_educ_euro", "indiv_earnings_real",
+    binscatter.plot(data = ., "edpgi_self", "indiv_earnings_real",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 1.5, y = 15,
@@ -504,16 +545,16 @@ genescore_earnings_causal.plot <- ukb.data %>%
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-earnings-causal.png"),
-    plot = genescore_earnings_causal.plot,
+ggsave(file.path(figures.folder, "edpgi-earnings-causal.png"),
+    plot = edpgi_earnings_causal.plot,
     units = "cm", width = presentation.width, height = 0.85 * presentation.height)
 
 
 # Correlation between gene score and cognitive measures later in life
 # Example of a direct effect.
-lm(log(cogtot) ~ 1 + genescore_educ_euro, data = ukb.data) %>% summary()
-genescore_cogtot.plot <- ukb.data %>%
-    binscatter.plot(data = ., "genescore_educ_euro", "cogtot", "orange") +
+lm(log(cogtot) ~ 1 + edpgi_self, data = ukb.data) %>% summary()
+edpgi_cogtot.plot <- ukb.data %>%
+    binscatter.plot(data = ., "edpgi_self", "cogtot", "orange") +
     annotate("text", colour = "orange",
         x = 0, y = 37.5,
         label = expression("Slope ≈ +2.9%"),
@@ -531,12 +572,12 @@ genescore_cogtot.plot <- ukb.data %>%
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-cogtot.png"),
-    plot = genescore_cogtot.plot,
+ggsave(file.path(figures.folder, "edpgi-cogtot.png"),
+    plot = edpgi_cogtot.plot,
     units = "cm", width = fig.width, height = fig.height)
 # Save this plot
-ggsave(file.path(figures.folder, "genescore-cogtot-wider.png"),
-    plot = genescore_cogtot.plot,
+ggsave(file.path(figures.folder, "edpgi-cogtot-wider.png"),
+    plot = edpgi_cogtot.plot,
     units = "cm", width = presentation.width, height = fig.height)
 
 # Compare education years.
@@ -556,7 +597,7 @@ ukb.data %>%
 # Show how Ed PGI is related to demographics, lm(Z ~ 1 + X)
 demographic.reg <- ukb.data %>%
     transmute(
-        genescore_educ_euro = genescore_educ_euro,
+        edpgi_self = edpgi_self,
         `Childhood SES: Family poor`            = family_poor,
         `Childhood SES: Family moved`           = family_move,
         `Childhood SES: Family financial help`  = family_finhelp,
@@ -572,7 +613,7 @@ demographic.reg <- ukb.data %>%
         `Mother Ed years`                       = ifelse(is.na(mother_edyears), 0, mother_edyears),
         `Mean Parent Ed years`                  = parent_edyears,
         `Female`                                = gender_female) %>%
-    lm(reformulate(".", response = "genescore_educ_euro"), data = .)
+    lm(reformulate(".", response = "edpgi_self"), data = .)
 print(summary(demographic.reg))
 # Plot the coefficients.
 demographic.plot <- modelsummary::modelplot(demographic.reg,
@@ -595,32 +636,32 @@ ggsave(file.path(figures.folder, "demographic-plot.png"),
     width = 1.5 * presentation.width, height = 1.25 * presentation.height)
 
 # Calculate the correlation plot.
-genescore_correlation.matrix <- ukb.data %>%
-    filter(!is.na(genescore_educ_euro)) %>%
+edpgi_correlation.matrix <- ukb.data %>%
+    filter(!is.na(edpgi_self)) %>%
     # Select the gene scores
     transmute(
-        EA           = genescore_educ_euro,
-        Cognition    = genescore_gencog_euro,
-        BMI          = genescore_bmi_euro,
-        Alcoholism   = genescore_alcohol_euro,
-        Alzheimers   = genescore_alzh_euro,
-        Wellbeing    = genescore_wellbeing_euro,
-        Bipolar      = genescore_bipolar_euro,
-        ADHD         = genescore_adhd_euro,
-        Longevity    = genescore_longevity_euro,
-        Antisocial   = genescore_antisocial_euro,
-        Depression   = genescore_mdepressived_euro,
-        Anxiety      = genescore_anxietyfactor_euro) %>%
+        EA           = edpgi_self,
+        Cognition    = edpgi_gencog_euro,
+        BMI          = edpgi_bmi_euro,
+        Alcoholism   = edpgi_alcohol_euro,
+        Alzheimers   = edpgi_alzh_euro,
+        Wellbeing    = edpgi_wellbeing_euro,
+        Bipolar      = edpgi_bipolar_euro,
+        ADHD         = edpgi_adhd_euro,
+        Longevity    = edpgi_longevity_euro,
+        Antisocial   = edpgi_antisocial_euro,
+        Depression   = edpgi_mdepressived_euro,
+        Anxiety      = edpgi_anxietyfactor_euro) %>%
     cor()
 # Plot the matrix, only the lower left.
-genescore_correlation.matrix[
-    upper.tri(genescore_correlation.matrix, diag = FALSE)] <- NA
-genescore_correlation.plot <- genescore_correlation.matrix %>%
+edpgi_correlation.matrix[
+    upper.tri(edpgi_correlation.matrix, diag = FALSE)] <- NA
+edpgi_correlation.plot <- edpgi_correlation.matrix %>%
     ggcorrplot::ggcorrplot(hc.order = FALSE,
         type = "full")
 # Save this file
-ggsave(file.path(figures.folder, "genescore-correlation.png"),
-    plot = genescore_correlation.plot,
+ggsave(file.path(figures.folder, "edpgi-correlation.png"),
+    plot = edpgi_correlation.plot,
     units = "cm", width = 1.5 * fig.width, height = 1.25 * fig.height)
 
 
@@ -662,7 +703,7 @@ effects.extract <- function(mediate.reg, model.name){
 }
 
 # Put relevant data into matrix form
-Z <- ukb.data %>% pull(genescore_educ_euro)
+Z <- ukb.data %>% pull(edpgi_self)
 D <- ukb.data %>% pull(indiv_edyears)
 Y <- ukb.data %>% transmute(Y = log(indiv_earnings_real)) %>% pull(Y)
 X <- ukb.data %>%
@@ -829,7 +870,7 @@ library(sampleSelection)
 library(boot)
 boot.samples <- 10^4
 # Put relevant data into matrix form
-Z <- ukb.data %>% pull(genescore_educ_euro)
+Z <- ukb.data %>% pull(edpgi_self)
 D <- ukb.data %>% pull(indiv_edyears)
 Y <- ukb.data %>% transmute(Y = log(indiv_earnings_real)) %>% pull(Y)
 X <- ukb.data %>%

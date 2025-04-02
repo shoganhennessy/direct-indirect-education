@@ -2,19 +2,24 @@
 
 Based on recent meetings with Professors
 
-## Current work plan:
-
-1. Use the observed PGI, mean(parents, siblings), to infer causal effects with sample size I currently have.
-Over summer, increase sample size by imputing from {parents, siblings} genotype data.
-(1) Operationalise the Young Snipar imputation to increase sample size. https://github.com/AlexTISYoung/snipar
-(2) Code which finds the genes inherited randomly, because a parent had only one copy (and not 2), and generate a PGI from these value.
-This second option is meaningfully different from the first, and might have different results in the causal estimates if so.  Indeed, it may not be centred around zero either.
-
-2. 
-
 ## Current to-do list in writing the paper:
 
 1. Connect the OCC score wages in pheno data, provided by Kweon+ (2025).
+
+- Update my UKB data dispense https://dnanexus.gitbook.io/uk-biobank-rap/getting-started/data-structure/updating-dispensed-data
+
+- Update the phenotype extract variables, to use multiple instances (i0, i1, ...) of SOC and education qualifications data.
+- Get separate columns for each qualification in EdQuals
+- Get the following other PGIs in https://biobank.ndph.ox.ac.uk/showcase/label.cgi?id=302
+Asthma                  https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26211
+Bipolar Disorder        https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26215
+Height                  https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26241
+BMI                     https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26217
+Schizophrenia           https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26276
+Type 2 Diabetes         https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26286
+Coronary Artery Disease https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=26228
+
+Eventually -> calculate the ADHD PGI, which would be an important control in education.
 
 2. Data section
 
