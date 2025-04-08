@@ -41,7 +41,9 @@ cd ukb/data-analyse
 R CMD BATCH --no-save ukb-summarise.R
 # First-stage effects, justifying the imputation research design.
 R CMD BATCH --no-save ukb-first-stage.R
-# Total genetic effects estimates.
+# Total genetic effect estimates.
+R CMD BATCH --no-save ukb-genetic-effects.R
+# Mediation analysis, direct + indirect effects of Ed PGI.
 R CMD BATCH --no-save ukb-direct-indirect.R
 # Go back to base folder.
 cd ../..

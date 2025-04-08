@@ -13,6 +13,7 @@
 ################################################################################
 ## IMport necessary files.
 
+apt-get install plink2
 # Snipar requires kinship + agesex file, computed in data-extract.py
 #                     + chr_i BGEN files computed in prs-pipeline.sh.
 
@@ -87,6 +88,36 @@ impute.py                             \
     --agesex    phenotype-agesex.dat  \
     --out       parent-imputed-geno-@ \
     --threads   4
+
+#! Command to list the bug for.
+impute.py --bgen chr_@ --chr_range 1-22 --ibd ibd_chr_@.ibd --king kinship-adjusted.dat --agesex phenotype-agesex.dat --out parent-imputed-geno-@
+#! Note:  32GB of RAM, to avoid getting memory killed.
+
+https://github.com/AlexTISYoung/snipar/issues/new
+Bug in pre_prepocessdata.py for .bgen input files.
+
+Hi, hope you are well today.
+
+I am listing a bug, related to line 600 in XXXYY.py.
+
+When I run the imput.py script, I am greeted with the following error.
+
+CODE HERE.
+
+In addition, if I use plink2 to convert the 22 chromosome bgen files to bim, and uses those files as input for impute.py, then everything runs smoothly.
+
+# Convert BGEN -> BED, then run impute.py --bed .
+for i in {1..22}
+do
+    echo $i
+    plink2                            \
+        --bgen chr_$i.bgen  ref-first \
+        --sample chr_$i.sample        \
+        --make-bed                    \
+        --out chr_$i
+done
+impute.py --bed chr_@ --chr_range 1-22 --ibd ibd_chr_@.ibd --king kinship-adjusted.dat --agesex phenotype-agesex.dat --out parent-imputed-geno-@
+
 
 # Step 3. Calculate the PGI, with parental values too.
 pgs.py imputed-ed-pgi                          \

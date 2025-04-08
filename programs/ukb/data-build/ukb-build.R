@@ -9,7 +9,7 @@ library(tidyverse)
 # Functions for fast data manipulation (adapting to data.table code from Kweon+)
 library(data.table)
 
-# Define folder paths (1) where data are (2) input data (3) intermed files.
+# Define folder paths (1) input data (2) clean data.
 data.folder <- file.path("..", "..", "..", "data", "ukb-restricted")
 input.folder <- file.path(data.folder, "input")
 output.folder <- file.path(data.folder, "cleaned")
@@ -22,6 +22,9 @@ output.folder <- file.path(data.folder, "cleaned")
 ukb_pheno.data <- input.folder %>%
     file.path("phenotype-extract.csv") %>%
     read_csv()
+
+print(ukb_pheno.data)
+print(names(ukb_pheno.data))
 
 # Load the relative connections data
 ukb_relatives.data <- input.folder %>%
@@ -253,6 +256,19 @@ cleaned_pheno.data <- cleaned_pheno.data %>%
         edpgi_imputed_maternal_norm = (edpgi_imputed_maternal_norm -
             mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE))
 
+#! Test: did the rescaling work?
+cleaned_pheno.data %>%
+    summarise(
+        self_mean    = mean(edpgi_imputed_self_norm, na.rm = TRUE),
+        self_sd      = sd(edpgi_imputed_self_norm, na.rm = TRUE),
+        sibling_mean = mean(edpgi_imputed_sibling_norm, na.rm = TRUE),
+        sibling_sd   = sd(edpgi_imputed_sibling_norm, na.rm = TRUE),
+        father_mean  = mean(edpgi_imputed_paternal_norm, na.rm = TRUE),
+        father_sd    = sd(edpgi_imputed_paternal_norm, na.rm = TRUE),
+        mother_mean  = mean(edpgi_imputed_maternal_norm, na.rm = TRUE),
+        mother_sd    = sd(edpgi_imputed_maternal_norm, na.rm = TRUE)) %>%
+    print()
+
 # Ensure outliers in PGIs do not persist.
 hist(cleaned_pheno.data$edpgi_all_raw)
 hist(cleaned_pheno.data$edpgi_all_norm)
@@ -271,7 +287,7 @@ print(cor(cleaned_pheno.data$edpgi_all_norm,
 
 
 ################################################################################
-## Save workable data file.
+## Declare base data file.
 
 # Rename and restrict to necessary columns.
 final_pheno.data <- cleaned_pheno.data %>%
@@ -280,15 +296,16 @@ final_pheno.data <- cleaned_pheno.data %>%
         edpgi_all     = edpgi_all_norm,
         # Ed PGI among sample with siblings -> main PGI in my analysis
         edpgi_self    = edpgi_imputed_self_norm,
-        edpgi_father = edpgi_imputed_paternal_norm,
-        edpgi_mother = edpgi_imputed_maternal_norm) %>%
-    # Mean parental Ed PGI
+        edpgi_father  = edpgi_imputed_paternal_norm,
+        edpgi_mother  = edpgi_imputed_maternal_norm) %>%
+    # Mean parental Ed PGI, scaled by 
     rowwise() %>%
     mutate(edpgi_parents = mean(
         c(edpgi_imputed_paternal_norm, edpgi_imputed_maternal_norm),
-        na.rm = TRUE)) %>%
+            na.rm = TRUE)) %>%
+    ungroup() %>%
     tibble() %>%
-    # Mark the analysis sample, those with imputed Ed PGI.
+    # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
     mutate(analysis_sample = as.integer(
         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
     # Select the relevant columns.
@@ -304,6 +321,8 @@ final_pheno.data <- cleaned_pheno.data %>%
         edpgi_all,
         edpgi_self,
         edpgi_parents,
+        edpgi_father,
+        edpgi_mother,
         # Education variables
         edyears,
         # Income variables
@@ -331,6 +350,37 @@ final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
 # Similarly, for with SOC occ wage data.
 final_pheno.data %>% filter(!is.na(soc_mean_hourly)) %>% NROW()
 final_pheno.data %>% filter(!is.na(edpgi_parents) & !is.na(edyears), !is.na(soc_mean_hourly)) %>% NROW()
+
+
+################################################################################
+## Calculate the random component of Ed PGI.
+
+# Get the sample for whom we are getting mean expected PGI.
+analysis.data <- final_pheno.data %>%
+    filter(!is.na(edpgi_parents))
+
+# (1) Calculate E[ Ed PGI | parents]
+expected_pgi.reg <- analysis.data %>%
+    lm(edpgi_self ~ poly(edpgi_father, 3) * poly(edpgi_mother, 3
+        ) * sex_male * father_present * mother_present,
+        data = .)
+# (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
+analysis.data$edpgi_random <-
+    analysis.data$edpgi_self - predict(expected_pgi.reg, analysis.data)
+
+# Show summary statistics of the random component.
+print(mean(analysis.data$edpgi_random))
+print(sd(analysis.data$edpgi_random))
+hist(analysis.data$edpgi_random)
+
+# Put Ed PGi random component back onto the phenotype data file.
+final_pheno.data <- analysis.data %>%
+    select(eid, edpgi_random) %>%
+    right_join(final_pheno.data, by = "eid")
+
+
+################################################################################
+## Save the resulting data file.
 
 # Save the file.
 final_pheno.data %>%

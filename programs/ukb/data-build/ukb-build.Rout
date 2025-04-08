@@ -21,7 +21,7 @@ Type 'q()' to quit R.
 > ## Senan Hogan-Hennessy, 11 March 2025.
 > ## Script to ingest raw UKB data, output familiar tabular format.
 > print(Sys.time())
-[1] "2025-04-01 15:33:24 EDT"
+[1] "2025-04-08 11:06:49 EDT"
 > set.seed(47)
 > ## Packages:
 > # functions for data manipulation and visualisation
@@ -347,6 +347,24 @@ dbl (2): year, cpi2015
 +         edpgi_imputed_maternal_norm = (edpgi_imputed_maternal_norm -
 +             mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE))
 > 
+> #! Test: did the rescaling work?
+> cleaned_pheno.data %>%
++     summarise(
++         self_mean    = mean(edpgi_imputed_self_norm, na.rm = TRUE),
++         self_sd      = sd(edpgi_imputed_self_norm, na.rm = TRUE),
++         sibling_mean = mean(edpgi_imputed_sibling_norm, na.rm = TRUE),
++         sibling_sd   = sd(edpgi_imputed_sibling_norm, na.rm = TRUE),
++         father_mean  = mean(edpgi_imputed_paternal_norm, na.rm = TRUE),
++         father_sd    = sd(edpgi_imputed_paternal_norm, na.rm = TRUE),
++         mother_mean  = mean(edpgi_imputed_maternal_norm, na.rm = TRUE),
++         mother_sd    = sd(edpgi_imputed_maternal_norm, na.rm = TRUE)) %>%
++     print()
+# A tibble: 1 × 8
+  self_mean self_sd sibling_mean sibling_sd father_mean father_sd mother_mean
+      <dbl>   <dbl>        <dbl>      <dbl>       <dbl>     <dbl>       <dbl>
+1 -2.32e-18       1       0.0565      0.575      0.0271     0.436      0.0278
+# ℹ 1 more variable: mother_sd <dbl>
+> 
 > # Ensure outliers in PGIs do not persist.
 > hist(cleaned_pheno.data$edpgi_all_raw)
 > hist(cleaned_pheno.data$edpgi_all_norm)
@@ -406,7 +424,7 @@ dbl (2): year, cpi2015
 > 
 > 
 > ################################################################################
-> ## Save workable data file.
+> ## Declare base data file.
 > 
 > # Rename and restrict to necessary columns.
 > final_pheno.data <- cleaned_pheno.data %>%
@@ -415,15 +433,16 @@ dbl (2): year, cpi2015
 +         edpgi_all     = edpgi_all_norm,
 +         # Ed PGI among sample with siblings -> main PGI in my analysis
 +         edpgi_self    = edpgi_imputed_self_norm,
-+         edpgi_father = edpgi_imputed_paternal_norm,
-+         edpgi_mother = edpgi_imputed_maternal_norm) %>%
-+     # Mean parental Ed PGI
++         edpgi_father  = edpgi_imputed_paternal_norm,
++         edpgi_mother  = edpgi_imputed_maternal_norm) %>%
++     # Mean parental Ed PGI, scaled by 
 +     rowwise() %>%
 +     mutate(edpgi_parents = mean(
 +         c(edpgi_imputed_paternal_norm, edpgi_imputed_maternal_norm),
-+         na.rm = TRUE)) %>%
++             na.rm = TRUE)) %>%
++     ungroup() %>%
 +     tibble() %>%
-+     # Mark the analysis sample, those with imputed Ed PGI.
++     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
 +     mutate(analysis_sample = as.integer(
 +         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
 +     # Select the relevant columns.
@@ -439,6 +458,8 @@ dbl (2): year, cpi2015
 +         edpgi_all,
 +         edpgi_self,
 +         edpgi_parents,
++         edpgi_father,
++         edpgi_mother,
 +         # Education variables
 +         edyears,
 +         # Income variables
@@ -471,10 +492,43 @@ dbl (2): year, cpi2015
 > final_pheno.data %>% filter(!is.na(edpgi_parents) & !is.na(edyears), !is.na(soc_mean_hourly)) %>% NROW()
 [1] 23202
 > 
+> 
+> ################################################################################
+> ## Calculate the random component of Ed PGI.
+> 
+> # Get the sample for whom we are getting mean expected PGI.
+> analysis.data <- final_pheno.data %>%
++     filter(!is.na(edpgi_parents))
+> 
+> # (1) Calculate E[ Ed PGI | parents]
+> expected.pgi <- analysis.data %>%
++     lm(edpgi_self ~ poly(edpgi_father, 3) * poly(edpgi_mother, 3
++         ) * sex_male * father_present * mother_present,
++         data = .)
+> # (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
+> analysis.data$edpgi_random <-
++     analysis.data$edpgi_self - predict(expected.pgi, analysis.data)
+> 
+> # Show summary statistics of the random component.
+> print(mean(analysis.data$edpgi_random))
+[1] 2.172374e-13
+> print(sd(analysis.data$edpgi_random))
+[1] 0.5380492
+> hist(analysis.data$edpgi_random)
+> 
+> # Put Ed PGi random component back onto the phenotype data file.
+> final_pheno.data <- analysis.data %>%
++     select(eid, edpgi_random) %>%
++     right_join(final_pheno.data, by = "eid")
+> 
+> 
+> ################################################################################
+> ## Save the resulting data file.
+> 
 > # Save the file.
 > final_pheno.data %>%
 +     write_csv(file.path(output.folder, "ukb-cleaned-pheno.csv"))
 > 
 > proc.time()
    user  system elapsed 
- 21.581   2.036  21.186 
+ 21.965   2.049  21.262 

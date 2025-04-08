@@ -43,7 +43,10 @@ desiredFields = ["eid",
     "p738_i0",
     "p21022",
     "p20143",
+    # Todo -> get other instances of Edyears, 
+    # Todo    then create binary values for ``whether has qual.'' based on this.
     "p6138_i0",
+    # Todo -> get other instances of SOC.
     "p845_i0",
     "p21000_i0",
     "p22006",
@@ -85,8 +88,6 @@ cmd = ["dx",
     "phenotype-extract.csv"
 ]
 subprocess.check_call(cmd)
-
-os.chdir("/home/s/Dropbox/direct-indirect-education/data/ukb-restricted/input")
 
 # Add on a column for Ed Years, to phenotype file.
 phenoData = pd.read_csv("phenotype-extract.csv")
@@ -257,7 +258,7 @@ relatedKinData[["FID", "ID1", "ID2", "InfType"]].to_csv(
     "kinship-adjusted.dat", sep="\t", index=False)
 # Upload to workspace
 subprocess.check_call(["dx", "upload", "kinship-adjusted.dat", "--path",
-    '"data-clean/kinship-adjusted.dat"'])
+    "data-input/kinship-adjusted.dat"])
 
 
 ################################################################################
@@ -273,11 +274,11 @@ phenoKinData = phenoData.copy()
 # A white-space delimited text file with header “FID”, “IID”, “sex”, “age”.
 # Each row contains the family-ID, individual-ID, age, and sex of one individual.
 # Male and Female sex should be represented with ‘M’ and ‘F’ respectively. 
-phenoKinData["IID"] = phenoKinData["participant.eid"]
+phenoKinData["IID"] = phenoKinData["eid"]
 phenoKinData["sex"] = ["M" if line == 1
     else "F"
-    for line in phenoKinData["participant.p31"].tolist()]
-phenoKinData["age"] = phenoKinData["participant.p21022"]
+    for line in phenoKinData["31-0.0"].tolist()]
+phenoKinData["age"] = phenoKinData["21022-0.0"]
 
 # Get the FAMID from the above clustering
 famidData = pd.concat(
@@ -301,4 +302,4 @@ phenoKinData[["FID", "IID", "sex", "age"]].to_csv(
     index=False, sep="\t")
 # Upload to workspace
 subprocess.check_call(["dx", "upload", "phenotype-agesex.dat", "--path",
-    '"data-clean/phenotype-agesex.dat"'])
+    "data-input/phenotype-agesex.dat"])
