@@ -149,7 +149,6 @@
         \item An explicit mediation analysis (methods from statistics/epidemiology)
         \item Aims to use these in way that is credible in labour econ, natural experiment setting.
     \end{enumerate}
-    \pause
     \vspace{0.25cm}
     Appreciate comments on what is confusing $+$ unclear from an econ audience, given these unconventional approaches.
 
@@ -160,15 +159,6 @@
 %-------------------------------------------------------------------------------
 \begin{frame}
     \frametitle{Introduction}
-    \begin{beamercolorbox}{postit}
-        \raggedright
-        \vspace{0.01cm} \\
-        ``\textbf{The difference of natural talents in different men}, is, in reality, much less than we are aware of [\ldots].
-        The difference between the most dissimilar characters, between a philosopher and a common street porter, seems to arise \textbf{not so much from nature, as from habit, custom, and education}.''
-        \hfill
-        \underline{\textit{Adam Smith (1776), The Wealth of Nations, Volume 1 p. 16.}}
-        \vspace{0.02cm}
-    \end{beamercolorbox}
     \vspace{-0.25cm}
     \begin{figure}[h!]
         \centering
@@ -206,13 +196,12 @@
         \vspace{0.02cm}
     \end{beamercolorbox}
     \vspace{-0.25cm}
-    \pause
     \begin{figure}[h!]
         \centering
         \singlespacing
         \begin{subfigure}[c]{0.5\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{presentation-files/headlines/economist-2022-revolution.png}
+            %\includegraphics[width=\textwidth]{presentation-files/headlines/economist-2022-revolution.png}
         \end{subfigure}
         \hfill
         \begin{subfigure}[c]{0.45\textwidth}
@@ -238,7 +227,6 @@
         \vspace{0.02cm}
     \end{beamercolorbox}
     \vspace{-0.25cm}
-    \pause
     \begin{figure}[h!]
         \centering
         \singlespacing
@@ -255,7 +243,7 @@
         \hfill
         \begin{subfigure}[c]{0.55\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{presentation-files/headlines/nature-2012-uneasy.png}
+            %\includegraphics[width=\textwidth]{presentation-files/headlines/nature-2012-uneasy.png}
         \end{subfigure}
     \end{figure}
 \end{frame}
@@ -265,7 +253,6 @@
     \textbf{How do genes associated with education affect labour outcomes?}
     \vspace{0.25cm}
     \begin{enumerate}
-        \pause
         \item Causal design for random variation in a genetic measure for education.
         \begin{figure}
             \centering
@@ -283,7 +270,6 @@
                 \node[color=red, above=-0.25cm of label] {Total Effect};
             \end{tikzpicture}
         \end{figure}
-        \pause
         \item Decompose mechanisms by a mediation analysis (with an overlapping natural experiment).
         \begin{figure}
             \centering
@@ -310,7 +296,6 @@
                 \node[color=MidnightBlue, below=0.35cm of treatment] {Direct Genetic Effect};
             \end{tikzpicture}
         \end{figure}
-        \pause
         \item Finding that genes associated with education do/not affect outcomes \textbf{directly or indirectly,} inferring they do/not measure intelligence, aptitude, or other factors.
     \end{enumerate}
 \end{frame}
@@ -345,13 +330,11 @@
             %% Label the direct effect
             \path[->,very thick,color=blue] (instrument) edge[bend right=45] (outcome);
             \node[color=MidnightBlue] [below=1cm of treatment] {Direct Genetic Effect};
-            \pause
             \path[->,very thick, color=ForestGreen] (instrument) edge (treatment);
             \node[color=ForestGreen] [above=0.1cm of treatment] (education) {Education};
             \path[->,very thick, color=ForestGreen] (treatment) edge (outcome);
         \end{tikzpicture}
     \end{figure}
-    \pause
     \vspace{-0.25cm}
     \begin{itemize}
         \item Genetic effects could be entirely returns to education
@@ -400,7 +383,6 @@
                 }
             \end{scope}
         \end{tikzpicture}
-        \pause
         {\flushleft Person 2's DNA: \\}
         \begin{tikzpicture}
             % Draw the top DNA Helix
@@ -473,7 +455,6 @@
             \node (gene) at (4.5,-1.5) {};
             \node[left=of gene] {Gene:};
             % Show that the gene leads to a protein
-            \pause
             \node[box,color=BlueGreen, below=of gene] (protein) {$X$};
             \node[color=BlueGreen, left=of protein] {Protein:};
             \node[above=0.05cm of protein] (proteinabove) {};
@@ -529,7 +510,6 @@
                 \node[below, color=red] at (14,{-abs(sin(14*36))}) {A};
             \end{scope}
             % Identify the gene region
-            \pause
             \draw[decorate, decoration = {brace}] (5.5,-1.5) -- (3.5,-1.5);
             \node (gene) at (4.5,-1.5) {};
             \node[left=of gene] {Gene:};
@@ -543,7 +523,6 @@
             \node[below=0.025cm of protein] (proteinbelow) {};
             \draw[->,thick] (proteinbelow) -- (outcome);
             % Add on a part referencing environment interactions
-            \pause
             \draw[decorate, decoration = {brace}] (6.125,-1.5) -- (6.125,-5);
             \node[text width=3cm] (environment) at (7.875,-3.25) {
                 Moderated by \\ external factors \\ \vspace{0.25cm}
@@ -558,9 +537,9 @@
 
     \begin{figure}
         \centering
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.75\textwidth]{
-                presentation-files/okbay-2018.png}}
+        %\makebox[\textwidth][c]{
+            %\includegraphics[width=0.75\textwidth]{
+                %presentation-files/okbay-2018.png}}
     \end{figure}
     \begin{beamercolorbox}{postit}
         \small
@@ -674,7 +653,6 @@
             \draw[->,thick] (proteinbelow) -- (outcome);
         \end{tikzpicture}
     \end{figure}
-    \pause
     \begin{itemize}
         \item In practice, we do not know exact location of relevant gene regions
         \item Nor the associated protein $+$ what they do
@@ -726,7 +704,6 @@
                 Education Attainment};
             \draw[->,thick] (gene) -- (outcome);
             % Show the PGI Process
-            \pause
             \node[text width=5.5cm] at (6,-3) {
                 Calculate \textcolor{blue}{Polygenic Index (PGI)}:
                 \begin{enumerate}
@@ -801,7 +778,6 @@
             \end{scope}
         \end{tikzpicture}
     \end{figure}
-    \pause
     \vfill
     Person 1's Ed PGI:
     \[ Z = \sum_{j \in J} w_j
@@ -917,8 +893,7 @@
             \node[color=red, above=-0.25cm of label] {Total Effect};
         \end{tikzpicture}
     \end{figure}
-    I look at how Ed PGI \textbf{causally affects} labour market earnings,
-    \pause and \textbf{model how much this relationship is because of the education channel.}
+    I look at how Ed PGI \textbf{causally affects} labour market earnings, and \textbf{model how much this relationship is because of the education channel.}
     \begin{figure}
         \centering
         \singlespacing
@@ -949,13 +924,10 @@
             \textcolor{ForestGreen}{Indirect Effect} & $+$ &
             \textcolor{blue}{Direct Effect} \\
             \textcolor{red}{(Ed PGI $\to$ Earnings)}
-            \pause
             && \textcolor{ForestGreen}{(Education)}
-            \pause
             && \textcolor{blue}{(Genetic)}
         \end{tabular}
     \end{table}
-    \pause
     \textbf{Contributions:}
     \begin{itemize}
         \item Connect new genetic measures to classic labour econ topics
@@ -975,7 +947,7 @@
         \singlespacing
         \begin{subfigure}[c]{0.45\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{presentation-files/headlines/ukb.png}
+            %\includegraphics[width=\textwidth]{presentation-files/headlines/ukb.png}
         \end{subfigure}
         \hfill
         \begin{subfigure}[c]{0.525\textwidth}
@@ -1002,7 +974,7 @@
         \singlespacing
         \begin{subfigure}[c]{0.45\textwidth}
             \centering
-            \includegraphics[width=1.1\textwidth]{presentation-files/headlines/times-ukbiobank.png}
+            %\includegraphics[width=1.1\textwidth]{presentation-files/headlines/times-ukbiobank.png}
         \end{subfigure}
         \hfill
         \begin{subfigure}[c]{0.525\textwidth}
@@ -1014,7 +986,6 @@
             \end{itemize}
         \end{subfigure}
     \end{figure}
-    \pause
     \vfill
     My access has not been processed yet, so I am merely describing the research design for using UK Biobank data. \\
     $\to$ UK Biobank has a $N \approx 30,000$ subsample of people with genetic data from parents included; public data do not have this.
@@ -1031,17 +1002,17 @@
         %\caption{Distribution of HRS Education Measures.}
         \begin{subfigure}[b]{0.495\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{../text/sections/figures/edyears-hist.png}
+            %\includegraphics[width=\textwidth]{../text/sections/figures/edyears-hist.png}
             \label{fig:edyears-hist}
         \end{subfigure}
         \begin{subfigure}[b]{0.495\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{../text/sections/figures/earnings-hist.png}
+            %\includegraphics[width=\textwidth]{../text/sections/figures/earnings-hist.png}
             \label{fig:earnings-hist}
         \end{subfigure}
     \end{figure}
     \vspace{-0.5cm}
-    $N = \input{../text/sections/tables/hrs-obs-count.txt}$ household heads with data on labour outcomes, age 50--65.\footnote[frame]{Limited to race $=$ white, for whom Ed PGI is defined.}
+    $N \approx 500,000$ household heads with data on labour outcomes, age 50--65.\footnote[frame]{Limited to race $=$ white, for whom Ed PGI is defined.}
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
@@ -1056,16 +1027,16 @@
         \begin{subfigure}[b]{0.495\textwidth}
             \centering
             %\caption{Education Years $+$ Earnings.}
-            \includegraphics[width=\textwidth]{../text/sections/figures/edyears-earnings.png}
+            %\includegraphics[width=\textwidth]{../text/sections/figures/edyears-earnings.png}
         \end{subfigure}
         \begin{subfigure}[b]{0.495\textwidth}
             \centering
             %\caption{Education Years $+$ Earnings.}
-            \includegraphics[width=\textwidth]{../text/sections/figures/college-earnings.png}
+            %\includegraphics[width=\textwidth]{../text/sections/figures/college-earnings.png}
         \end{subfigure}
     \end{figure}
     \vspace{-0.25cm}
-    $N = \input{../text/sections/tables/hrs-obs-count.txt}$ household heads with data on labour outcomes, age 50--65.\footnote[frame]{Limited to race $=$ white, for whom Ed PGI is defined.}
+    household heads with data on labour outcomes, age 50--65.\footnote[frame]{Limited to race $=$ white, for whom Ed PGI is defined.}
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}[noframenumbering]
@@ -1073,12 +1044,12 @@
     A representative panel of retirement-age Americans 1990--2021.
     \begin{figure}
         \centering
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.75\textwidth]{
-                ../text/sections/figures/genescore-hist-presentation.png}}
+        %\makebox[\textwidth][c]{
+            %\includegraphics[width=0.75\textwidth]{
+                %../text/sections/figures/genescore-hist-presentation.png}}
     \end{figure}
     \vspace{-0.25cm}
-    $N = \input{../text/sections/tables/hrs-obs-count.txt}$ household heads with data on labour outcomes, age 50--65.\footnote[frame]{Limited to race $=$ white, for whom Ed PGI is defined.}
+    household heads with data on labour outcomes, age 50--65.\footnote[frame]{Limited to race $=$ white, for whom Ed PGI is defined.}
 \end{frame}
 %-------------------------------------------------------------------------------
 \section{2. Genetic Effects}
@@ -1091,9 +1062,9 @@
     \begin{figure}
         \centering
         \singlespacing
-        \makebox[\textwidth][c]{
-            \includegraphics[width=\textwidth]{
-                ../text/sections/figures/demographic-plot.png}}
+        %\makebox[\textwidth][c]{
+            %\includegraphics[width=\textwidth]{
+                %../text/sections/figures/demographic-plot.png}}
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1155,7 +1126,6 @@
             \end{tikzpicture}
         \end{figure}
         \column{0.4\textwidth}
-            \pause
             \textbf{Answer:}
             
             No, inherited from parents.
@@ -1204,11 +1174,11 @@
 \begin{frame}[noframenumbering]
     \frametitle{Genetic Associations: Independent Assortment}
     Difference in Ed PGI from parents' arises from random inheritance $+$ mixing, \textcolor{ForestGreen}{Mendelian Independent Assortment}.
-    \begin{figure}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.5\textwidth]{
-                presentation-files/headlines/mendels-peas.png}}
-    \end{figure}
+    %\begin{figure}
+    %    %\makebox[\textwidth][c]{
+    %        %\includegraphics[width=0.5\textwidth]{
+    %            %presentation-files/headlines/mendels-peas.png}}
+    %\end{figure}
     \vfill
     Gregor Mendel (1886) worked through principles of genetic inheritance 
     (Stenseth Andersson Hoekstra, 2022 PNAS).
@@ -1347,7 +1317,6 @@
             I.e., inheritance prop. score depends only on parents' genetics.
 
             \vspace{0.5cm}
-            \pause
             Propagate this reasoning across all \textcolor{red}{1,271 single-letter gene changes} in the Ed PGI, and both parents:
     \end{columns}
     \[ Z_i^\text{\textcolor{ForestGreen}{Child}}
@@ -1513,23 +1482,12 @@
             - \Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
                 Z^\text{\textcolor{orange}{Mother}}_i,
                     Z^\text{\textcolor{blue}{Father}}_i} \]
-            \pause
             
             \textbf{Remark on Identification:} \\
             Equivalent to instrumenting \textcolor{ForestGreen}{Child}'s Ed PGI
             using deviation from parents \\
             (e.g., formula instrument).
     \end{columns}
-    \pause
-    \[ Z_i^\text{\textcolor{ForestGreen}{Child}} = 
-    Z_i^\text{\textcolor{MidnightBlue}{Random}}
-    + \frac 12 \left( Z^\text{\textcolor{orange}{Mother}}_i +
-        Z^\text{\textcolor{blue}{Father}}_i \right) \]
-    \[ Y_i = \alpha + \beta Z_i^\text{\textcolor{MidnightBlue}{Random}}
-    \neq \alpha + \beta Z_i^\text{\textcolor{ForestGreen}{Child}}
-    + \phi^M Z^\text{\textcolor{orange}{Mother}}_i +
-    \phi^F Z^\text{\textcolor{blue}{Father}}_i \]
-    %\textbf{LWIPS Note:} UK Biobank has data on a few thousand people linked to parent/siblings.
 \end{frame}
 %-------------------------------------------------------------------------------
 \begin{frame}
@@ -1552,11 +1510,11 @@
     \vspace{-0.25cm}
     \begin{figure}
         \centering
-        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+        \caption{Bin Scatter, \textcolor{blue}{Ed PGI}
             $+$ \textcolor{ForestGreen}{Education Years}.}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-edyears-wider.png}}
+        %\makebox[\textwidth][c]{
+            %\includegraphics[width=0.8\textwidth]{
+                %../text/sections/figures/genescore-edyears-wider.png}}
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1583,8 +1541,8 @@
         \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
             $+$ \textcolor{ForestGreen}{Education Years}.}
         \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-edyears-causal.png}
+            %\includegraphics[width=0.8\textwidth]{
+                %../text/sections/figures/genescore-edyears-causal.png}
             }
     \end{figure}
 \end{frame}
@@ -1611,9 +1569,9 @@
         \centering
         \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
             $+$ \textcolor{red}{Annual Earnings.}}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-earnings-wider.png}}
+        %\makebox[\textwidth][c]{
+            %\includegraphics[width=0.8\textwidth]{
+                %../text/sections/figures/genescore-earnings-wider.png}}
     \end{figure}
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1640,8 +1598,8 @@
         \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
             $+$ \textcolor{red}{Annual Earnings.}}
         \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-earnings-causal.png}
+            %\includegraphics[width=0.8\textwidth]{
+                %../text/sections/figures/genescore-earnings-causal.png}
                 }
     \end{figure}
 \end{frame}
@@ -1651,7 +1609,6 @@
 \begin{frame}
     \frametitle{Direct and Indirect Effects}
     Ed PGI is correlated with \textbf{education and income}, so what?
-    \pause
 
     $\to$ Ed PGI computed from training data on \textbf{only genes $+$ education}.
     \vspace{-0.35cm}
@@ -1669,13 +1626,11 @@
             \path[->, color=orange] (-3.0, 1.5) edge[bend left=40] (-1.5, 0.75);
             \node[text width=2cm, color=orange] at (-2.75, 1.25) {PGI\\calculated};
             % Add in direct effects.
-            \pause
             \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
             \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
             \path[->,thick] (instrument) edge[bend right=45] (outcome);
             \node[text height=0.25cm, color=orange] [below=0.35cm of treatment] {Direct Effect};
             % Add on returns to education.
-            \pause
             \path[->,thick] (treatment) edge (outcome);
             \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
         \end{tikzpicture}
@@ -1731,7 +1686,6 @@
             \node[color=orange] [below=0.35cm of treatment] {Direct Effect};
         \end{tikzpicture}
     \end{figure}
-    \pause
     \vspace{-0.5cm}
     \begin{align*}
         \text{\textcolor{blue}{Direct Effect}}
@@ -1745,7 +1699,6 @@
                         \text{\textcolor{orange}{Returns to Education, Estimate}}}
     \end{align*}
     \vfill
-    \pause
     Can be estimated with standard tools --- e.g., simultaneous OLS, or anything (DML, etc.).
     \hyperlink{mediation-equations}{\beamergotobutton{Mediation, OLS}}
 \end{frame}
@@ -1760,7 +1713,6 @@
     \end{itemize}
     \vspace{0.5cm}
 
-    \pause
     \textbf{What are you getting, then?}
     \hyperlink{selection-bias-equations}{\beamergotobutton{Bias Equations}}
     \begin{align*}
@@ -1774,7 +1726,6 @@
                 &+ \, \text{\textcolor{orange}{Non-complier Bias}}\Big)
     \end{align*}
     \vfill
-    \pause
     \textcolor{red}{Bias terms persist}, regardless of how random \textcolor{blue}{Ed PGI, $Z_i$} is, with any selection-on-observables estimand (i.e., negative identification result).
 \end{frame}
 %-------------------------------------------------------------------------------
@@ -1804,7 +1755,6 @@
             \path[->,thick] (instrument) edge[bend right=45] (outcome);
             \node[color=orange] [below=1cm of treatment] {Average Direct Effect};
             % Add on the unobserved confounder.
-            \pause
             \node[state,purple] (confounder) [above right=1.5cm of treatment] {$U$};
             \path[->,dashed,color=purple] (confounder) edge (treatment);
             \path[->,dashed,color=purple] (confounder) edge (outcome);
@@ -1812,7 +1762,6 @@
             \node[color=purple] [below right=-0.2cm and 0.2cm of confounder] {e.g., private schooling};
         \end{tikzpicture}
     \end{figure}
-    \pause
     \vspace{-0.125cm}
     UKB has no info on private schooling\ldots
     \begin{itemize}
@@ -1821,384 +1770,268 @@
     \end{itemize} 
 \end{frame}
 %-------------------------------------------------------------------------------
-\begin{frame}
-    \frametitle{Direct and Indirect Effects: Selection Bias}
-    \textbf{Side-quest:}
-    Why should we not use mediation methods off-the-shelf?
-    \begin{figure}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.6\textwidth]{
-                presentation-files/headlines/oxford-private-2021.png}}
-        \caption{$< 6$\% British children in private schools, but massively overrepresented at elite unis (FT, 2021).}
-    \end{figure}
-    \vspace{-0.125cm}
-    UKB has no info on private schooling\ldots
-    \begin{itemize}
-        \item \textcolor{red}{Selection bias} from not controlling for private schooling
-        \item Overestimate education returns $\to$ biased direct $+$ indirect estimates.
-    \end{itemize} 
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}
-    \frametitle{Direct and Indirect Effects: Selection Bias}
-    \begin{itemize}
-        \item \textcolor{red}{Selection bias} from not controlling for private education.
-        \pause
-        \item Motivates finding \textcolor{ForestGreen}{plausibly random education variation} in Britain, to avoid selection bias.
-    \end{itemize}
-    \vspace{-0.5cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \begin{tikzpicture}
-            % First nodes, Z, D, Y
-            \node[state,ForestGreen] (treatment) at (0,0) {$D$};
-            \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
-            \path[->,thick] (instrument) edge (treatment);
-            % Labels for Z, D, Y
-            \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[color=ForestGreen] [below=-0.1cm of treatment] (education) {Education};
-            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-            % Label the effects of interest.
-            \node[text height=0.5cm, color=orange] [above left=-0.3cm and 0.2cm of treatment] {First-stage};
-            \path[->,thick] (treatment) edge (outcome);
-            \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
-            \path[->,thick] (instrument) edge[bend right=45] (outcome);
-            \node[color=orange] [below=1cm of treatment] {Average Direct Effect};
-            % Add on the overlapping research design
-            % For Ed PGI
-            \pause
-            \node[state,purple] (instrument-instrument) [above=1cm of instrument] {$\tilde Z$};
-            \path[->,dashed] (instrument-instrument) edge (instrument);
-            \node[color=purple] [above left=-0.1cm and 0.2cm of instrument-instrument] {Parental};
-            \node[color=purple] [left=0.1cm of instrument-instrument] {Deviation};
-            % For Education
-            \pause
-            \node[state,green] (treatment-instrument) [above=1cm of treatment] {$\tilde D$};
-            \path[->,dashed] (treatment-instrument) edge (treatment);
-            % Label the overlapping instruments
-            \node[color=ForestGreen] [above right=0.01cm and 0.175cm of treatment-instrument] {Random};
-            \node[color=ForestGreen] [right=0.1cm of treatment-instrument] {Education Variation};
-        \end{tikzpicture}
-        \caption{Overlapping Research Design.}
-    \end{figure}
-    \vspace{-0.25cm}
-    \[ \implies \text{Identifies average direct} + \text{indirect effects, local to } \tilde D \text{ compliers.} \]
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Direct and Indirect Effects: Selection Bias}
-    \begin{itemize}
-        \item \textcolor{red}{Selection bias} from not controlling for private education.
-        \pause
-        \item Motivates finding \textcolor{ForestGreen}{plausibly random education variation} in Britain.
-    \end{itemize}
-    \vspace{-0.5cm}
-    \begin{figure}[h!]
-        \centering
-        \singlespacing
-        \begin{subfigure}[b]{0.575\textwidth}
-            \centering
-            \caption{Tuition Fees, Britain\\(Brookings, End of Free College in England, 2017).}
-            \includegraphics[width=\textwidth]{
-                presentation-files/headlines/british-tuition-fees.png}
-        \end{subfigure}
-        \hfill
-        \begin{subfigure}[b]{0.375\textwidth}
-            \centering
-            \caption{Changes in Mandatory School-Leaving Age, Britain.}
-            \includegraphics[width=\textwidth]{
-                presentation-files/headlines/british-school-age.png}
-        \end{subfigure}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\subsection{(Optional) Correlational Results, HRS Data}
-%-------------------------------------------------------------------------------
-\begin{frame}
-    \frametitle{(Optional) Correlational Results, HRS Data}
-    Total Association:
-    \vspace{-1.125cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \begin{tikzpicture}
-            \node[state,blue] (instrument) at (0,0) {$Z$};
-            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-            \path[->,thick] (instrument) edge (outcome);
-            % Label the nodes with econ examples
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-        \end{tikzpicture}
-    \end{figure}
-    \vspace{-0.5cm}
-    \begin{figure}
-        \centering
-        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
-            $+$ \textcolor{red}{Annual Earnings.}}
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.8\textwidth]{
-                ../text/sections/figures/genescore-earnings-wider}}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{(Optional) Correlational Results, HRS Data}
-    Total Association:
-    \vspace{-1.125cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \begin{tikzpicture}
-            \node[state,blue] (instrument) at (0,0) {$Z$};
-            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
-            \path[->,thick] (instrument) edge (outcome);
-            % Label the nodes with econ examples
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-        \end{tikzpicture}
-    \end{figure}
-    \vspace{-0.5cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.9\textwidth]{
-                ../text/sections/figures/mediation-total-plot.png}}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{(Optional) Correlational Results, HRS Data}
-    Decomposition:
-    \vspace{-1.5cm}
-    \begin{figure}
-        %\centering
-        \singlespacing
-        \begin{tikzpicture}
-            \node[state,ForestGreen] (treatment) at (0,0) {$D$};
-            \node[state,blue] (instrument) [left=1.25cm of treatment] {$Z$};
-            \node[state,red] (outcome) [right=1.25cm of treatment] {$Y$};
-            %\path[->,thick] (instrument) edge (treatment);
-            %\path[->,thick] (treatment) edge (outcome);
-            % Label the nodes with econ examples
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[text height=0.5cm, color=ForestGreen] [above right=-0.3cm and -0.1cm of treatment] {Indirect};
-            % Add in direct effects.
-            %\path[->,thick] (instrument) edge[bend right=45] (outcome);
-            % Label the pathways with the colours
-            \path[->, very thick, color=ForestGreen] (instrument) edge (treatment);
-            \path[->, very thick, color=ForestGreen] (treatment) edge (outcome);
-            \path[->, very thick, color=blue] (instrument) edge[bend right=35] (outcome);
-            \node[text height=0.25cm, color=blue] [below=-0.1cm of treatment] {Direct Effect};
-        \end{tikzpicture}
-    \end{figure}
-    \vspace{-1cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.9\textwidth]{
-                ../text/sections/figures/mediation-plot.png}}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{(Optional) Correlational Results, HRS Data}
-    Percent through education:
-    \vspace{-0.25cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.9\textwidth]{
-                ../text/sections/figures/mediation-percent-plot.png}}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}
-    \frametitle{(Optional) Correlational Results, HRS Data}
-    Same results, with structural adjustment for selection into education:
-    \vspace{-0.25cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.9\textwidth]{
-                ../text/sections/figures/mediation-selection-plot.png}}
-    \end{figure}
-    \vspace{-0.625cm}
-    
-    $\implies$ Returns to education unaffected, direct genetic channel $\to 0$. 
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Direct and Indirect Effects}
-    HRS Results with structural assumptions for identification:
-    \vspace{-0.25cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \makebox[\textwidth][c]{
-            \includegraphics[width=0.9\textwidth]{
-                ../text/sections/figures/mediation-selection-percent-plot.png}}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}
-    \frametitle{Conclusion}
-    \begin{beamercolorbox}{postit}
-        \raggedright
-        \vspace{0.01cm} \\
-        ``\textbf{The difference of natural talents in different men}, is, in reality, much less than we are aware of [\ldots].
-        The difference between the most dissimilar characters, between a philosopher and a common street porter, seems to arise \textbf{not so much from nature, as from habit, custom, and education}.''
-        \hfill
-        \underline{\textit{Adam Smith (1776), The Wealth of Nations, Volume 1 p. 16.}}
-        \vspace{0.02cm}
-    \end{beamercolorbox}
-    \vspace{0.25cm}
-    
-    \textbf{This Project:}
-    \begin{enumerate}
-        \item Studies total genetic effects, on later-life labour outcomes (earnings).
-        \item Design-based decomposition, effect of \textcolor{red}{Ed PGI $\to$ Earnings} to \textcolor{blue}{direct (genetic)} $+$ \textcolor{ForestGreen}{indirect (education)} effects.
-        \item Overlapping research design for causal effects (UK Biobank), in-progress.
-    \end{enumerate}
-    \vfill
-
-    \hrulefill
-
-    Thank you for your listening to my presentation.
-    \vspace{0.25cm}
-    
-    Comments welcome now, later, or at \href{mailto:seh325@cornell.edu}{\textcolor{blue}{seh325@cornell.edu}}.
-    %\begin{beamercolorbox}{postit}
-    %    \small
-    %    \vspace{0.025cm}
-    %    
-    %    %\raggedright
-    %    ``The evidence suggests \textbf{fluid intelligence and self-control partly mediate} the relationship between the Ed PGI and education.''
-    %    
-    %    \underline{\textit{Abstract --- Carvalho (2024, JPE Micro)}}
-    %    \vspace{0.025cm}
-    %\end{beamercolorbox}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Appendix: Mediation Equations}
-    \label{mediation-equations}
-    Mediation methods decompose the total effect to direct $+$ indirect channels.
-    E.g., OLS simultaneous regression (Imai Keele Yamamoto, 2010):\footnote[frame]{
-        Usually estimated with added controls, $+ \vec \zeta' \vec X_i$.
-    }
-    \begin{align*}
-        &\textcolor{blue}{Z_i \leftarrow \text{ Ed PGI}} &
-        \text{First-stage: }
-            \textcolor{ForestGreen}{D_i}
-                &= \phi + \pi \textcolor{blue}{Z_i} + \eta_i \\
-        &\textcolor{ForestGreen}{D_i \leftarrow \text{ Education years}} &
-        \text{Second-stage: }
-            \textcolor{red}{Y_i}
-                &= \alpha
-                    + \beta \textcolor{ForestGreen}{D_i}
-                    + \gamma \textcolor{blue}{Z_i}
-                    + \delta \textcolor{blue}{Z_i} \textcolor{ForestGreen}{D_i}
-                    + \varepsilon_i \\
-        &\textcolor{red}{Y_i \leftarrow \text{ log(Earnings)}} &
-            \implies \textcolor{Orange}{\text{Direct Effect }}
-            &= \gamma + \delta \E{\textcolor{ForestGreen}{D_i}} \\
-        &   &\textcolor{Orange}{\text{Indirect Effect }}
-            &= \pi \left( \beta + \delta \E{\textcolor{blue}{Z_i}} \right)
-    \end{align*}
-
-    i.e., a regression decomposition, asumming \\
-    (1) seq ignorablility, (2) linear outcome model, (3) homogenous TEs:
-    \vspace{-0.5cm}
-    \begin{figure}
-        \centering
-        \singlespacing
-        \begin{tikzpicture}
-            \node[state,ForestGreen] (treatment) at (0,0) {$D$};
-            \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
-            \path[->,thick] (instrument) edge (treatment);
-            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
-            \node[text width=1.675cm, color=ForestGreen] [above=0.15cm of treatment] (education) {Education};
-            \node[color=orange] [above left=-0.3cm and 0.2cm of treatment] {First-stage};
-            \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
-            \path[->,thick] (treatment) edge (outcome);
-            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
-            \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
-            % Add in direct effects.
-            \path[->,thick] (instrument) edge[bend right=45] (outcome);
-            \node[text height=0.25cm, color=orange] [below=0.4cm of treatment] {Direct Effect};
-        \end{tikzpicture}
-    \end{figure}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Appendix: Bias in Direct Effect Estimates}
-    \label{selection-bias-equations}
-    \vspace{-0.5cm}
-    \[ \text{\textcolor{purple}{Estimand, Direct}}
-        = \text{\textcolor{blue}{Direct Effect}}
-            + \Big(\text{\textcolor{red}{Selection Bias}}
-            + \text{\textcolor{orange}{Complier Bias}}\Big) \]
-    \vspace{-0.25cm}
-    \begin{align*}
-        & \underbrace{\mathbb E_{D_i} \Big[
-            \Egiven{Y_i}{Z_i = 1, D_i} - \Egiven{Y_i}{Z_i = 0, D_i} \Big]}_{
-                \text{\textcolor{purple}{Estimand, Direct Effect}} } \\
-        & = \underbrace{\E{Y_i(1, D_i(Z_i)) - Y_i(0, D_i(Z_i))}}_{
-            \text{\textcolor{blue}{Average Direct Effect}}} \\
-        & \;\;\;\; + \underbrace{ \mathbb E_{D_i} \Big[ 
-            \Egiven{Y_i(0, D_i(Z_i))}{D_i(1) = d} 
-            - \Egiven{Y_i(0, D_i(Z_i))}{D_i(0) = d} \Big] }_{
-                \text{\textcolor{red}{Selection Bias}}} \\
-        & \;\;\;\; + \underbrace{ \E[D_i ]{
-            \begin{aligned}
-            &\Big(1 - \Prob{D_i(1) = d} \Big) \\
-            &\times \left( \begin{aligned}
-                &\Egiven{Y_i(1, D_i(Z_i)) - Y_i(0, D_i(Z_i))}{D_i(1) = d} \\ 
-                &  - \Egiven{Y_i(1, D_i(Z_i)) - Y_i(0, D_i(Z_i))}{D_i(0) = 1- d}
-                \end{aligned} \right) \end{aligned}} }_{
-                    \text{\textcolor{orange}{Complier Bias}}}
-    \end{align*}
-\end{frame}
-%-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering]
-    \frametitle{Appendix: Bias in Indirect Effect Estimates}
-    \vspace{-0.5cm}
-    \[ \text{\textcolor{purple}{Estimand, Indirect}}
-        = \text{\textcolor{ForestGreen}{Indirect Effect}}
-            + \Big(\text{\textcolor{red}{Selection Bias}}
-            + \text{\textcolor{orange}{Non-complier Bias}}\Big) \]
-    \vspace{-0.25cm}
-    \small
-    \begin{align*}
-        & \underbrace{\E[Z_i]{
-            \Big( \Egiven{D_i}{Z_i = 1} - \Egiven{D_i}{Z_i = 0} \Big) \times
-            \Big( \Egiven{Y_i}{Z_i, D_i = 1} - \Egiven{Y_i}{Z_i, D_i = 0} \Big) }}_{ \text{\textcolor{purple}{Estimand, Indirect Effect}} } \\
-        & = \underbrace{\E{Y_i(Z_i, D_i(1)) - Y_i(Z_i, D_i(0))}}_{
-            \text{\textcolor{ForestGreen}{Indirect Effect}} } \\
-        & \;\;\;\; + \underbrace{\Prob{D_i(1) = 1, D_i(0) = 0}  \Big(
-            \Egiven{Y_i(Z_i, 0)}{D_i = 1} - \Egiven{Y_i(Z_i, 0)}{D_i = 0} \Big)}_{
-                \text{\textcolor{red}{Selection Bias}}} \\
-        & \;\;\;\; + \Prob{D_i(1) = 1, D_i(0) = 0} \times \\
-        & \;\;\;\; \;\; \underbrace{ \left[ \begin{aligned}
-            &\Big( 1 - \Prob{D_i=1} \Big)
-            \left( \begin{aligned}
-                &\Egiven{Y_i(Z_i, 1) - Y_i(Z_i, 0)}{D_i = 1} \\ 
-                &  - \Egiven{Y_i(Z_i, 1) - Y_i(Z_i, 0)}{D_i = 0}
-            \end{aligned} \right) \\
-            &+ \left( \frac{1 - \Prob{D_i(1) = 1, D_i(0) = 0} }{
-                \Prob{D_i(1) = 1, D_i(0) = 0}} \right)
-            \left( \begin{aligned}
-                &\Egiven{Y_i(Z_i, 1) - Y_i(Z_i, 0)}{D_i(1) = 0 \text{ or } D_i(0)=1} \\ 
-                &  - \E{Y_i(Z_i, 1) - Y_i(Z_i, 0)}
-            \end{aligned} \right)
-        \end{aligned} \right]}_{\text{\textcolor{orange}{Non-complier Bias}}}
-    \end{align*}
-\end{frame}
-%-------------------------------------------------------------------------------
+%\begin{frame}
+%    \frametitle{Direct and Indirect Effects: Selection Bias}
+%    \textbf{Side-quest:}
+%    Why should we not use mediation methods off-the-shelf?
+%    \begin{figure}
+%        \makebox[\textwidth][c]{
+%            %\includegraphics[width=0.6\textwidth]{
+%                presentation-files/headlines/oxford-private-2021.png}}
+%        \caption{$< 6$\% British children in private schools, but massively overrepresented at elite unis (FT, 2021).}
+%    \end{figure}
+%    \vspace{-0.125cm}
+%    UKB has no info on private schooling\ldots
+%    \begin{itemize}
+%        \item \textcolor{red}{Selection bias} from not controlling for private schooling
+%        \item Overestimate education returns $\to$ biased direct $+$ indirect estimates.
+%    \end{itemize} 
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}
+%    \frametitle{Direct and Indirect Effects: Selection Bias}
+%    \begin{itemize}
+%        \item \textcolor{red}{Selection bias} from not controlling for private education.
+%        \item Motivates finding \textcolor{ForestGreen}{plausibly random education variation} in Britain, to avoid selection bias.
+%    \end{itemize}
+%    \[ \implies \text{Identifies average direct} + \text{indirect effects, local to } \tilde D \text{ compliers.} \]
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}[noframenumbering]
+%    \frametitle{Direct and Indirect Effects: Selection Bias}
+%    \begin{itemize}
+%        \item \textcolor{red}{Selection bias} from not controlling for private education.
+%        \item Motivates finding \textcolor{ForestGreen}{plausibly random education variation} in Britain.
+%    \end{itemize}
+%    \vspace{-0.5cm}
+%    \begin{figure}[h!]
+%        \centering
+%        \singlespacing
+%        \begin{subfigure}[b]{0.575\textwidth}
+%            \centering
+%            \caption{Tuition Fees, Britain\\(Brookings, End of Free College in England, 2017).}
+%            \includegraphics[width=\textwidth]{
+%                presentation-files/headlines/british-tuition-fees.png}
+%        \end{subfigure}
+%        \hfill
+%        \begin{subfigure}[b]{0.375\textwidth}
+%            \centering
+%            \caption{Changes in Mandatory School-Leaving Age, Britain.}
+%            \includegraphics[width=\textwidth]{
+%                presentation-files/headlines/british-school-age.png}
+%        \end{subfigure}
+%    \end{figure}
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\subsection{(Optional) Correlational Results, HRS Data}
+%%-------------------------------------------------------------------------------
+%\begin{frame}
+%    \frametitle{(Optional) Correlational Results, HRS Data}
+%    Total Association:
+%    \vspace{-1.125cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \begin{tikzpicture}
+%            \node[state,blue] (instrument) at (0,0) {$Z$};
+%            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
+%            \path[->,thick] (instrument) edge (outcome);
+%            % Label the nodes with econ examples
+%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+%            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+%        \end{tikzpicture}
+%    \end{figure}
+%    \vspace{-0.5cm}
+%    \begin{figure}
+%        \centering
+%        \caption{Bin Scatter Between \textcolor{blue}{Ed PGI}
+%            $+$ \textcolor{red}{Annual Earnings.}}
+%        %\makebox[\textwidth][c]{
+%            %\includegraphics[width=0.8\textwidth]{
+%                %../text/sections/figures/genescore-earnings-wider}}
+%    \end{figure}
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}[noframenumbering]
+%    \frametitle{(Optional) Correlational Results, HRS Data}
+%    Total Association:
+%    \vspace{-1.125cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \begin{tikzpicture}
+%            \node[state,blue] (instrument) at (0,0) {$Z$};
+%            \node[state,red] (outcome) [right=1.5cm of instrument] {$Y$};
+%            \path[->,thick] (instrument) edge (outcome);
+%            % Label the nodes with econ examples
+%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+%            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+%        \end{tikzpicture}
+%    \end{figure}
+%    \vspace{-0.5cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \makebox[\textwidth][c]{
+%            %\includegraphics[width=0.9\textwidth]{
+%                %../text/sections/figures/mediation-total-plot.png}}
+%    \end{figure}
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}[noframenumbering]
+%    \frametitle{(Optional) Correlational Results, HRS Data}
+%    Decomposition:
+%    \vspace{-1.5cm}
+%    \begin{figure}
+%        %\centering
+%        \singlespacing
+%        \begin{tikzpicture}
+%            \node[state,ForestGreen] (treatment) at (0,0) {$D$};
+%            \node[state,blue] (instrument) [left=1.25cm of treatment] {$Z$};
+%            \node[state,red] (outcome) [right=1.25cm of treatment] {$Y$};
+%            %\path[->,thick] (instrument) edge (treatment);
+%            %\path[->,thick] (treatment) edge (outcome);
+%            % Label the nodes with econ examples
+%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+%            \node[text height=0.5cm, color=ForestGreen] [above right=-0.3cm and -0.1cm of treatment] {Indirect};
+%            % Add in direct effects.
+%            %\path[->,thick] (instrument) edge[bend right=45] (outcome);
+%            % Label the pathways with the colours
+%            \path[->, very thick, color=ForestGreen] (instrument) edge (treatment);
+%            \path[->, very thick, color=ForestGreen] (treatment) edge (outcome);
+%            \path[->, very thick, color=blue] (instrument) edge[bend right=35] (outcome);
+%            \node[text height=0.25cm, color=blue] [below=-0.1cm of treatment] {Direct Effect};
+%        \end{tikzpicture}
+%    \end{figure}
+%    \vspace{-1cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \makebox[\textwidth][c]{
+%            %\includegraphics[width=0.9\textwidth]{
+%                %../text/sections/figures/mediation-plot.png}}
+%    \end{figure}
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}[noframenumbering]
+%    \frametitle{(Optional) Correlational Results, HRS Data}
+%    Percent through education:
+%    \vspace{-0.25cm}
+%    %\begin{figure}
+%    %    \centering
+%    %    \singlespacing
+%    %    \makebox[\textwidth][c]{
+%    %        %\includegraphics[width=0.9\textwidth]{
+%    %            %../text/sections/figures/mediation-percent-plot.png}}
+%    %\end{figure}
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}
+%    \frametitle{(Optional) Correlational Results, HRS Data}
+%    Same results, with structural adjustment for selection into education:
+%    \vspace{-0.25cm}
+%    %\begin{figure}
+%    %    \centering
+%    %    \singlespacing
+%    %    \makebox[\textwidth][c]{
+%    %        %\includegraphics[width=0.9\textwidth]{
+%    %            %../text/sections/figures/mediation-selection-plot.png}}
+%    %\end{figure}
+%    \vspace{-0.625cm}
+%    
+%    $\implies$ Returns to education unaffected, direct genetic channel $\to 0$. 
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}[noframenumbering]
+%    \frametitle{Direct and Indirect Effects}
+%    HRS Results with structural assumptions for identification:
+%    \vspace{-0.25cm}
+%    %\begin{figure}
+%    %    \centering
+%    %    \singlespacing
+%    %    \makebox[\textwidth][c]{
+%    %        %\includegraphics[width=0.9\textwidth]{
+%    %            %../text/sections/figures/mediation-selection-percent-plot.png}}
+%    %\end{figure}
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}
+%    \frametitle{Conclusion}
+%    \begin{beamercolorbox}{postit}
+%        \raggedright
+%        \vspace{0.01cm} \\
+%        ``\textbf{The difference of natural talents in different men}, is, in reality, much less than we are aware of [\ldots].
+%        The difference between the most dissimilar characters, between a philosopher and a common street porter, seems to arise \textbf{not so much from nature, as from habit, custom, and education}.''
+%        \hfill
+%        \underline{\textit{Adam Smith (1776), The Wealth of Nations, Volume 1 p. 16.}}
+%        \vspace{0.02cm}
+%    \end{beamercolorbox}
+%    \vspace{0.25cm}
+%    
+%    \textbf{This Project:}
+%    \begin{enumerate}
+%        \item Studies total genetic effects, on later-life labour outcomes (earnings).
+%        \item Design-based decomposition, effect of \textcolor{red}{Ed PGI $\to$ Earnings} to \textcolor{blue}{direct (genetic)} $+$ \textcolor{ForestGreen}{indirect (education)} effects.
+%        \item Overlapping research design for causal effects (UK Biobank), in-progress.
+%    \end{enumerate}
+%    \vfill
+%
+%    \hrulefill
+%
+%    Thank you for your listening to my presentation.
+%    \vspace{0.25cm}
+%    
+%    Comments welcome now, later, or at \href{mailto:seh325@cornell.edu}{\textcolor{blue}{seh325@cornell.edu}}.
+%\end{frame}
+%%-------------------------------------------------------------------------------
+%\begin{frame}[noframenumbering]
+%    \frametitle{Appendix: Mediation Equations}
+%    \label{mediation-equations}
+%    Mediation methods decompose the total effect to direct $+$ indirect channels.
+%    E.g., OLS simultaneous regression (Imai Keele Yamamoto, 2010):\footnote[frame]{
+%        Usually estimated with added controls, $+ \vec \zeta' \vec X_i$.
+%    }
+%    \begin{align*}
+%        &\textcolor{blue}{Z_i \leftarrow \text{ Ed PGI}} &
+%        \text{First-stage: }
+%            \textcolor{ForestGreen}{D_i}
+%                &= \phi + \pi \textcolor{blue}{Z_i} + \eta_i \\
+%        &\textcolor{ForestGreen}{D_i \leftarrow \text{ Education years}} &
+%        \text{Second-stage: }
+%            \textcolor{red}{Y_i}
+%                &= \alpha
+%                    + \beta \textcolor{ForestGreen}{D_i}
+%                    + \gamma \textcolor{blue}{Z_i}
+%                    + \delta \textcolor{blue}{Z_i} \textcolor{ForestGreen}{D_i}
+%                    + \varepsilon_i \\
+%        &\textcolor{red}{Y_i \leftarrow \text{ log(Earnings)}} &
+%            \implies \textcolor{Orange}{\text{Direct Effect }}
+%            &= \gamma + \delta \E{\textcolor{ForestGreen}{D_i}} \\
+%        &   &\textcolor{Orange}{\text{Indirect Effect }}
+%            &= \pi \left( \beta + \delta \E{\textcolor{blue}{Z_i}} \right)
+%    \end{align*}
+%
+%    i.e., a regression decomposition, asumming \\
+%    (1) seq ignorablility, (2) linear outcome model, (3) homogenous TEs:
+%    \vspace{-0.5cm}
+%    \begin{figure}
+%        \centering
+%        \singlespacing
+%        \begin{tikzpicture}
+%            \node[state,ForestGreen] (treatment) at (0,0) {$D$};
+%            \node[state,blue] (instrument) [left=2cm of treatment] {$Z$};
+%            \path[->,thick] (instrument) edge (treatment);
+%            \node[color=blue] [left=0.1cm of instrument] {Ed PGI};
+%            \node[text width=1.675cm, color=ForestGreen] [above=0.15cm of treatment] (education) {Education};
+%            \node[color=orange] [above left=-0.3cm and 0.2cm of treatment] {First-stage};
+%            \node[state,red] (outcome) [right=2cm of treatment] {$Y$};
+%            \path[->,thick] (treatment) edge (outcome);
+%            \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Earnings};
+%            \node[text height=0.5cm, color=orange] [above right=-0.3 and 0.4cm of treatment] {Returns};
+%            % Add in direct effects.
+%            \path[->,thick] (instrument) edge[bend right=45] (outcome);
+%            \node[text height=0.25cm, color=orange] [below=0.4cm of treatment] {Direct Effect};
+%        \end{tikzpicture}
+%    \end{figure}
+%\end{frame}
 \end{document}

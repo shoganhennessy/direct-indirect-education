@@ -58,7 +58,7 @@ analysis.data %>%
     summary() %>%
     print()
 # Note coef on parents < 1 because of measurement error.
-#TODO: use a second PGI for an obviously related IV robustness check.
+#TODO: use independent weightes for Ed PGI, obviously related IV robustness.
 
 
 ################################################################################
@@ -84,8 +84,7 @@ analysis.data %>%
 
 # Try it with the random part as an instrument.
 analysis.data %>%
-    ivreg(edyears ~
-        1 + edpgi_self | 1 + edpgi_random,
+    ivreg::ivreg(edyears ~ 1 + edpgi_self | 1 + edpgi_random,
         data = .) %>%
     summary() %>%
     print()

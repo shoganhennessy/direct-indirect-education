@@ -99,7 +99,7 @@ analysis.data <- ukb.data %>%
 #        | Obs                | Obs.
 
 summary.table <- function(given.data){
-    # Generate summary data, for analysis sample (MEAN)
+    # Generate summary data, for provided data (MEAN)
     summary.mean <- given.data %>%
         summarise_all(mean, na.rm = TRUE) %>%
         pivot_longer(cols = everything(),
@@ -117,7 +117,7 @@ analysis_summary.data <- analysis.data %>%
     transmute(
         `Male` = sex_male,
         `Age`  = recruitedage,
-        `Race $=$ White` = genetic_euroancest,
+        `Ethnicity $=$ European` = genetic_euroancest,
         # Genetic variables.
         `Ed PGI` = edpgi_self,
         `Ed PGI, parental mean` = edpgi_parents,
@@ -144,17 +144,17 @@ all_summary.data <- ukb.data %>%
     transmute(
         `Male` = sex_male,
         `Age`  = recruitedage,
-        `Race $=$ White` = genetic_euroancest,
+        `Ethnicity $=$ European` = genetic_euroancest,
         # Genetic variables.
         `Ed PGI` = edpgi_self,
         `Ed PGI, parental mean` = edpgi_parents,
         # Education variables
         `Education years` = edyears,
         # Income variables
-        `Occ. hourly wage` = soc_mean_hourly,
-        `Household income $<$ 18k` = householdincome_less18k,
-        `Household income 18--31k` = householdincome_18to31k,
-        `Household income 31--52k` = householdincome_31to52k,
+        `Occ. hourly wage`          = soc_mean_hourly,
+        `Household income $<$ 18k`  = householdincome_less18k,
+        `Household income 18--31k`  = householdincome_18to31k,
+        `Household income 31--52k`  = householdincome_31to52k,
         `Household income 52--100k` = householdincome_52to100k,
         `Household income 100k $<$` = householdincome_above100k,
         # Designators
@@ -231,16 +231,16 @@ edpgi.plot <- analysis.data %>%
     geom_density(aes(y = after_stat(count)), fill = colour.list[1]) +
     theme_bw() +
     geom_vline(xintercept = 0, linetype = "dashed") +
-    annotate("text", colour = colour.list[1], x = -2.9, y = 2000,
-        label = expression("Mean\nEd PGI = 0"),
+    annotate("text", colour = colour.list[1],
+        x = -2.9, y = 8000,
+        label = TeX(r"(Mean Ed PGI $=$ 0)"),
         size = 4.25,  hjust = 0, vjust = 0) +
     scale_x_continuous(expand = c(0, 0),
         name = "Ed PGI, s.d. units",
         breaks = seq(-5, 5, by = 1)) +
     scale_y_continuous(expand = c(0, 0),
         name = "",
-        #breaks = seq(0, 1, by = 0.05),
-        limits = c(0, 2500)) +
+        limits = c(0, 10010)) +
     ggtitle(TeX(r"(Observations, \textit{N})")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
@@ -255,10 +255,10 @@ ggsave(file.path(figures.folder, "edpgi-hist-presentation.png"),
     units = "cm", width = presentation.width, height = presentation.height)
 
 # Show the histogram of ed years.
-mean.edyears <- analysis.data %>% pull(indiv_edyears) %>% mean(na.rm = TRUE)
+mean.edyears <- analysis.data %>% pull(edyears) %>% mean(na.rm = TRUE)
 edyears.plot <- analysis.data %>%
-    filter(indiv_edyears >= 10) %>%
-    ggplot(aes(x = indiv_edyears)) +
+    #filter(edyears >= 10) %>%
+    ggplot(aes(x = edyears)) +
     geom_bar(aes(y = after_stat(count)),
         fill = colour.list[2], colour = 1) +
     #geom_vline(xintercept = mean.edyears, linetype = "dashed") +
@@ -270,9 +270,9 @@ edyears.plot <- analysis.data %>%
         name = "Education Years",
         breaks = seq(0, 20, by = 1)) +
     scale_y_continuous(expand = c(0, 0),
-        name = "",
-        breaks = seq(0, 3000, by = 250),
-        limits = c(0, 2240)) +
+        name = "") +#,
+        #breaks = seq(0, 3000, by = 250),
+        #limits = c(0, 2240)) +
     ggtitle(TeX(r"(Observations, \textit{N})")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
@@ -283,23 +283,23 @@ ggsave(file.path(figures.folder, "edyears-hist.png"),
     units = "cm", width = fig.width, height = fig.height)
 
 # Show the histogram of annual income.
-mean.earnings <- analysis.data %>% pull(indiv_earnings_real) %>% mean(na.rm = TRUE)
+mean.earnings <- analysis.data %>% pull(soc_mean_hourly) %>% mean(na.rm = TRUE)
 earnings.plot <- analysis.data %>%
-    ggplot(aes(x = indiv_earnings_real / 1000)) +
+    ggplot(aes(x = soc_mean_hourly)) +
     geom_density(aes(y = after_stat(count)), fill = colour.list[3]) +
-    geom_vline(xintercept = mean.earnings / 1000, linetype = "dashed") +
-    annotate("text", colour = colour.list[3], x = 100, y = 50,
-        label = "Mean Individual \nEarnings = $80,000",
-        size = 4.25,  hjust = 0, vjust = 0) +
+    geom_vline(xintercept = mean.earnings, linetype = "dashed") +
+    #annotate("text", colour = colour.list[3], x = 100, y = 50,
+    #    label = "Mean Individual \nEarnings = $80,000",
+    #    size = 4.25,  hjust = 0, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0.5),
         name = "Annual Earnings, $ thousands",
-        limits = c(0, 300),
+        #limits = c(0, 300),
         breaks = seq(0, 300, by = 50)) +
     scale_y_continuous(expand = c(0, 0),
-        name = "",
-        breaks = seq(0, 100, by = 10),
-        limits = c(0, 62.5)) +
+        name = "") +
+        #breaks = seq(0, 100, by = 10),
+        #limits = c(0, 62.5)
     ggtitle(TeX(r"(Observations, \textit{N})")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
@@ -311,16 +311,16 @@ ggsave(file.path(figures.folder, "earnings-hist.png"),
 
 # Show correlation between edyears and income
 analysis.data %>%
-    filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    lm(log(indiv_earnings_real) ~ 1 + indiv_edyears, data = .) %>%
+    filter(10 <= edyears, edyears <= 17) %>%
+    lm(log(soc_mean_hourly) ~ 1 + edyears, data = .) %>%
     summary() %>%
     print()
 # Scatter plot of edyears + earnings.
 edyears_earnings.plot <- analysis.data %>%
-    filter(indiv_edyears >= 10) %>%
-    group_by(indiv_edyears) %>%
-    summarise(indiv_earnings_real = mean(indiv_earnings_real, na.rm = TRUE)) %>%
-    ggplot(aes(x = indiv_edyears, y = indiv_earnings_real / 1000)) +
+    filter(edyears >= 10) %>%
+    group_by(edyears) %>%
+    summarise(soc_mean_hourly = mean(soc_mean_hourly, na.rm = TRUE)) %>%
+    ggplot(aes(x = edyears, y = soc_mean_hourly)) +
     geom_point() +
     geom_smooth(method = "loess",
         colour = colour.list[2], fill = colour.list[2], size = 2) +
@@ -354,23 +354,23 @@ ggsave(file.path(figures.folder, "presentation-edyears-earnings.png"),
 ## Show correlation between edyears and income
 # Get mean eductaion gain between high-school and uni degree.
 analysis.data %>%
-    filter(indiv_edyears >= 12, degree_reported >= 2) %>%
+    filter(edyears >= 12) %>%
     mutate(college_degree = as.integer(degree_reported >= 5)) %>%
-    lm(log(indiv_earnings_real) ~ 1 + college_degree, data = .) %>%
+    lm(log(soc_mean_hourly) ~ 1 + college_degree, data = .) %>%
     summary() %>%
     print()
 # SHow this in a plot.
 college_earnings.plot <- analysis.data %>%
-    filter(indiv_edyears >= 12, degree_reported >= 2) %>%
+    filter(edyears >= 12) %>%
     mutate(college_degree = as.character(degree_reported >= 5)) %>%
     group_by(college_degree) %>%
-    summarise(indiv_earnings_real = mean(indiv_earnings_real, na.rm = TRUE)) %>%
+    summarise(soc_mean_hourly = mean(soc_mean_hourly, na.rm = TRUE)) %>%
     ungroup() %>%
-    ggplot(aes(x = college_degree, y = indiv_earnings_real / 1000)) +
+    ggplot(aes(x = college_degree, y = soc_mean_hourly)) +
     geom_bar(stat = "identity", colour = 1, fill = colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 0.5, y = 100,
-        label = expression("Mean ≈ +45%"),
+        label = TeX(r"(Mean ≈ +45%)"),
         size = 4.25, hjust = 0, vjust = 0) +
     theme_bw() +
     scale_x_discrete(
@@ -393,14 +393,14 @@ ggsave(file.path(figures.folder, "college-earnings.png"),
 # Show correlation between Ed PGI and edyears
 # First-stage OLS no controls 0.66519
 analysis.data %>%
-    filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    lm(indiv_edyears ~ 1 + edpgi_self, data = .) %>%
+    filter(10 <= edyears, edyears <= 17) %>%
+    lm(edyears ~ 1 + edpgi_self, data = .) %>%
     summary() %>%
     print()
 # Show in a Bin-scatter plot.
 edpgi_edyears.plot <- analysis.data %>%
-    filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    binscatter.plot(data = ., "edpgi_self", "indiv_edyears",
+    filter(10 <= edyears, edyears <= 17) %>%
+    binscatter.plot(data = ., "edpgi_self", "edyears",
         colour.list[2]) +
     annotate("text", colour = colour.list[2],
         x = 0.875, y = 10.5,
@@ -431,8 +431,8 @@ ggsave(file.path(figures.folder, "edpgi-edyears-wider.png"),
 
 # Generate a version with the (implied) causal design.
 edpgi_edyears_causal.plot <- analysis.data %>%
-    filter(10 <= indiv_edyears, indiv_edyears <= 17) %>%
-    binscatter.plot(data = ., "edpgi_self", "indiv_edyears",
+    filter(10 <= edyears, edyears <= 17) %>%
+    binscatter.plot(data = ., "edpgi_self", "edyears",
         colour.list[2], option = "half-line") +
     annotate("text", colour = colour.list[2],
         x = 0.875, y = 10.5,
@@ -473,14 +473,14 @@ ggsave(file.path(figures.folder, "edpgi-edyears-causal.png"),
 # Reduced-form OLS no controls 0.100560
 # First-stage OLS no controls 0.66519
 analysis.data %>%
-    filter(indiv_earnings_real <= 250000) %>%
-    lm(log(indiv_earnings_real) ~ 1 + edpgi_self, data = .) %>%
+    filter(soc_mean_hourly <= 250000) %>%
+    lm(log(soc_mean_hourly) ~ 1 + edpgi_self, data = .) %>%
     summary() %>%
     print()
 # Reduced-form OLS with controls 0.056507
 edpgi_earnings.plot <- analysis.data %>%
-    mutate(indiv_earnings_real = indiv_earnings_real / 1000) %>%
-    binscatter.plot(data = ., "edpgi_self", "indiv_earnings_real",
+    mutate(soc_mean_hourly = soc_mean_hourly) %>%
+    binscatter.plot(data = ., "edpgi_self", "soc_mean_hourly",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 1.5, y = 15,
@@ -511,8 +511,8 @@ ggsave(file.path(figures.folder, "edpgi-earnings-wider.png"),
 
 # Generate a version with the (implied) causal design.
 edpgi_earnings_causal.plot <- analysis.data %>%
-    mutate(indiv_earnings_real = indiv_earnings_real / 1000) %>%
-    binscatter.plot(data = ., "edpgi_self", "indiv_earnings_real",
+    mutate(soc_mean_hourly = soc_mean_hourly) %>%
+    binscatter.plot(data = ., "edpgi_self", "soc_mean_hourly",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 1.5, y = 15,
@@ -557,7 +557,7 @@ edpgi_cogtot.plot <- analysis.data %>%
     binscatter.plot(data = ., "edpgi_self", "cogtot", "orange") +
     annotate("text", colour = "orange",
         x = 0, y = 37.5,
-        label = expression("Slope ≈ +2.9%"),
+        label = TeX(r"(Slope ≈ +2.9%)"),
         size = 4.25,  hjust = 0, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0),
@@ -582,12 +582,12 @@ ggsave(file.path(figures.folder, "edpgi-cogtot-wider.png"),
 
 # Compare education years.
 analysis.data %>%
-    dplyr::select(indiv_edyears, degree_reported) %>%
+    dplyr::select(edyears, degree_reported) %>%
     table(exclude = NULL)
 
 # See dist of edyears.
 analysis.data %>%
-    pull(indiv_edyears) %>%
+    pull(edyears) %>%
     table(exclude = NULL)
 
 

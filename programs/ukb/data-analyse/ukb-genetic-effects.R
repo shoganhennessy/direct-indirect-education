@@ -83,24 +83,7 @@ print(names(analysis.data))
 
 
 ################################################################################
-## Testing out the first-stage, with random component of Ed PGI
-
-# Correlation between random component and the realised PGI
-analysis.data %>%
-    lm(edpgi_self ~ 1 + edpgi_random, data = .) %>%
-    summary() %>%
-    print()
-# Compare to the true DGP: PGI = E[ PGI | parents] + random component
-analysis.data %>%
-    lm(edpgi_self ~ 1 + edpgi_parents + edpgi_random, data = .) %>%
-    summary() %>%
-    print()
-# Note coef on parents < 1 because of measurement error.
-#TODO: use a second PGI for an obviously related IV robustness check.
-
-
-################################################################################
-## Quasi second-stage, Ed PGI -> Ed Years
+## Effect on education years Ed PGI -> Ed Years
 
 # OLS (not causal)
 analysis.data %>%
@@ -108,7 +91,7 @@ analysis.data %>%
     summary() %>%
     print()
 
-# Show the correlation between the random value, and Ed years
+# Effect of random component on Ed years
 analysis.data %>%
     lm(edyears ~ 1 + edpgi_random, data = .) %>%
     summary() %>%
@@ -122,45 +105,34 @@ analysis.data %>%
 
 # Try it with the random part as an instrument.
 analysis.data %>%
-    ivreg(edyears ~
-        1 + edpgi_self | 1 + edpgi_random,
-        data = .) %>%
+    ivreg(edyears ~ 1 + edpgi_self | 1 + edpgi_random, data = .) %>%
     summary() %>%
     print()
 
-# Show the mean Ed PGI random compoinet across the parent dist
-analysis.data$parental_quantile <-
-    ecdf(analysis.data$edpgi_parents)(analysis.data$edpgi_parents)
-analysis.data$parental_quantile <- factor(
-    round(10 * analysis.data$parental_quantile))
-# Compare this to Houmark+ (2024) Figure 1.
+
+################################################################################
+## Effect on education years Ed PGI -> Income.
+
+# OLS (not causal)
 analysis.data %>%
-    group_by(parental_quantile) %>%
-    summarise(
-        edpgi_random_mean   = mean(edpgi_random),
-        edpgi_random_sd     = sd(edpgi_random),
-        edpgi_self_mean     = mean(edpgi_self),
-        edpgi_self_sd       = sd(edpgi_self),
-        edpgi_parental_mean = mean(edpgi_parents),
-        edpgi_parental_sd   = sd(edpgi_parents)) %>%
-    View()
-mean(analysis.data$edpgi_self > analysis.data$edpgi_parents)
-# Ensure this does not vary across the parental distribution.
-analysis.data %>%
-    lm(edpgi_self ~ 1 + edpgi_random * parental_quantile, data = .) %>%
+    lm(log(soc_mean_hourly) ~ 1 + edpgi_self, data = .) %>%
     summary() %>%
     print()
-#  TEST: does this association hold true among people for whom we observe one or both parents? -> Yes.
+
+# Effect of random component on Ed years
 analysis.data %>%
-    filter(father_present + mother_present > 0) %>%
-    lm(edpgi_random ~ 1 + 
-        sex_male * (edpgi_father + edpgi_mother), data = .) %>%
+    lm(log(soc_mean_hourly) ~ 1 + edpgi_random, data = .) %>%
     summary() %>%
     print()
-# Compare to the Ed PGI in raw form.
+
+# Show the correlation between the self + parents value, and Ed years
 analysis.data %>%
-    filter(father_present + mother_present > 0) %>%
-    lm(edpgi_self ~ 1 +
-        sex_male * (edpgi_father + edpgi_mother), data = .) %>%
+    lm(log(soc_mean_hourly) ~ 1 + edpgi_self + edpgi_parents, data = .) %>%
+    summary() %>%
+    print()
+
+# Try it with the random part as an instrument.
+analysis.data %>%
+    ivreg(log(soc_mean_hourly) ~ 1 + edpgi_self | 1 + edpgi_random, data = .) %>%
     summary() %>%
     print()

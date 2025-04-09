@@ -10,6 +10,8 @@ library(tidyverse)
 library(xtable)
 # The standard, linear, IV estimator package.
 library(ivreg)
+# Causal medation package, Imai Keele Yamamoto (2010)
+library(mediation)
 # Define number of digits in tables and graphs
 digits.no <- 3
 # Size for figures
@@ -31,43 +33,6 @@ tables.folder <- file.path("..", "..", "..", "text", "sections", "tables")
 
 
 ################################################################################
-## Convenience functions.
-
-# Define a function to automate Bin scatter.
-binscatter.plot <- function(data, x, y, colour.name, option = "none"){
-    library(binsreg)
-    # Run the binscatter regression.
-    binscatter.data <- binsreg(data[[y]], data[[x]], randcut = 1,
-            line = c(1, 1), ci = c(1, 1), cb = c(1, 1), polyreg = 3)  %>%
-        magrittr::use_series("data.plot") %>%
-        magrittr::use_series("Group Full Sample")
-    # Plot the binscatter
-    binscatter.ggplot <- ggplot() +
-        # Add the bin means
-        geom_point(data = binscatter.data$data.dots, aes(x = x, y = fit),
-            colour = colour.name, size = 2) +
-        # Add the bin error bars
-        #geom_errorbar(data = binscatter.data$data.ci,
-        #    aes(x = x, ymin = ci.l, ymax = ci.r),
-        #    colour = colour.name, size = 0.5, width = 0.02, linetype = "solid") +
-        geom_ribbon(data = binscatter.data$data.cb,
-            aes(x = x, ymin = cb.l, ymax = cb.r),
-            fill = colour.name, alpha = 0.2) +
-        # Add the line between bin means
-        geom_smooth(data = binscatter.data$data.dots, aes(x = x, y = fit),
-            se = FALSE, colour = colour.name, size = 0.5, linetype = "solid")
-        if (option == "half-line"){
-            binscatter.ggplot <- binscatter.ggplot +
-                geom_smooth(data = binscatter.data$data.dots,
-                aes(x = x, y = (6 + fit / 2)), se = FALSE,
-                colour = "orange", size = 1, linetype = "solid")
-        }
-    # Return the ggplot of this.
-    return(binscatter.ggplot)
-}
-
-
-################################################################################
 ## Import relevant UKB data. 
 
 # Load the pre-cleaned UKB panel data.
@@ -80,6 +45,32 @@ analysis.data <- data.folder %>%
 # Show the construction
 print(analysis.data)
 print(names(analysis.data))
+
+
+################################################################################
+#! Exploratory: correlational mediation (i.e., suffering from selection bias).
+
+# Get data.
+Z <- analysis.data %>% pull(edpgi_self)
+D <- analysis.data %>% pull(edyears)
+Y <- analysis.data %>% pull(soc_mean_hourly) %>% log(.)
+
+# Define number of samples to bootstrap over.
+boot.samples <- 10^2
+
+# Define the simple OLS model
+mediation_ols.reg <-
+    mediate(
+        lm(D ~ (1 + Z)),
+        lm(Y ~ (1 + Z * D)),
+        treat = "Z", mediator = "D",
+        robustSE = FALSE, sims = boot.samples)
+print(summary(mediation_ols.reg))
+
+# SHow the correlational D -> Y returns to educ used in this analysis.
+lm(Y ~ 1 + factor(D)) %>% summary() %>% print()
+
+#! Note Edyears has decreasing earnings 15 -> 19 years, possible miscoding
 
 
 ################################################################################
