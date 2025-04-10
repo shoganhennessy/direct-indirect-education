@@ -133,30 +133,6 @@
 % Introduction.
 \section{Introduction}
 %-------------------------------------------------------------------------------
-\begin{frame}[noframenumbering, plain]
-    \frametitle{\large The Direct and Indirect Effects of Genetics and Education}
-    
-    \vspace{-0.5cm}    
-    {\centering Senan Hogan-Hennessy, 14 November 2024.}
-    
-    \vspace{0.5cm}
-    \textbf{Notes for LWIPS:}
-
-    \vspace{0.25cm}
-    This project integrates data, methods from other fields to labour econ topics.
-    \begin{enumerate}
-        \item New genetic measures (from genetics)
-        \item An explicit mediation analysis (methods from statistics/epidemiology)
-        \item Aims to use these in way that is credible in labour econ, natural experiment setting.
-    \end{enumerate}
-    \vspace{0.25cm}
-    Appreciate comments on what is confusing $+$ unclear from an econ audience, given these unconventional approaches.
-
-    \vfill
-    \textbf{Note:}
-    Explains an overlapping research design approach for causal effects using UK Biobank data; causal results with these data are not ready here.
-\end{frame}
-%-------------------------------------------------------------------------------
 \begin{frame}
     \frametitle{Introduction}
     \vspace{-0.25cm}
@@ -237,7 +213,7 @@
             \begin{enumerate}
                 \item Genetics measure one component of nature \\(at most\dots)
                 \item Genes associated with outcomes are not the entire story
-                \item Genetics gives new findings\pause, \textbf{with caveats.}
+                \item Genetics gives new findings, \textbf{with caveats.}
             \end{enumerate}
         \end{subfigure}
         \hfill
@@ -284,14 +260,12 @@
                 % Label the nodes with econ examples
                 \node[color=blue, left=0.1cm of instrument] {Ed Genes};
                 \node[color=red, right=0.1cm of outcome] {Earnings};
-                \pause
                 \node[color=ForestGreen, above=0.1cm of treatment] {Education};
                 % Add in direct + indirect effects.
                 %\path[->,thick] (instrument) edge[bend right=45] (outcome);
                 % Label the pathways with the colours
                 \path[->, very thick, color=ForestGreen] (instrument) edge (treatment);
                 \path[->, very thick, color=ForestGreen] (treatment) edge (outcome);
-                \pause
                 \path[->, very thick, color=blue] (instrument) edge[bend right=30] (outcome);
                 \node[color=MidnightBlue, below=0.35cm of treatment] {Direct Genetic Effect};
             \end{tikzpicture}
@@ -497,7 +471,6 @@
                     \node[above, color=blue] at (\x,{abs(sin(\x*36))}) {G};
                     \node[below, color=blue] at (\x,{-abs(sin(\x*36))}) {C};
                 }
-                %\pause
                 % Difference in the base pairs.
                 \foreach \x in {1, 7, 14}{
                     \draw[very thick, red] (\x,{-sin(\x*36)}) -- (\x,{sin(\x*36)});
