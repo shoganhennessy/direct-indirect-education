@@ -175,7 +175,7 @@ ukb_soc.data <- cleaned_pheno.data %>%
         age  = as.integer(recruitedage),
         year = as.integer(visityear))
 
-# Use the Kweon Koellinger script for SOC occ wages.
+# Use the Kweon Koellinger script for SOC occ hourly wages.
 source("income-impute.R")
 ukb_soc.data <- GET_INCOME(ukb_soc.data)
 

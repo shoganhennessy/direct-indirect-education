@@ -24,8 +24,10 @@ dispensed_dataset_id = dxpy.find_one_data_object(
 
 # Get project ID
 project_id = dxpy.find_one_project()["id"]
-dataset = (":").join([project_id, dispensed_dataset_id])
 
+# Host raw dataset.
+dataset = (":").join([project_id, dispensed_dataset_id])
+print(dataset)
 cmd = ["dx", "extract_dataset", dataset, "-ddd", "--delimiter", ","]
 subprocess.check_call(cmd)
 
@@ -35,32 +37,49 @@ subprocess.check_call(cmd)
 
 # Input: list of variables I have parsed through, and want.
 # See -> phenotype-names.txt
-desiredFields = ["eid",
-    "p31",
-    "p34",
-    "p52",
-    "p53_i0",
-    "p738_i0",
-    "p21022",
-    "p20143",
+desiredFields = ["eid", # eid, person identifier (anonymised).
+    "p31", # sex
+    "p34", # birthyear
+    "p52", # eid
+    "p53_i0", "p53_i0", "p53_i1", "p53_i2", "p53_i3", # Date visit (4 instances).
+    "p738_i0", "p738_i1", "p738_i2", "p738_i3",       # householdincome_cat (4 instances).
+    "p21022",    # recruitedage
+    "p20143",    # datelastcontact
+    "p6138_i0", "p6138_i1", "p6138_i2", "p6138_i3", # edquals (4 instances).
+    "p845_i0",  "p845_i2",  "p845_i3",  "p845_i4",  # agefinishededuc
+    "p21000_i0", # ethnicity
+    "p22006",    # genetic_race
+    "p20277_i0", "p20277_i1", "p20277_i2", "p20277_i3" # jobcode (4 instances).
+    "p6142_i0",  "p6142_i1",  "p6142_i2",  "p6142_i3", # employment (4 instances).
+    "p767_i0",   "p767_i1",   "p767_i2",   "p767_i3",  # hours_workweek (4 instances). 
+    "p816_i0",   "p816_i1",   "p816_i2",   "p816_i3",  # manualwork (4 instances). 
+    "p129_i0",   "p129_i1",   "p129_i2",   "p129_i3",  # birth_n_coord (4 instances). 
+    "p130_i0",   "p130_i1",   "p130_i2",   "p130_i3",  # birth_e_coord (4 instances). 
+    "p1647_i0",  "p1647_i1",  "p1647_i2",  "p1647_i3", # birth_country (4 instances).
+    "p845_i0",   "p845_i1",   "p845_i2",   "p845_i3",  # agefinishededuc (4 instances). 
+    "p40000_i0", # datedeath
+    "p22020",    # inPCA
+    "p26210",    # asthma_pgi
+    "p26214",    # bipolar_pgi
+    "p26216",    # bmi_pgi
+    "p26240",    # height_pgi
+    "p26275",    # schizophrenia_pgi
+    "p26285"]    # t2diabetes_pgi
+
+
+#TODO list, extracting new data:
+# 1. Standardise Ed years and SOC data for new instances.
+# -> annual income is 52 * hours worked * SOC hourly wage.
+# 2. Generate binary variables for highest level of education achieved.
+# -> Leave out the vocational highest level.
     # Todo -> get other instances of Edyears, 
     # Todo    then create binary values for ``whether has qual.'' based on this.
-    "p6138_i0",
-    # Todo -> get other instances of SOC.
-    "p845_i0",
-    "p21000_i0",
-    "p22006",
-    "p20277_i0",
-    "p22599",
-    "p22661",
-    "p22601_a0",
-    "p22617_a0",
-    "p22602_a0",
-    "p22604_a0",
-    "p22605_a0",
-    "p22501",
-    "p40000_i0",
-    "p22020"]
+# 3. Funky coding for birth coordinates -> Card uni proximity instrument.
+# -> Get data to have yearly coordinates of UK higher ed (equivalent to IPEDS)
+# -> Match these data to UKB, getting binary (in local area) and distance to closest
+# -> gets columns for uni in local area at age 18, and distance to closest.
+
+
 desiredFieldsStr = [f"participant.{f}" for f in desiredFields]
 fieldNames = ",".join(desiredFieldsStr)
 print(fieldNames)

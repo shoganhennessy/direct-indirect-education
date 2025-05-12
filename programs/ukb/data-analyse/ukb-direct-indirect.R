@@ -4,14 +4,16 @@
 set.seed(47)
 print(Sys.time())
 
-# Functions for data manipulation and visualisation
-library(tidyverse)
-# Functions for tables into TeX
-library(xtable)
 # The standard, linear, IV estimator package.
 library(ivreg)
 # Causal medation package, Imai Keele Yamamoto (2010)
 library(mediation)
+# G-computation of causal effects (allows control interations)
+library(marginaleffects)
+# Functions for tables into TeX
+library(xtable)
+# Functions for data manipulation and visualisation
+library(tidyverse)
 # Define number of digits in tables and graphs
 digits.no <- 3
 # Size for figures
@@ -45,33 +47,85 @@ analysis.data <- data.folder %>%
 # Show the construction
 print(analysis.data)
 print(names(analysis.data))
-
+hist(analysis.data$birthyear + 18)
 
 ################################################################################
 #! Exploratory: correlational mediation (i.e., suffering from selection bias).
 
-# Get data.
-Z <- analysis.data %>% pull(edpgi_self)
-D <- analysis.data %>% pull(edyears)
-Y <- analysis.data %>% pull(soc_mean_hourly) %>% log(.)
+# Get the data, to use in regression, adjusting types along the way.
+analysis.data <- analysis.data %>%
+    transmute(
+        edpgi_self        = edpgi_self,
+        edpgi_random        = edpgi_random,
+        edyears             = edyears,
+        highered            = as.integer(edyears >= 20),
+        soc_mean_hourly     = soc_mean_hourly,
+        sex_male            = factor(sex_male),
+        visityear           = factor(visityear),
+        birthmonth          = factor(birthmonth),
+        birthyear           = factor(birthyear),
+        recruitedage        = factor(recruitedage),
+        edpgi_parents       = edpgi_parents,
+        sibling_count       = factor(sibling_count),
+        father_present      = factor(father_present),
+        mother_present      = factor(mother_present))
+
+# Show first-stage effect.
+lm(edyears ~ (1 + edpgi_random - highered), data = analysis.data) %>% summary() %>% print()
+lm(edyears ~ (1 + edpgi_random + edpgi_parents - highered), data = analysis.data) %>% summary() %>% print()
+lm(edyears ~ (1 + edpgi_random + . - soc_mean_hourly - highered), data = analysis.data) %>% summary() %>% print()
+lm(highered ~ (
+    1 + edpgi_random + . - soc_mean_hourly - edyears), data = analysis.data) %>% summary() %>% print()
+# Show total effect.
+lm(log(soc_mean_hourly) ~ (1 + edpgi_random), data = analysis.data) %>% summary() %>% print()
+lm(log(soc_mean_hourly) ~ (1 + edpgi_random + edpgi_parents), data = analysis.data) %>% summary() %>% print()
+lm(log(soc_mean_hourly) ~ (1 + edpgi_random + . - edyears - highered), data = analysis.data) %>% summary() %>% print()
 
 # Define number of samples to bootstrap over.
-boot.samples <- 10^2
-
-# Define the simple OLS model
-mediation_ols.reg <-
-    mediate(
-        lm(D ~ (1 + Z)),
-        lm(Y ~ (1 + Z * D)),
-        treat = "Z", mediator = "D",
-        robustSE = FALSE, sims = boot.samples)
+boot.samples <- 10^3
+# Define the simple OLS model (i.e., the straw-man).
+mediation_ols.reg <- mediate(
+    lm(edyears ~ (1 + edpgi_self), data = analysis.data),
+    lm(log(soc_mean_hourly) ~ (1 + edpgi_self * edyears), data = analysis.data),
+    treat = "edpgi_self", mediator = "edyears",
+    robustSE = FALSE, sims = boot.samples)
 print(summary(mediation_ols.reg))
+# Define the mediation with random PGI (but not for education, yet)
+mediation_random.reg <- mediate(
+    lm(edyears ~ (1 + edpgi_random), data = analysis.data),
+    lm(log(soc_mean_hourly) ~ (1 + edpgi_random * edyears), data = analysis.data),
+    treat = "edpgi_random", mediator = "edyears",
+    boot = TRUE)
+print(summary(mediation_random.reg))
 
 # SHow the correlational D -> Y returns to educ used in this analysis.
-lm(Y ~ 1 + factor(D)) %>% summary() %>% print()
-
 #! Note Edyears has decreasing earnings 15 -> 19 years, possible miscoding
+lm(log(soc_mean_hourly) ~ (1 + edyears), data = analysis.data) %>% summary() %>% print()
+lm(log(soc_mean_hourly) ~ (1 + factor(edyears)), data = analysis.data) %>% summary() %>% print()
+analysis.data <- analysis.data %>% filter(edyears != 19)
 
+# Direct effect:
+direct.reg <- lm(
+    log(soc_mean_hourly) ~ (1 + edpgi_random * edyears + . - edpgi_self),
+    data = analysis.data %>% mutate(edyears = factor(edyears)))
+print(summary(direct.reg))
+direct.est <- marginaleffects::avg_slopes(
+    direct.reg, by = TRUE, variables = "edpgi_random")
+print(direct.est)
+# Indirect effect:
+firststage.reg <- lm(
+    edyears ~ (1 + edpgi_random + . - edpgi_self - soc_mean_hourly - highered),
+    data = analysis.data)
+indirect.reg <- lm(
+    log(soc_mean_hourly) ~ (1 + edpgi_random * edyears + . - highered - edpgi_self),
+    data = analysis.data)
+indirect.est <- marginaleffects::avg_slopes(
+    indirect.reg, by = TRUE, variables = "highered")
+print(coefficients(firststage.reg)["edpgi_random"] * indirect.est["estimate"])
+#Todo: standard errors on the above.
+
+
+#! Old work below:
 
 ################################################################################
 ## Plot comparison of causal med (1) OLS (2) OLS + controls (3) DML.

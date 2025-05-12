@@ -208,7 +208,7 @@ analysis.data %>%
         #TODO: `University degree`          = as.integer(edyears == 20)
         # Panel C. Income and labour market outcomes
         `Occupation hourly wage`    = soc_mean_hourly,
-        #TODO -> `Occupation hourly wage`    = soc_mean_hourly,
+        #TODO -> `Occupation annual income`    = soc_mean_hourly,
         `Household income < 18k`    = householdincome_less18k,
         `Household income 18--31k`  = householdincome_18to31k,
         `Household income 31--52k`  = householdincome_31to52k,
