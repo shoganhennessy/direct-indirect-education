@@ -41,22 +41,22 @@ desiredFields = ["eid", # eid, person identifier (anonymised).
     "p31", # sex
     "p34", # birthyear
     "p52", # eid
-    "p53_i0", "p53_i0", "p53_i1", "p53_i2", "p53_i3", # Date visit (4 instances).
-    "p738_i0", "p738_i1", "p738_i2", "p738_i3",       # householdincome_cat (4 instances).
+    "p53_i0",   "p53_i1",     "p53_i2",    "p53_i3",   # Date visit (4 instances).
+    "p738_i0",  "p738_i1",    "p738_i2",   "p738_i3",  # householdincome_cat (4 instances).
     "p21022",    # recruitedage
     "p20143",    # datelastcontact
-    "p6138_i0", "p6138_i1", "p6138_i2", "p6138_i3", # edquals (4 instances).
-    "p845_i0",  "p845_i2",  "p845_i3",  "p845_i4",  # agefinishededuc
+    "p6138_i0",  "p6138_i1",  "p6138_i2",  "p6138_i3", # edquals (4 instances).
+    "p845_i0",   "p845_i1",   "p845_i2",               # agefinishededuc (3 instances).
     "p21000_i0", # ethnicity
     "p22006",    # genetic_race
-    "p20277_i0", "p20277_i1", "p20277_i2", "p20277_i3" # jobcode (4 instances).
+    "p20118_i0", # urbancat
+    "p20277_i0", "p20277_i1", "p20277_i2", "p20277_i3", # jobcode (4 instances).
     "p6142_i0",  "p6142_i1",  "p6142_i2",  "p6142_i3", # employment (4 instances).
     "p767_i0",   "p767_i1",   "p767_i2",   "p767_i3",  # hours_workweek (4 instances). 
     "p816_i0",   "p816_i1",   "p816_i2",   "p816_i3",  # manualwork (4 instances). 
-    "p129_i0",   "p129_i1",   "p129_i2",   "p129_i3",  # birth_n_coord (4 instances). 
-    "p130_i0",   "p130_i1",   "p130_i2",   "p130_i3",  # birth_e_coord (4 instances). 
-    "p1647_i0",  "p1647_i1",  "p1647_i2",  "p1647_i3", # birth_country (4 instances).
-    "p845_i0",   "p845_i1",   "p845_i2",   "p845_i3",  # agefinishededuc (4 instances). 
+    "p129_i0",   "p129_i1",   "p129_i2",               # birth_n_coord (3 instances). 
+    "p130_i0",   "p130_i1",   "p130_i2",               # birth_e_coord (3 instances). 
+    "p1647_i0",  "p1647_i1",  "p1647_i2",              # birth_country (3 instances).
     "p40000_i0", # datedeath
     "p22020",    # inPCA
     "p26210",    # asthma_pgi
@@ -66,19 +66,16 @@ desiredFields = ["eid", # eid, person identifier (anonymised).
     "p26275",    # schizophrenia_pgi
     "p26285"]    # t2diabetes_pgi
 
-
 #TODO list, extracting new data:
-# 1. Standardise Ed years and SOC data for new instances.
-# -> annual income is 52 * hours worked * SOC hourly wage.
-# 2. Generate binary variables for highest level of education achieved.
-# -> Leave out the vocational highest level.
-    # Todo -> get other instances of Edyears, 
-    # Todo    then create binary values for ``whether has qual.'' based on this.
+# 1. Adjust the extract of employment category to be binary measures (not lists).
+#    Same for urban rural designator.
+# https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=6142
+# https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=20118
+
 # 3. Funky coding for birth coordinates -> Card uni proximity instrument.
 # -> Get data to have yearly coordinates of UK higher ed (equivalent to IPEDS)
 # -> Match these data to UKB, getting binary (in local area) and distance to closest
 # -> gets columns for uni in local area at age 18, and distance to closest.
-
 
 desiredFieldsStr = [f"participant.{f}" for f in desiredFields]
 fieldNames = ",".join(desiredFieldsStr)
@@ -95,67 +92,85 @@ print([field + " not included." for field in desiredFields
 ################################################################################
 ## Step 3. Extract pheno data using dx extract_dataset command.
 
-# Extract from the phenotype database.
-cmd = ["dx", 
-    "extract_dataset",
-    dataset,
-    "--fields",
-    fieldNames,
-    "--delimiter",
-    ",",
-    "--output",
-    "phenotype-extract.csv"
-]
-subprocess.check_call(cmd)
+# Piece by piece data extraction (cannot get all in one call)
+desiredLen = 9
+desiredFieldsLists = [
+    ["participant.eid"] + desiredFieldsStr[1:][i : i + desiredLen]
+    for i in range(0, len(desiredFieldsStr[1:]), desiredLen)]
+# Loop across each set of columns.
+for i in range(0, len(desiredFieldsLists)) :
+    print("Starting phenotype-extract-part" + str(i) + ".csv")
+    desiredFieldNames = ",".join(desiredFieldsLists[i])
+    subprocess.check_call(["dx", "extract_dataset",
+        dataset, "--fields", desiredFieldNames, "--delimiter", ",", "--output",
+        "phenotype-extract-part" + str(i) + ".csv"])
+    print(i + 1, "out of", len(desiredFieldsLists),
+        "datasets (column-wise) extracted.")
 
-# Add on a column for Ed Years, to phenotype file.
-phenoData = pd.read_csv("phenotype-extract.csv")
+# Stitch back together the disparate datasets
+phenoData = pd.read_csv("phenotype-extract-part0.csv")
+for i in range(1, len(desiredFieldsLists)) :
+    extraData = pd.read_csv("phenotype-extract-part" + str(i) + ".csv")
+    phenoData = phenoData.merge(extraData, how="left", on="participant.eid")
 
-# Define function edQual -> Edyears Following ISCED (see Mulsimnova+ 2024, p14)
-# https://github.com/DilnozaM/Rank-Concordance-of-PGI/blob/main/GWAS%26PGS/EA_GWAS/Preparing_residual_EA_new_nosibrel_fastgwas.do
-def edQualsConvert(edQual) :
-    """ Input: edQual, a number representing ed qual from UKB
-    Output: edYears, a number representing num years of ed from that qual.
-    """
-    edYears = np.nan
-    if edQual == -7   : edYears =  7      # None of above, given mandatory min.
-    elif edQual == -3 : edYears =  np.nan # Prefer not to answer.
-    elif edQual == 1  : edYears =  20     # Uni degree.
-    elif edQual == 2  : edYears =  13     # A Levels.
-    elif edQual == 3  : edYears =  10     # CSEs (old version of exams age 16)
-    elif edQual == 4  : edYears =  10     # GCSEs (new version of exams age 16)
-    elif edQual == 5  : edYears =  19     # Vocational degree (one year higher).
-    elif edQual == 6  : edYears =  15     # Professional qual (teach, nurse).
-    return(edYears)
-
-# extract the column of lists.
+## Clean the ed quals columns (needs python list comprehension, so do here).
+# extract the column of lists, for each instance.
 from ast import literal_eval
-edQualsLists = [literal_eval(row)
+edQualsLists_i0 = [literal_eval(row)
     for row in phenoData["participant.p6138_i0"].fillna("[]").tolist()]
-# Get years of education for each qualification they have obtained.
-edYearsLists = [
-    [edQualsConvert(edQual) for edQual in edQualsList]
-    for edQualsList in edQualsLists]
-# Get the maximum edyears.
-maxEdList = [
-    max(edList)
-    if len(edList) > 0
-    else np.nan
-    for edList in edYearsLists]
-# Put onto the phenotype dataframe.
-phenoData["participant.edyears"] = maxEdList
-# Get the qualification corresponding to max Ed Years.
-maxEdqualList = [
-    edQualsLists[i][np.argmax(max(edYearsLists[i]))]
-    if len(edQualsLists[i]) > 0
-    else np.nan
-    for i in range(0, len(edQualsLists))]
-# Put onto the phenotype dataframe.
-phenoData["participant.p6138_i0"] = maxEdqualList
+edQualsLists_i1 = [literal_eval(row)
+    for row in phenoData["participant.p6138_i1"].fillna("[]").tolist()]
+edQualsLists_i2 = [literal_eval(row)
+    for row in phenoData["participant.p6138_i2"].fillna("[]").tolist()]
+edQualsLists_i3 = [literal_eval(row)
+    for row in phenoData["participant.p6138_i3"].fillna("[]").tolist()]
+# Put these lists to one.
+edQualsLists = [edQualsLists_i0[i] + edQualsLists_i1[i] +
+    edQualsLists_i2[i] + edQualsLists_i3[i]
+    for i in range(0, len(edQualsLists_i0))]
+# Remove duplicates within each list 
+edQualsLists = [list(dict.fromkeys(edQualsLists[i]))
+    for i in range(0, len(edQualsLists_i0))]
 
-# SHow that it worked.abs
-print(phenoData[
-    ["participant.eid", "participant.p6138_i0", "participant.edyears"]])
+# Get binary values for level of education.
+# qual == -7    None of above, given mandatory min   -> edYears =  7    
+# qual == -3  Prefer not to answer.                  -> edYears =  np.nan 
+# qual ==  1  Uni degree.                            -> edYears =  20    
+# qual ==  2  A Levels.                              -> edYears =  13    
+# qual ==  3  CSEs (old version of exams age 16      -> edYears =  10    
+# qual ==  4  GCSEs (new version of exams age 1      -> edYears =  10    
+# qual ==  5  Vocational degree (one year higher ed) -> edYears =  19    
+# qual ==  6  Professional qual (teach, nurse).      -> edYears =  15    
+higheredList    = [int(1 in edQualsList) for edQualsList in edQualsLists]
+alevelsList     = [int(2 in edQualsList) for edQualsList in edQualsLists]
+gcsesList       = [int(3 in edQualsList or 4 in edQualsList)
+    for edQualsList in edQualsLists]
+vocationalList  = [int(5 in edQualsList) for edQualsList in edQualsLists]
+professionaList = [int(6 in edQualsList) for edQualsList in edQualsLists]
+edminimumList   = [int(-7 in edQualsList) for edQualsList in edQualsLists]
+edmissingList   = [int(edQualsLists[i] == [] or edQualsLists[i] == [-3])
+    for i in range(0, len(edQualsLists))]
+
+# Put onto the phenotype dataframe.
+phenoData["participant.edqual_highered"]     = higheredList
+phenoData["participant.edqual_alevels"]      = alevelsList
+phenoData["participant.edqual_gcses"]        = gcsesList
+phenoData["participant.edqual_vocational"]   = vocationalList
+phenoData["participant.edqual_professional"] = professionaList
+phenoData["participant.edqual_minimum"]      = edminimumList
+phenoData["participant.edqual_missing"]      = edmissingList
+
+# Show that it worked.
+print(phenoData[[
+    "participant.eid",
+    "participant.p6138_i0",
+    "participant.edqual_highered",
+    "participant.edqual_alevels",
+    "participant.edqual_gcses",
+    "participant.edqual_vocational",
+    "participant.edqual_professional",
+    "participant.edqual_minimum",
+    "participant.edqual_missing"]])
 
 # Save (with the adjusted columns).
 phenoData.to_csv("phenotype-extract.csv")
@@ -163,6 +178,18 @@ phenoData.to_csv("phenotype-extract.csv")
 uploadCall = ["dx", "upload", "phenotype-extract.csv",
     "--path", "data-clean/phenotype-extract.csv"]
 subprocess.check_call(uploadCall)
+
+#! Test: this should have zero rows -> everyone has ed value, or marked as missing.
+phenoData["participant.edqual_any"] = (
+    phenoData["participant.edqual_highered"] +
+    phenoData["participant.edqual_alevels"] +
+    phenoData["participant.edqual_gcses"] +
+    phenoData["participant.edqual_vocational"] +
+    phenoData["participant.edqual_professional"] +
+    phenoData["participant.edqual_minimum"])
+phenoData[["participant.eid","participant.edqual_any"]][
+    (phenoData["participant.edqual_any"] == 1) &
+    (phenoData["participant.edqual_missing"] == 1)]
 
 
 ################################################################################
@@ -229,7 +256,7 @@ famGraph.add_edges_from(famEdges)
 relatedKinData["FID"] = np.nan
 # Loop across the EIDs, filling in family EID, based on connected components.
 i = 0
-for ID1 in ID1List :
+for ID1 in ID1List:
     print(str(i) + " out of " + str(len(ID1List)))
     i += 1
     famConnections = list(nx.node_connected_component(famGraph, ID1))

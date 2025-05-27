@@ -20,15 +20,6 @@ bash prs-impute.sh
 ################################################################################
 ## Build data sets of relevance
 
-# 1. HRS
-cd hrs/data-build
-# Combine panel of HRS data with genetic educ scores
-R CMD BATCH --no-save hrs-build.R
-# Collapse the panel of HRS data, keeping genetic educ scores
-R CMD BATCH --no-save hrs-collapse.R
-cd ../..
-
-# 2. UKB
 cd ukb/data-build
 # Build the cross-section of phenotype data, with PGIs (base + parent imputed).
 R CMD BATCH --no-save ukb-build.R
@@ -48,7 +39,7 @@ R CMD BATCH --no-save ukb-direct-indirect.R
 # Go back to base folder.
 cd ../..
 
-## Statistical analysis, hrs
+## Statistical analysis, HRS
 cd hrs/data-analyse
 
 # Summarise HRS data.

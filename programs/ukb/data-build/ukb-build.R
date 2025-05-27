@@ -1,6 +1,6 @@
 #!/usr/bin/R
 ## Senan Hogan-Hennessy, 11 March 2025.
-## Script to ingest raw UKB data, output familiar tabular format.
+## Script to ingest raw UKB data, and output familiar tabular format.
 print(Sys.time())
 set.seed(47)
 ## Packages:
@@ -23,6 +23,7 @@ ukb_pheno.data <- input.folder %>%
     file.path("phenotype-extract.csv") %>%
     read_csv()
 
+# SHow how these data look.
 print(ukb_pheno.data)
 print(names(ukb_pheno.data))
 
@@ -33,7 +34,7 @@ ukb_relatives.data <- input.folder %>%
 
 # Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
 ukb_edpgi.data <- input.folder %>%
-    file.path("ed-pgi-score.sscore") %>%
+    file.path("ed-pgi-score.tsv") %>%
     read_tsv()
 
 # Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
@@ -52,6 +53,63 @@ cpi.data <- input.folder %>%
 
 
 ################################################################################
+## Clean the multiple instance columns, and standardise ed quals variables.
+
+# Code for making the instance files homogenised.
+ukb_pheno.data <- ukb_pheno.data %>%
+    mutate(
+        # SOC job code
+        jobcode_soc =
+            ifelse(!is.na(participant.p20277_i0), participant.p20277_i0,
+            ifelse(!is.na(participant.p20277_i1), participant.p20277_i1,
+            ifelse(!is.na(participant.p20277_i2), participant.p20277_i2,
+            ifelse(!is.na(participant.p20277_i3), participant.p20277_i3, NA)))),
+        # birth_n_coord
+        birth_n_coord =
+            ifelse(!is.na(participant.p129_i0) & participant.p129_i0 != -1, participant.p129_i0,
+            ifelse(!is.na(participant.p129_i1) & participant.p129_i1 != -1, participant.p129_i1,
+            ifelse(!is.na(participant.p129_i2) & participant.p129_i2 != -1, participant.p129_i2, NA))),
+        # birth_e_coord
+        birth_e_coord =
+            ifelse(!is.na(participant.p130_i0), participant.p130_i0,
+            ifelse(!is.na(participant.p130_i1), participant.p130_i1,
+            ifelse(!is.na(participant.p130_i2), participant.p130_i2, NA))),
+        # birth_country
+        birth_country =
+            ifelse(!is.na(participant.p1647_i0), participant.p1647_i0,
+            ifelse(!is.na(participant.p1647_i1), participant.p1647_i1,
+            ifelse(!is.na(participant.p1647_i2), participant.p1647_i2, NA))),
+        # employment
+        employment =
+            ifelse(!is.na(participant.p6142_i0), participant.p6142_i0,
+            ifelse(!is.na(participant.p6142_i1), participant.p6142_i1,
+            ifelse(!is.na(participant.p6142_i2), participant.p6142_i2,
+            ifelse(!is.na(participant.p6142_i3), participant.p6142_i3, NA)))),
+        # hours_workweek
+        hours_workweek =
+            ifelse(!is.na(participant.p767_i0) & participant.p767_i0 > 0, participant.p767_i0,
+            ifelse(!is.na(participant.p767_i1) & participant.p767_i0 > 0, participant.p767_i1,
+            ifelse(!is.na(participant.p767_i2) & participant.p767_i0 > 0, participant.p767_i2,
+            ifelse(!is.na(participant.p767_i3) & participant.p767_i0 > 0, participant.p767_i3,
+                NA)))))
+
+# Code edQuals -> Edyears Following ISCED
+ukb_pheno.data <- ukb_pheno.data %>%
+    mutate(edyears =
+        ifelse(participant.edqual_highered == 1,     18, # Uni degree -> 18
+        ifelse(participant.edqual_professional == 1, 15, # Professional post-secondary -> 15
+        ifelse(participant.edqual_alevels == 1,      14, # A Levels -> 14
+        ifelse(participant.edqual_vocational == 1,   14, # Vocational post-secondary -> 14 
+        ifelse(participant.edqual_gcses == 1,        12, # GCSEs -> 12
+        ifelse(participant.edqual_minimum == 1,      9,  # None of above -> lower secondary (i.e., legal minimum). 
+        ifelse(participant.edqual_missing == 1,      NA, # Missing -> NA
+            100)))))))) # End condition for everyone.
+# Ensure reasonable distribution for everyone (and end condition not met.)
+ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
+ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
+
+
+################################################################################
 ## Clean Pheno file.
 
 # Clean the phenotype data.
@@ -60,29 +118,40 @@ cleaned_pheno.data <- ukb_pheno.data %>%
     transmute(
         eid                    = as.integer(participant.eid),
         sex_male               = as.integer(participant.p31),
+        visitdate              = date(participant.p53_i0),
+        deathdate              = date(participant.p40000_i0),
+        urban_cat              = as.integer(participant.p20118_i0),
+        # Birth info.
+        birth_n_coord          = as.integer(birth_n_coord),
+        birth_e_coord          = as.integer(birth_e_coord),
+        birth_country          = as.integer(birth_country),
         birthyear              = as.integer(participant.p34),
         birthmonth             = as.integer(participant.p52),
-        visitdate              = date(participant.p53_i0),
-        # Income categories,
+        # Work + income categories,
         householdincome_cat    = as.integer(participant.p738_i0),
         recruitedage           = as.integer(participant.p21022),
-        datelastcontact        = date(participant.p20143),
-        edquals                = as.integer(participant.p6138_i0),
-        edyears                = as.integer(participant.edyears),
-        agefinishededuc        = as.integer(participant.p845_i0),
-        ethnicity              = as.integer(participant.p21000_i0),
+        jobcode_soc            = as.integer(jobcode_soc),
+        employment             = as.integer(employment),
+        hours_workweek         = as.integer(hours_workweek),
+        # Education info.
+        edqual_highered        = as.integer(participant.edqual_highered),
+        edqual_professional    = as.integer(participant.edqual_professional),
+        edqual_alevels         = as.integer(participant.edqual_alevels),
+        edqual_vocational      = as.integer(participant.edqual_vocational),
+        edqual_gcses           = as.integer(participant.edqual_gcses),
+        edqual_minimum         = as.integer(participant.edqual_minimum),
+        edqual_missing         = as.integer(participant.edqual_missing),
+        edyears                = as.integer(edyears),
+        # Genetic variables.
         genetic_race           = as.integer(participant.p22006),
-        jobcode_soc            = as.integer(participant.p20277_i0),
-        numjobs                = as.integer(participant.p22599),
-        numjobgaps             = as.integer(participant.p22661),
-        jobcode_online         = as.integer(participant.p22601_a0),
-        jobcode_onlineSOC2000  = as.integer(participant.p22617_a0),
-        jobyearstarted_online  = as.integer(participant.p22602_a0),
-        jobhoursworked_online  = as.integer(participant.p22604_a0),
-        jobhoursperweek_online = as.numeric(participant.p22605_a0),
-        yearendededuc_online   = as.integer(participant.p22501),
-        deathdate              = date(participant.p40000_i0),
-        PCA                    = as.integer(participant.p22020)) %>%
+        PCA                    = as.integer(participant.p22020),
+        asthma_pgi             = as.integer(participant.p26210),  
+        bipolar_pgi            = as.integer(participant.p26214),  
+        bmi_pgi                = as.integer(participant.p26216),  
+        height_pgi             = as.integer(participant.p26240),  
+        schizophrenia_pgi      = as.integer(participant.p26275),  
+        t2diabetes_pgi         = as.integer(participant.p26285)
+        ) %>%
     # Clean the resulting columns
     mutate(
         # householdincome_cat,    p738_i0,    https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=738
@@ -96,8 +165,6 @@ cleaned_pheno.data <- ukb_pheno.data %>%
             as.integer(householdincome_cat == 4)),
         householdincome_above100k = ifelse(is.na(householdincome_cat), NA,
             as.integer(householdincome_cat == 5)),
-        # Missing values to missing.
-        agefinishededuc    = ifelse(agefinishededuc < 0, NA, agefinishededuc),
         # Replace missing values with binary values.
         genetic_euroancest = ifelse(is.na(genetic_race), 0, genetic_race),
         inPCA = ifelse(is.na(PCA), 0, PCA),
@@ -105,6 +172,26 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         deathyear = as.integer(format(deathdate, "%Y")),
         visityear = as.integer(format(visitdate, "%Y")),
         hasdied = as.integer(!is.na(deathdate)))
+
+
+################################################################################
+## Connect UKB data with collected distance to nearest uni data.
+
+# Read the birth counties data.
+#TODO might not use this one.
+birth_counties.data <- read_csv(
+    file.path(input.folder, "birth-locations", "main_phase_locations.csv"))
+
+# Read the higher ed locations file.
+higher_loc.data <- read_csv(
+    file.path(input.folder, "..", "..", "uk-highered", "highered-compiled.csv"))
+
+#TODO: use the counties base map to assign counties to 
+#TODO: birth_n_coord, birth_e_coord
+
+#TODO: write merging code that gives the closest uni
+#TODO: (if currently founded in year aged 17).
+#TODO: Then a binary for whether there is a uni in your county, and distance to it.
 
 
 ################################################################################
@@ -120,10 +207,13 @@ cleaned_edpgi.data <- ukb_edpgi.data %>%
 cleaned_imputed.data <- ukb_imputed.data %>%
     transmute(
         eid                        = IID,
+        famid                      = FID,
         edpgi_imputed_self_raw     = proband,
         edpgi_imputed_sibling_raw  = sibling,
         edpgi_imputed_paternal_raw = paternal,
         edpgi_imputed_maternal_raw = maternal)
+
+#TODO: get a second PGI measure for Ed PGI, to use ORIV.
 
 
 ################################################################################
@@ -166,7 +256,6 @@ print(sum(relatives_present.data$father_present) +
 
 # Get the data file to merge with OCC coded wage data.
 ukb_soc.data <- cleaned_pheno.data %>%
-    #TODO: fill in empty SOC with past values, or values from second questionnaire.
     filter(!is.na(jobcode_soc)) %>%
     # Get the variables needed for income-impute.R
     transmute(eid = eid,
@@ -189,11 +278,11 @@ cpi.factor <- cpi.update / cpi.base
 ukb_soc.data <- ukb_soc.data %>%
     transmute(
         eid = eid,
-        soc_mean_hourly       = cpi.factor * soc_mean_hourly,
-        soc_median_hourly     = cpi.factor * soc_median_hourly,
-        soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
-        soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
-        soc_2d_hourly         = exp(log_y_hourly))
+        soc_mean_hourly       = cpi.factor * soc_mean_hourly)
+        # soc_median_hourly     = cpi.factor * soc_median_hourly,
+        # soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
+        # soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
+        # soc_2d_hourly         = exp(log_y_hourly))
 
 
 ################################################################################
@@ -297,7 +386,9 @@ final_pheno.data <- cleaned_pheno.data %>%
         # Ed PGI among sample with siblings -> main PGI in my analysis
         edpgi_self    = edpgi_imputed_self_norm,
         edpgi_father  = edpgi_imputed_paternal_norm,
-        edpgi_mother  = edpgi_imputed_maternal_norm) %>%
+        edpgi_mother  = edpgi_imputed_maternal_norm,
+        # Annual wage by hours worked
+        soc_mean_annual = 52.14 * soc_mean_hourly * hours_workweek) %>%
     # Mean parental Ed PGI, scaled by 
     rowwise() %>%
     mutate(edpgi_parents = mean(
@@ -307,31 +398,50 @@ final_pheno.data <- cleaned_pheno.data %>%
     tibble() %>%
     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
     mutate(analysis_sample = as.integer(
-        !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
+        !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
     # Select the relevant columns.
-    select(eid,
+    select(eid, famid,
         # Demographic variables.
         sex_male,
         visityear,
-        birthyear,
-        birthmonth,
         recruitedage,
         genetic_euroancest,
+        urban_cat,
+        # Birth variables.
+        birth_n_coord,
+        birth_e_coord,
+        birth_country,
+        birthyear,
+        birthmonth,
         # Genetic variables.
         edpgi_all,
         edpgi_self,
         edpgi_parents,
         edpgi_father,
         edpgi_mother,
+        asthma_pgi,
+        bipolar_pgi,
+        bmi_pgi,
+        height_pgi,
+        schizophrenia_pgi,
+        t2diabetes_pgi,
         # Education variables
+        edqual_highered,
+        edqual_professional,
+        edqual_alevels,
+        edqual_vocational,
+        edqual_gcses,
+        edqual_minimum,
+        edqual_missing,
         edyears,
         # Income variables
+        householdincome_cat,
+        recruitedage,
         jobcode_soc,
+        #TODO employment -> fix in the python extract because lists.
+        hours_workweek,
         soc_mean_hourly,
-        soc_median_hourly,
-        soc_mean_hourly_all,
-        soc_median_hourly_all,
-        soc_2d_hourly,
+        soc_mean_annual,
         starts_with("householdincome"),
         # Health & Death variables
         deathyear,

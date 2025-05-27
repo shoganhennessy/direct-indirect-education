@@ -89,7 +89,7 @@ analysis.data %>%
     summary() %>%
     print()
 
-# Show the mean Ed PGI random compoinet across the parent dist
+# Show the mean Ed PGI random component across the parent dist
 analysis.data$parental_quantile <-
     ecdf(analysis.data$edpgi_parents)(analysis.data$edpgi_parents)
 analysis.data$parental_quantile <- factor(

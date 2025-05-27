@@ -77,11 +77,14 @@ binscatter.plot <- function(data, x, y, colour.name, option = "none"){
 # Load the pre-cleaned UKB panel data.
 ukb.data <- data.folder %>%
     file.path("ukb-cleaned-pheno.csv") %>%
-    read_csv()
+    read_csv() 
 
 # Get the sibling imputed analysis sample.
 analysis.data <- ukb.data %>%
     filter(analysis_sample == 1)
+
+#! Test.
+analysis.data %>% head(100) %>% View()
 
 
 ################################################################################
@@ -115,24 +118,26 @@ summary.table <- function(given.data){
 # Summarise analysis sample
 analysis_summary.data <- analysis.data %>%
     transmute(
-        `Male` = sex_male,
-        `Age`  = recruitedage,
-        `Ethnicity $=$ European` = genetic_euroancest,
+        "Male" = sex_male,
+        "Age"  = recruitedage,
+        "Ethnicity $=$ European" = genetic_euroancest,
         # Genetic variables.
-        `Ed PGI` = edpgi_self,
-        `Ed PGI, parental mean` = edpgi_parents,
+        "Ed PGI" = edpgi_self,
+        "Ed PGI, parental mean" = edpgi_parents,
         # Education variables
-        `Education years` = edyears,
+        "Education years" = edyears,
         # Income variables
-        `Occupation hourly wage`    = soc_mean_hourly,
-        `Household income < 18k`    = householdincome_less18k,
-        `Household income 18--31k`  = householdincome_18to31k,
-        `Household income 31--52k`  = householdincome_31to52k,
-        `Household income 52--100k` = householdincome_52to100k,
-        `Household income 100k <`   = householdincome_above100k,
-        # Designators
-        `Any siblings?`  = sibling_present,
-        `Count of siblings` = sibling_count) %>%
+        "Occupation hourly wage"    = soc_mean_hourly,
+        "Occupation annual income"  = soc_mean_annual,
+        "Average hours worked week" = hours_workweek,
+        "Household income < 18k"    = householdincome_less18k,
+        "Household income 18--31k"  = householdincome_18to31k,
+        "Household income 31--52k"  = householdincome_31to52k,
+        "Household income 52--100k" = householdincome_52to100k,
+        "Household income 100k <"   = householdincome_above100k,
+        # Family designators
+        "Any siblings?"  = sibling_present,
+        "Count of siblings" = sibling_count) %>%
     summary.table() %>%
     transmute(variable = variable,
         mean_analysis = mean,
@@ -142,24 +147,24 @@ all_summary.data <- ukb.data %>%
     # Make Ed PGI for parents missing in the entire data file summary table.
     mutate(edpgi_parents = NA) %>%
     transmute(
-        `Male` = sex_male,
-        `Age`  = recruitedage,
-        `Ethnicity $=$ European` = genetic_euroancest,
+        "Male" = sex_male,
+        "Age"  = recruitedage,
+        "Ethnicity $=$ European" = genetic_euroancest,
         # Genetic variables.
-        `Ed PGI` = edpgi_self,
-        `Ed PGI, parental mean` = edpgi_parents,
+        "Ed PGI" = edpgi_all,
+        "Ed PGI, parental mean" = edpgi_parents,
         # Education variables
-        `Education years` = edyears,
+        "Education years" = edyears,
         # Income variables
-        `Occ. hourly wage`          = soc_mean_hourly,
-        `Household income $<$ 18k`  = householdincome_less18k,
-        `Household income 18--31k`  = householdincome_18to31k,
-        `Household income 31--52k`  = householdincome_31to52k,
-        `Household income 52--100k` = householdincome_52to100k,
-        `Household income 100k $<$` = householdincome_above100k,
+        "Occ. hourly wage"          = soc_mean_hourly,
+        "Household income $<$ 18k"  = householdincome_less18k,
+        "Household income 18--31k"  = householdincome_18to31k,
+        "Household income 31--52k"  = householdincome_31to52k,
+        "Household income 52--100k" = householdincome_52to100k,
+        "Household income 100k $<$" = householdincome_above100k,
         # Designators
-        `Any siblings` = sibling_present,
-        `Count siblings` = sibling_count) %>%
+        "Any siblings" = sibling_present,
+        "Count siblings" = sibling_count) %>%
     summary.table()
 
 # Combine into one file.
@@ -195,31 +200,31 @@ ukb.data %>%
 analysis.data %>%
     transmute(
         # Panel A. Genetic measures.
-        `Ed PGI` = edpgi_self,
-        `Ed PGI, parental mean` = edpgi_parents,
+        "Ed PGI" = edpgi_self,
+        "Ed PGI, parental mean" = edpgi_parents,
         #TODO:
         # Panel B. Education.
-        `Education years` = edyears,
-        #TODO: `No education qualification` = as.integer(edyears >= 10)
-        #TODO: `GCSEs $+$`                  = as.integer(edyears >= 10)
-        #TODO: `A Levels $+$`               = as.integer(edyears >= 13)
-        #TODO: `Professional degree`        = as.integer(edyears == 15)
-        #TODO: `Vocational degree`          = as.integer(edyears == 19)
-        #TODO: `University degree`          = as.integer(edyears == 20)
+        "Education years" = edyears,
+        #TODO: "No education qualification" = as.integer(edyears >= 10)
+        #TODO: "GCSEs $+$"                  = as.integer(edyears >= 10)
+        #TODO: "A Levels $+$"               = as.integer(edyears >= 13)
+        #TODO: "Professional degree"        = as.integer(edyears == 15)
+        #TODO: "Vocational degree"          = as.integer(edyears == 19)
+        #TODO: "University degree"          = as.integer(edyears == 20)
         # Panel C. Income and labour market outcomes
-        `Occupation hourly wage`    = soc_mean_hourly,
-        #TODO -> `Occupation annual income`    = soc_mean_hourly,
-        `Household income < 18k`    = householdincome_less18k,
-        `Household income 18--31k`  = householdincome_18to31k,
-        `Household income 31--52k`  = householdincome_31to52k,
-        `Household income 52--100k` = householdincome_52to100k,
-        `Household income 100k <`   = householdincome_above100k,
+        "Occupation hourly wage"    = soc_mean_hourly,
+        #TODO -> "Occupation annual income"    = soc_mean_hourly,
+        "Household income < 18k"    = householdincome_less18k,
+        "Household income 18--31k"  = householdincome_18to31k,
+        "Household income 31--52k"  = householdincome_31to52k,
+        "Household income 52--100k" = householdincome_52to100k,
+        "Household income 100k <"   = householdincome_above100k,
         # Panel D. Demographics
-        `Male`                    = sex_male,
-        `Age`                     = recruitedage,
-        `Ethnicity $=$ Caucasian` = genetic_euroancest,
-        `Any siblings?`           = sibling_present,
-        `Count of siblings`       = sibling_count)
+        "Male"                    = sex_male,
+        "Age"                     = recruitedage,
+        "Ethnicity $=$ Caucasian" = genetic_euroancest,
+        "Any siblings?"           = sibling_present,
+        "Count of siblings"       = sibling_count)
 
 
 ################################################################################
@@ -598,21 +603,21 @@ analysis.data %>%
 demographic.reg <- analysis.data %>%
     transmute(
         edpgi_self = edpgi_self,
-        `Childhood SES: Family poor`            = family_poor,
-        `Childhood SES: Family moved`           = family_move,
-        `Childhood SES: Family financial help`  = family_finhelp,
-        `Childhood SES: Father missing`         = father_missing,
-        `Childhood SES: Father unemployed`      = father_unemp,
-        `Childhood SES: Father manual labourer` = father_manualjob,
-        `Childhood SES: Parents smoked`         = parents_smoke,
-        `Childhood SES: Childhood head injury`  = child_headinjury,
-        `Age`                                   = indiv_agey,
-        `No. children`                          = child,
-        `Size household`                        = hhres,
-        `Father Ed years`                       = ifelse(is.na(father_edyears), 0, father_edyears),
-        `Mother Ed years`                       = ifelse(is.na(mother_edyears), 0, mother_edyears),
-        `Mean Parent Ed years`                  = parent_edyears,
-        `Female`                                = gender_female) %>%
+        "Childhood SES: Family poor"            = family_poor,
+        "Childhood SES: Family moved"           = family_move,
+        "Childhood SES: Family financial help"  = family_finhelp,
+        "Childhood SES: Father missing"         = father_missing,
+        "Childhood SES: Father unemployed"      = father_unemp,
+        "Childhood SES: Father manual labourer" = father_manualjob,
+        "Childhood SES: Parents smoked"         = parents_smoke,
+        "Childhood SES: Childhood head injury"  = child_headinjury,
+        "Age"                                   = indiv_agey,
+        "No. children"                          = child,
+        "Size household"                        = hhres,
+        "Father Ed years"                       = ifelse(is.na(father_edyears), 0, father_edyears),
+        "Mother Ed years"                       = ifelse(is.na(mother_edyears), 0, mother_edyears),
+        "Mean Parent Ed years"                  = parent_edyears,
+        "Female"                                = gender_female) %>%
     lm(reformulate(".", response = "edpgi_self"), data = .)
 print(summary(demographic.reg))
 # Plot the coefficients.

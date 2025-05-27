@@ -1,13 +1,11 @@
 
-R version 4.3.3 (2024-02-29) -- "Angel Food Cake"
-Copyright (C) 2024 The R Foundation for Statistical Computing
-Platform: x86_64-pc-linux-gnu (64-bit)
+R version 4.5.0 (2025-04-11) -- "How About a Twenty-Six"
+Copyright (C) 2025 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
 Type 'license()' or 'licence()' for distribution details.
-
-  Natural language support but running in an English locale
 
 R is a collaborative project with many contributors.
 Type 'contributors()' for more information and
@@ -19,9 +17,9 @@ Type 'q()' to quit R.
 
 > #!/usr/bin/R
 > ## Senan Hogan-Hennessy, 11 March 2025.
-> ## Script to ingest raw UKB data, output familiar tabular format.
+> ## Script to ingest raw UKB data, and output familiar tabular format.
 > print(Sys.time())
-[1] "2025-04-08 11:06:49 EDT"
+[1] "2025-05-21 15:26:07 EDT"
 > set.seed(47)
 > ## Packages:
 > # functions for data manipulation and visualisation
@@ -29,9 +27,9 @@ Type 'q()' to quit R.
 ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 ✔ dplyr     1.1.4     ✔ readr     2.1.5
 ✔ forcats   1.0.0     ✔ stringr   1.5.1
-✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-✔ purrr     1.0.2     
+✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     
 ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
 ✖ dplyr::lag()    masks stats::lag()
@@ -55,7 +53,7 @@ The following object is masked from ‘package:purrr’:
     transpose
 
 > 
-> # Define folder paths (1) where data are (2) input data (3) intermed files.
+> # Define folder paths (1) input data (2) clean data.
 > data.folder <- file.path("..", "..", "..", "data", "ukb-restricted")
 > input.folder <- file.path(data.folder, "input")
 > output.folder <- file.path(data.folder, "cleaned")
@@ -70,14 +68,71 @@ The following object is masked from ‘package:purrr’:
 +     read_csv()
 New names:
 • `` -> `...1`
-Rows: 502129 Columns: 25
+Rows: 502129 Columns: 66
 ── Column specification ────────────────────────────────────────────────────────
 Delimiter: ","
-dbl  (22): ...1, participant.eid, participant.p31, participant.p34, particip...
-date  (3): participant.p53_i0, participant.p20143, participant.p40000_i0
+chr   (8): participant.p6138_i0, participant.p6138_i1, participant.p6138_i2,...
+dbl  (52): ...1, participant.eid, participant.p31, participant.p34, particip...
+date  (6): participant.p53_i0, participant.p53_i1, participant.p53_i2, parti...
 
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+> 
+> print(ukb_pheno.data)
+# A tibble: 502,129 × 66
+    ...1 participant.eid participant.p31 participant.p34 participant.p52
+   <dbl>           <dbl>           <dbl>           <dbl>           <dbl>
+ 1     0         1000061               0            1951               7
+ 2     1         1000087               0            1944               4
+ 3     2         1000113               0            1939               1
+ 4     3         1000152               1            1961              12
+ 5     4         1000264               1            1946               6
+ 6     5         1000298               1            1941              12
+ 7     6         1000374               0            1951              12
+ 8     7         1000540               0            1966               8
+ 9     8         1000634               0            1966              12
+10     9         1000925               0            1966               3
+# ℹ 502,119 more rows
+# ℹ 61 more variables: participant.p53_i0 <date>, participant.p53_i1 <date>,
+#   participant.p53_i2 <date>, participant.p53_i3 <date>,
+#   participant.p738_i0 <dbl>, participant.p738_i1 <dbl>,
+#   participant.p738_i2 <dbl>, participant.p738_i3 <dbl>,
+#   participant.p21022 <dbl>, participant.p20143 <date>,
+#   participant.p6138_i0 <chr>, participant.p6138_i1 <chr>, …
+> print(names(ukb_pheno.data))
+ [1] "...1"                            "participant.eid"                
+ [3] "participant.p31"                 "participant.p34"                
+ [5] "participant.p52"                 "participant.p53_i0"             
+ [7] "participant.p53_i1"              "participant.p53_i2"             
+ [9] "participant.p53_i3"              "participant.p738_i0"            
+[11] "participant.p738_i1"             "participant.p738_i2"            
+[13] "participant.p738_i3"             "participant.p21022"             
+[15] "participant.p20143"              "participant.p6138_i0"           
+[17] "participant.p6138_i1"            "participant.p6138_i2"           
+[19] "participant.p6138_i3"            "participant.p845_i0"            
+[21] "participant.p845_i1"             "participant.p845_i2"            
+[23] "participant.p21000_i0"           "participant.p22006"             
+[25] "participant.p20118_i0"           "participant.p20277_i0"          
+[27] "participant.p20277_i1"           "participant.p20277_i2"          
+[29] "participant.p20277_i3"           "participant.p6142_i0"           
+[31] "participant.p6142_i1"            "participant.p6142_i2"           
+[33] "participant.p6142_i3"            "participant.p767_i0"            
+[35] "participant.p767_i1"             "participant.p767_i2"            
+[37] "participant.p767_i3"             "participant.p816_i0"            
+[39] "participant.p816_i1"             "participant.p816_i2"            
+[41] "participant.p816_i3"             "participant.p129_i0"            
+[43] "participant.p129_i1"             "participant.p129_i2"            
+[45] "participant.p130_i0"             "participant.p130_i1"            
+[47] "participant.p130_i2"             "participant.p1647_i0"           
+[49] "participant.p1647_i1"            "participant.p1647_i2"           
+[51] "participant.p40000_i0"           "participant.p22020"             
+[53] "participant.p26210"              "participant.p26214"             
+[55] "participant.p26216"              "participant.p26240"             
+[57] "participant.p26275"              "participant.p26285"             
+[59] "participant.edqual_highered"     "participant.edqual_alevels"     
+[61] "participant.edqual_gcses"        "participant.edqual_vocational"  
+[63] "participant.edqual_professional" "participant.edqual_minimum"     
+[65] "participant.edqual_missing"      "participant.edqual_any"         
 > 
 > # Load the relative connections data
 > ukb_relatives.data <- input.folder %>%
@@ -94,7 +149,7 @@ dbl (3): FID, ID1, ID2
 > 
 > # Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
 > ukb_edpgi.data <- input.folder %>%
-+     file.path("ed-pgi-score.sscore") %>%
++     file.path("ed-pgi-score.tsv") %>%
 +     read_tsv()
 Rows: 487409 Columns: 5
 ── Column specification ────────────────────────────────────────────────────────
@@ -140,6 +195,133 @@ dbl (2): year, cpi2015
 > 
 > 
 > ################################################################################
+> ## Clean the multiple instance columns, and standardise ed quals variables.
+> 
+> # Code for making the instance files homogenised.
+> ukb_pheno.data <- ukb_pheno.data %>%
++     mutate(
++         # SOC job code
++         jobcode_soc =
++             ifelse(!is.na(participant.p20277_i0), participant.p20277_i0,
++             ifelse(!is.na(participant.p20277_i1), participant.p20277_i1,
++             ifelse(!is.na(participant.p20277_i2), participant.p20277_i2,
++             ifelse(!is.na(participant.p20277_i3), participant.p20277_i3, NA)))),
++         # birth_n_coord
++         birth_n_coord =
++             ifelse(!is.na(participant.p129_i0), participant.p129_i0,
++             ifelse(!is.na(participant.p129_i1), participant.p129_i1,
++             ifelse(!is.na(participant.p129_i2), participant.p129_i2, NA))),
++         # birth_e_coord
++         birth_e_coord =
++             ifelse(!is.na(participant.p130_i0), participant.p130_i0,
++             ifelse(!is.na(participant.p130_i1), participant.p130_i1,
++             ifelse(!is.na(participant.p130_i2), participant.p130_i2, NA))),
++         # birth_country
++         birth_country =
++             ifelse(!is.na(participant.p1647_i0), participant.p1647_i0,
++             ifelse(!is.na(participant.p1647_i1), participant.p1647_i1,
++             ifelse(!is.na(participant.p1647_i2), participant.p1647_i2, NA))),
++         # employment
++         employment =
++             ifelse(!is.na(participant.p6142_i0), participant.p6142_i0,
++             ifelse(!is.na(participant.p6142_i1), participant.p6142_i1,
++             ifelse(!is.na(participant.p6142_i2), participant.p6142_i2,
++             ifelse(!is.na(participant.p6142_i3), participant.p6142_i3, NA)))),
++         # hours_workweek
++         hours_workweek =
++             ifelse(!is.na(participant.p767_i0) & participant.p767_i0 > 0, participant.p767_i0,
++             ifelse(!is.na(participant.p767_i1) & participant.p767_i0 > 0, participant.p767_i1,
++             ifelse(!is.na(participant.p767_i2) & participant.p767_i0 > 0, participant.p767_i2,
++             ifelse(!is.na(participant.p767_i3) & participant.p767_i0 > 0, participant.p767_i3,
++                 NA)))))
+> 
+> # Code edQuals -> Edyears Following ISCED
+> ukb_pheno.data <- ukb_pheno.data %>%
++     mutate(edyears =
++         ifelse(participant.edqual_highered == 1,     18, # Uni degree -> 18
++         ifelse(participant.edqual_professional == 1, 15, # Professional post-secondary -> 15
++         ifelse(participant.edqual_alevels == 1,      14, # A Levels -> 14
++         ifelse(participant.edqual_vocational == 1,   14, # Vocational post-secondary -> 14 
++         ifelse(participant.edqual_gcses == 1,        12, # GCSEs -> 12
++         ifelse(participant.edqual_minimum == 1,      9,  # None of above -> lower secondary (i.e., legal minimum). 
++         ifelse(participant.edqual_missing == 1,      NA, # Missing -> NA
++             100)))))))) # End condition for everyone.
+> # Ensure reasonable distribution for everyone (and end condition not met.)
+> ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
+.
+     9     12     14     15     18   <NA> 
+ 84152  81540  89993  72506 165211   8727 
+> ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
+.
+  1111   1112   1113   1114   1121   1122   1123   1131   1132   1133   1134 
+   926   1347    833   1095   7509   2394    160   3665   6394    440    455 
+  1135   1136   1137   1141   1142   1151   1152   1161   1162   1163   1171 
+  2455   4355    806    628    741   2161   3826    933    711   2556     66 
+  1172   1173   1174   1181   1182   1183   1184   1185   1211   1212   1219 
+   276    298    190   1751    167    273   1047    727     60    193     87 
+  1221   1222   1223   1224   1225   1226   1231   1232   1233   1234   1235 
+   576    205   1008    492    464     97   2166    252    127   1462     96 
+  1239   2111   2112   2113   2121   2122   2123   2124   2125   2126   2127 
+  2179    648   1803    481   1812   1573    760    588    266    670    348 
+  2128   2129   2131   2132   2211   2212   2213   2214   2215   2216   2311 
+   466   1109   2728   3788   3270    611    773    262    568    199   5681 
+  2312   2313   2314   2315   2316   2317   2319   2321   2322   2329   2411 
+  3521    884   9641   9507   1720   1957   2992    429    395    806   2828 
+  2419   2421   2422   2423   2431   2432   2433   2434   2441   2442   2443 
+   230   2648    291   3304   1251    428    650   1612   1545   2547    420 
+  2444   2451   2452   3111   3112   3113   3114   3115   3119   3121   3122 
+  1380   1364    264   1258    230    662    292    156    631    213    684 
+  3123   3131   3132   3211   3212   3213   3214   3215   3216   3217   3218 
+    72   1222    448  10237    879    147    534    372     76    380    540 
+  3221   3222   3223   3229   3231   3232   3311   3312   3313   3314   3319 
+   969    623    344   1905   1022   3041     88   1886    526    405    280 
+  3411   3412   3413   3414   3415   3416   3421   3422   3431   3432   3433 
+   583   1447    433     50    493    383    731    782    981    696    414 
+  3434   3441   3442   3443   3449   3511   3512   3513   3514   3520   3531 
+   764     36    467    474     72     81    190    164    225    555    627 
+  3532   3533   3534   3535   3536   3537   3539   3541   3542   3543   3544 
+   655    255   1735    531     99    334   1232    628   2546   1087    342 
+  3551   3552   3561   3562   3563   3564   3565   3566   3567   3568   4111 
+   287     90   2968   1537   1971    452    226    187    783    293   2859 
+  4112   4113   4114   4121   4122   4123   4131   4132   4133   4134   4135 
+  3275   3034   1060    439   8978   2322   1504    803    787    612    920 
+  4136   4137   4141   4142   4150   4211   4212   4213   4214   4215   4216 
+   653    326    289    308  11661   1562    820   1196    834   6203   3111 
+  4217   5111   5112   5113   5119   5211   5212   5213   5214   5215   5216 
+   276    532    136   1366     89     43     38    202    134    459    136 
+  5221   5222   5223   5224   5231   5232   5233   5234   5241   5242   5243 
+   340    272   2744    258    893    141     51     60   2774    726     70 
+  5244   5245   5249   5311   5312   5313   5314   5315   5316   5319   5321 
+   135    506   1210    109    455    177   1526   1814    166   1879    216 
+  5322   5323   5411   5412   5413   5414   5419   5421   5422   5423   5424 
+   259    953     30    152     36    185     57     92    313    206     29 
+  5431   5432   5433   5434   5491   5492   5493   5494   5495   5496   5499 
+   167    271     33   1730    252    268     40     43    107    159    138 
+  6111   6112   6113   6114   6115   6121   6122   6123   6124   6131   6139 
+  2173    263    272    750   5010   1477    946    289   4878     76    169 
+  6211   6212   6213   6214   6215   6219   6221   6222   6231   6232   6291 
+   195    372    272    445    191     39   1092    325    552    882    169 
+  6292   7111   7112   7113   7121   7122   7123   7124   7125   7129   7211 
+    49   6169   1199    183    121    317    135    159    232    532    526 
+  7212   8111   8112   8113   8114   8115   8116   8117   8118   8119   8121 
+  2350    581     58    111    430     25    108    121     31     33    190 
+  8122   8123   8124   8125   8126   8129   8131   8132   8133   8134   8135 
+    83     55     87   1544     56    144    252    303    658     46     29 
+  8136   8137   8138   8139   8141   8142   8143   8149   8211   8212   8213 
+    33    383    152    338    110    151     55    515   2376   1802   1276 
+  8214   8215   8216   8217   8218   8219   8221   8222   8223   8229   9111 
+  1493    704    143     66    179    155     73    418     13    181    151 
+  9112   9119   9121   9129   9131   9132   9133   9134   9139   9141   9149 
+    43    114    640    130     24     76    192    313   1196     48   2068 
+  9211   9219   9221   9222   9223   9224   9225   9226   9229   9231   9232 
+  1652    724    113     57   1662    280    270     69     84    158     71 
+  9233   9234   9235   9239   9241   9242   9243   9244   9245   9249   9251 
+  3398    209    102     27   1576     31    132    698     88    293    232 
+  9259   <NA> 
+   234 158920 
+> 
+> 
+> ################################################################################
 > ## Clean Pheno file.
 > 
 > # Clean the phenotype data.
@@ -148,29 +330,40 @@ dbl (2): year, cpi2015
 +     transmute(
 +         eid                    = as.integer(participant.eid),
 +         sex_male               = as.integer(participant.p31),
++         visitdate              = date(participant.p53_i0),
++         deathdate              = date(participant.p40000_i0),
++         urban_cat              = as.integer(participant.p20118_i0),
++         # Birth info.
++         birth_n_coord          = as.integer(birth_n_coord),
++         birth_e_coord          = as.integer(birth_e_coord),
++         birth_country          = as.integer(birth_country),
 +         birthyear              = as.integer(participant.p34),
 +         birthmonth             = as.integer(participant.p52),
-+         visitdate              = date(participant.p53_i0),
-+         # Income categories,
++         # Work + income categories,
 +         householdincome_cat    = as.integer(participant.p738_i0),
 +         recruitedage           = as.integer(participant.p21022),
-+         datelastcontact        = date(participant.p20143),
-+         edquals                = as.integer(participant.p6138_i0),
-+         edyears                = as.integer(participant.edyears),
-+         agefinishededuc        = as.integer(participant.p845_i0),
-+         ethnicity              = as.integer(participant.p21000_i0),
++         jobcode_soc            = as.integer(jobcode_soc),
++         employment             = as.integer(employment),
++         hours_workweek         = as.integer(hours_workweek),
++         # Education info.
++         edqual_highered        = as.integer(participant.edqual_highered),
++         edqual_professional    = as.integer(participant.edqual_professional),
++         edqual_alevels         = as.integer(participant.edqual_alevels),
++         edqual_vocational      = as.integer(participant.edqual_vocational),
++         edqual_gcses           = as.integer(participant.edqual_gcses),
++         edqual_minimum         = as.integer(participant.edqual_minimum),
++         edqual_missing         = as.integer(participant.edqual_missing),
++         edyears                = as.integer(edyears),
++         # Genetic variables.
 +         genetic_race           = as.integer(participant.p22006),
-+         jobcode_soc            = as.integer(participant.p20277_i0),
-+         numjobs                = as.integer(participant.p22599),
-+         numjobgaps             = as.integer(participant.p22661),
-+         jobcode_online         = as.integer(participant.p22601_a0),
-+         jobcode_onlineSOC2000  = as.integer(participant.p22617_a0),
-+         jobyearstarted_online  = as.integer(participant.p22602_a0),
-+         jobhoursworked_online  = as.integer(participant.p22604_a0),
-+         jobhoursperweek_online = as.numeric(participant.p22605_a0),
-+         yearendededuc_online   = as.integer(participant.p22501),
-+         deathdate              = date(participant.p40000_i0),
-+         PCA                    = as.integer(participant.p22020)) %>%
++         PCA                    = as.integer(participant.p22020),
++         asthma_pgi             = as.integer(participant.p26210),  
++         bipolar_pgi            = as.integer(participant.p26214),  
++         bmi_pgi                = as.integer(participant.p26216),  
++         height_pgi             = as.integer(participant.p26240),  
++         schizophrenia_pgi      = as.integer(participant.p26275),  
++         t2diabetes_pgi         = as.integer(participant.p26285)
++         ) %>%
 +     # Clean the resulting columns
 +     mutate(
 +         # householdincome_cat,    p738_i0,    https://biobank.ctsu.ox.ac.uk/crystal/field.cgi?id=738
@@ -184,8 +377,6 @@ dbl (2): year, cpi2015
 +             as.integer(householdincome_cat == 4)),
 +         householdincome_above100k = ifelse(is.na(householdincome_cat), NA,
 +             as.integer(householdincome_cat == 5)),
-+         # Missing values to missing.
-+         agefinishededuc    = ifelse(agefinishededuc < 0, NA, agefinishededuc),
 +         # Replace missing values with binary values.
 +         genetic_euroancest = ifelse(is.na(genetic_race), 0, genetic_race),
 +         inPCA = ifelse(is.na(PCA), 0, PCA),
@@ -193,6 +384,11 @@ dbl (2): year, cpi2015
 +         deathyear = as.integer(format(deathdate, "%Y")),
 +         visityear = as.integer(format(visitdate, "%Y")),
 +         hasdied = as.integer(!is.na(deathdate)))
+Warning message:
+There was 1 warning in `transmute()`.
+ℹ In argument: `employment = as.integer(employment)`.
+Caused by warning:
+! NAs introduced by coercion 
 > 
 > 
 > ################################################################################
@@ -257,7 +453,6 @@ dbl (2): year, cpi2015
 > 
 > # Get the data file to merge with OCC coded wage data.
 > ukb_soc.data <- cleaned_pheno.data %>%
-+     #TODO: fill in empty SOC with past values, or values from second questionnaire.
 +     filter(!is.na(jobcode_soc)) %>%
 +     # Get the variables needed for income-impute.R
 +     transmute(eid = eid,
@@ -266,7 +461,7 @@ dbl (2): year, cpi2015
 +         age  = as.integer(recruitedage),
 +         year = as.integer(visityear))
 > 
-> # Use the Kweon Koellinger script for SOC occ wages.
+> # Use the Kweon Koellinger script for SOC occ hourly wages.
 > source("income-impute.R")
 > ukb_soc.data <- GET_INCOME(ukb_soc.data)
 > 
@@ -280,11 +475,11 @@ dbl (2): year, cpi2015
 > ukb_soc.data <- ukb_soc.data %>%
 +     transmute(
 +         eid = eid,
-+         soc_mean_hourly       = cpi.factor * soc_mean_hourly,
-+         soc_median_hourly     = cpi.factor * soc_median_hourly,
-+         soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
-+         soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
-+         soc_2d_hourly         = exp(log_y_hourly))
++         soc_mean_hourly       = cpi.factor * soc_mean_hourly)
+>         # soc_median_hourly     = cpi.factor * soc_median_hourly,
+>         # soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
+>         # soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
+>         # soc_2d_hourly         = exp(log_y_hourly))
 > 
 > 
 > ################################################################################
@@ -362,7 +557,7 @@ dbl (2): year, cpi2015
 # A tibble: 1 × 8
   self_mean self_sd sibling_mean sibling_sd father_mean father_sd mother_mean
       <dbl>   <dbl>        <dbl>      <dbl>       <dbl>     <dbl>       <dbl>
-1 -2.32e-18       1       0.0565      0.575      0.0271     0.436      0.0278
+1 -2.61e-18       1       0.0565      0.575      0.0271     0.436      0.0278
 # ℹ 1 more variable: mother_sd <dbl>
 > 
 > # Ensure outliers in PGIs do not persist.
@@ -374,47 +569,47 @@ dbl (2): year, cpi2015
 > 
 > # Show observation counts by both methods.
 > cleaned_pheno.data %>% filter(!is.na(edpgi_imputed_self_norm)) %>% print()
-# A tibble: 36,456 × 54
-       eid sex_male birthyear birthmonth visitdate  householdincome_cat
-     <dbl>    <int>     <int>      <int> <date>                   <int>
- 1 1000061        0      1951          7 2010-01-09                   4
- 2 1001059        0      1946          4 2008-08-07                  -3
- 3 1001713        1      1946          1 2008-01-14                   2
- 4 1002442        1      1966         11 2010-02-22                  -3
- 5 1002773        1      1958          5 2007-07-11                  -1
- 6 1003004        1      1961          6 2009-07-20                   3
- 7 1004438        0      1945          5 2009-12-03                   2
- 8 1004734        1      1947          1 2007-06-26                   4
- 9 1005599        0      1949          4 2008-06-14                  -3
-10 1008723        0      1949          4 2008-12-15                   4
+# A tibble: 36,456 × 57
+       eid sex_male visitdate  deathdate urban_cat birth_n_coord birth_e_coord
+     <dbl>    <int> <date>     <date>        <int>         <int>         <int>
+ 1 1000061        0 2010-01-09 NA                7        389500        341500
+ 2 1001059        0 2008-08-07 NA                6        557500        431500
+ 3 1001713        1 2008-01-14 NA                5        176500        318500
+ 4 1002442        1 2010-02-22 NA                5        395500        358500
+ 5 1002773        1 2007-07-11 NA                5        394500        379500
+ 6 1003004        1 2009-07-20 NA                5        520500        443500
+ 7 1004438        0 2009-12-03 NA                5        393500        339500
+ 8 1004734        1 2007-06-26 NA                7        174500        518500
+ 9 1005599        0 2008-06-14 NA                5        564500        415500
+10 1008723        0 2008-12-15 NA                5        405500        358500
 # ℹ 36,446 more rows
-# ℹ 48 more variables: recruitedage <int>, datelastcontact <date>,
-#   edquals <int>, edyears <int>, agefinishededuc <int>, ethnicity <int>,
-#   genetic_race <int>, jobcode_soc <int>, numjobs <int>, numjobgaps <int>,
-#   jobcode_online <int>, jobcode_onlineSOC2000 <int>,
-#   jobyearstarted_online <int>, jobhoursworked_online <int>,
-#   jobhoursperweek_online <dbl>, yearendededuc_online <int>, …
+# ℹ 50 more variables: birth_country <int>, birthyear <int>, birthmonth <int>,
+#   householdincome_cat <int>, recruitedage <int>, jobcode_soc <int>,
+#   employment <int>, hours_workweek <int>, edqual_highered <int>,
+#   edqual_professional <int>, edqual_alevels <int>, edqual_vocational <int>,
+#   edqual_gcses <int>, edqual_minimum <int>, edqual_missing <int>,
+#   edyears <int>, genetic_race <int>, PCA <int>, asthma_pgi <int>, …
 > cleaned_pheno.data %>% filter(!is.na(edpgi_all_norm)) %>% print()
-# A tibble: 408,625 × 54
-       eid sex_male birthyear birthmonth visitdate  householdincome_cat
-     <dbl>    <int>     <int>      <int> <date>                   <int>
- 1 1000061        0      1951          7 2010-01-09                   4
- 2 1000087        0      1944          4 2010-02-02                   2
- 3 1000113        0      1939          1 2008-06-25                   1
- 4 1000152        1      1961         12 2007-10-27                   3
- 5 1000264        1      1946          6 2009-06-17                   1
- 6 1000374        0      1951         12 2009-12-01                   2
- 7 1000634        0      1966         12 2008-08-12                   3
- 8 1001003        0      1960          2 2008-01-15                   2
- 9 1001059        0      1946          4 2008-08-07                  -3
-10 1001075        0      1941         12 2009-11-06                   2
+# A tibble: 408,625 × 57
+       eid sex_male visitdate  deathdate  urban_cat birth_n_coord birth_e_coord
+     <dbl>    <int> <date>     <date>         <int>         <int>         <int>
+ 1 1000061        0 2010-01-09 NA                 7        389500        341500
+ 2 1000087        0 2010-02-02 NA                 5        392500        443500
+ 3 1000113        0 2008-06-25 2015-01-29         5        401500        377500
+ 4 1000152        1 2007-10-27 NA                11        665500        259500
+ 5 1000264        1 2009-06-17 NA                 6        170500        360500
+ 6 1000374        0 2009-12-01 NA                 7        535500        418500
+ 7 1000634        0 2008-08-12 NA                 5        175500        360500
+ 8 1001003        0 2008-01-15 NA                 5        174500        317500
+ 9 1001059        0 2008-08-07 NA                 6        557500        431500
+10 1001075        0 2009-11-06 NA                 5        397500        332500
 # ℹ 408,615 more rows
-# ℹ 48 more variables: recruitedage <int>, datelastcontact <date>,
-#   edquals <int>, edyears <int>, agefinishededuc <int>, ethnicity <int>,
-#   genetic_race <int>, jobcode_soc <int>, numjobs <int>, numjobgaps <int>,
-#   jobcode_online <int>, jobcode_onlineSOC2000 <int>,
-#   jobyearstarted_online <int>, jobhoursworked_online <int>,
-#   jobhoursperweek_online <dbl>, yearendededuc_online <int>, …
+# ℹ 50 more variables: birth_country <int>, birthyear <int>, birthmonth <int>,
+#   householdincome_cat <int>, recruitedage <int>, jobcode_soc <int>,
+#   employment <int>, hours_workweek <int>, edqual_highered <int>,
+#   edqual_professional <int>, edqual_alevels <int>, edqual_vocational <int>,
+#   edqual_gcses <int>, edqual_minimum <int>, edqual_missing <int>,
+#   edyears <int>, genetic_race <int>, PCA <int>, asthma_pgi <int>, …
 > 
 > # Validate the correlation between two different packages for computing Ed PGI.
 > print(cor(cleaned_pheno.data$edpgi_all_norm,
@@ -434,7 +629,9 @@ dbl (2): year, cpi2015
 +         # Ed PGI among sample with siblings -> main PGI in my analysis
 +         edpgi_self    = edpgi_imputed_self_norm,
 +         edpgi_father  = edpgi_imputed_paternal_norm,
-+         edpgi_mother  = edpgi_imputed_maternal_norm) %>%
++         edpgi_mother  = edpgi_imputed_maternal_norm,
++         # Annual wage by hours worked
++         soc_mean_annual = 52.14 * soc_mean_hourly * hours_workweek) %>%
 +     # Mean parental Ed PGI, scaled by 
 +     rowwise() %>%
 +     mutate(edpgi_parents = mean(
@@ -444,31 +641,50 @@ dbl (2): year, cpi2015
 +     tibble() %>%
 +     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
 +     mutate(analysis_sample = as.integer(
-+         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
++         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
 +     # Select the relevant columns.
 +     select(eid,
 +         # Demographic variables.
 +         sex_male,
 +         visityear,
-+         birthyear,
-+         birthmonth,
 +         recruitedage,
 +         genetic_euroancest,
++         urban_cat,
++         # Birth variables.
++         birth_n_coord,
++         birth_e_coord,
++         birth_country,
++         birthyear,
++         birthmonth,
 +         # Genetic variables.
 +         edpgi_all,
 +         edpgi_self,
 +         edpgi_parents,
 +         edpgi_father,
 +         edpgi_mother,
++         asthma_pgi,
++         bipolar_pgi,
++         bmi_pgi,
++         height_pgi,
++         schizophrenia_pgi,
++         t2diabetes_pgi,
 +         # Education variables
++         edqual_highered,
++         edqual_professional,
++         edqual_alevels,
++         edqual_vocational,
++         edqual_gcses,
++         edqual_minimum,
++         edqual_missing,
 +         edyears,
 +         # Income variables
++         householdincome_cat,
++         recruitedage,
 +         jobcode_soc,
++         #TODO employment -> fix in the python extract because lists.
++         hours_workweek,
 +         soc_mean_hourly,
-+         soc_median_hourly,
-+         soc_mean_hourly_all,
-+         soc_median_hourly_all,
-+         soc_2d_hourly,
++         soc_mean_annual,
 +         starts_with("householdincome"),
 +         # Health & Death variables
 +         deathyear,
@@ -484,13 +700,13 @@ dbl (2): year, cpi2015
 > final_pheno.data %>% NROW()
 [1] 502129
 > final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
-[1] 23202
+[1] 20630
 > 
 > # Similarly, for with SOC occ wage data.
 > final_pheno.data %>% filter(!is.na(soc_mean_hourly)) %>% NROW()
-[1] 324776
+[1] 343209
 > final_pheno.data %>% filter(!is.na(edpgi_parents) & !is.na(edyears), !is.na(soc_mean_hourly)) %>% NROW()
-[1] 23202
+[1] 24781
 > 
 > 
 > ################################################################################
@@ -501,17 +717,17 @@ dbl (2): year, cpi2015
 +     filter(!is.na(edpgi_parents))
 > 
 > # (1) Calculate E[ Ed PGI | parents]
-> expected.pgi <- analysis.data %>%
+> expected_pgi.reg <- analysis.data %>%
 +     lm(edpgi_self ~ poly(edpgi_father, 3) * poly(edpgi_mother, 3
 +         ) * sex_male * father_present * mother_present,
 +         data = .)
 > # (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
 > analysis.data$edpgi_random <-
-+     analysis.data$edpgi_self - predict(expected.pgi, analysis.data)
++     analysis.data$edpgi_self - predict(expected_pgi.reg, analysis.data)
 > 
 > # Show summary statistics of the random component.
 > print(mean(analysis.data$edpgi_random))
-[1] 2.172374e-13
+[1] 1.999491e-13
 > print(sd(analysis.data$edpgi_random))
 [1] 0.5380492
 > hist(analysis.data$edpgi_random)
@@ -531,4 +747,4 @@ dbl (2): year, cpi2015
 > 
 > proc.time()
    user  system elapsed 
- 21.965   2.049  21.262 
+ 31.813   2.494  28.371 
