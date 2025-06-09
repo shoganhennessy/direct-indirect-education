@@ -21,8 +21,6 @@ apt-get install plink2
 for i in {1..22}
 do
     echo $i
-    # Download BGEN, for relevant regions of the Ed PGI.
-    dx download data-input/chr_$i.bgen
     # Get sample ID files.
     dx download "Bulk/Imputation/UKB imputation from genotype/ukb22828_c${i}_b0_v3.sample"
     mv "ukb22828_c${i}_b0_v3.sample" "chr_${i}.sample"
@@ -34,8 +32,15 @@ do
         --out chr_$i
 done
 
+
 # Get the Ed PGI GWAS weights
-dx download data-input/EA4_additive_p1e-5_clumped.csv
+#gwasResultsCsv=$1
+#gwasResultsCsv="EA4_additive_p1e-5_clumped.csv"
+#gwasResultsCsv="tan_2024_educational_attainment.csv"
+gwasResultsCsv="EA4_additive_excl_23andMe.csv"
+dx download data-input/$gwasResultsCsv
+head $gwasResultsCsv
+
 # Get the computed Kinship file.
 dx download data-input/kinship-adjusted.dat
 # Get the computed age-sex file.
@@ -90,19 +95,25 @@ impute.py                             \
     --threads   4
 
 # Step 3. Calculate the PGI, with parental values too.
-pgs.py imputed-ed-pgi                          \
-    --bed       chr_@                          \
-    --imp       parent-imputed-geno-@          \
-    --chr_range 1-22                           \
-    --weights   EA4_additive_p1e-5_clumped.csv \
-    --SNP       "rsid"                         \
-    --beta_col  "Beta"                         \
-    --A1        "effect_allele"                \
-    --A2        "noneffect_allele"             \
-    --sep       ","                            \
-    --fit_sib                                  \
-    --parsum                                   \
-    --threads   4
+pgs.py imputed-pgi                    \
+    --bed       chr_@                 \
+    --imp       parent-imputed-geno-@ \
+    --chr_range 1-22                  \
+    --weights   $gwasResultsCsv       \
+    --SNP       "rsid"                \
+    --beta_col  "Beta"                \
+    --A1        "effect_allele"       \
+    --A2        "noneffect_allele"    \
+    --sep       ","                   \
+    --fit_sib                         \
+    --parsum                          \
+    --threads   16
+
+# Name of the output file.
+#gwasResultsOutput=$2
+#gwasResultsOutput="imputed-ed-pgi-okbay-2022"
+gwasResultsOutput="imputed-ed-pgi-okbay-exclude-2022"
+#gwasResultsOutput="imputed-ed-pgi-tan-2024"
 
 # Save the parental imputed Ed PGI file.
-dx upload imputed-ed-pgi.pgs.txt --path data-clean/imputed-ed-pgi.pgs.txt
+dx upload imputed-pgi.pgs.txt --path data-clean/$gwasResultsOutput.pgs.txt

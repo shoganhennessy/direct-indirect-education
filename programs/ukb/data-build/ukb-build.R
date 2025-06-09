@@ -8,6 +8,8 @@ set.seed(47)
 library(tidyverse)
 # Functions for fast data manipulation (adapting to data.table code from Kweon+)
 library(data.table)
+# Geospatial filetypes.
+library(sf)
 
 # Define folder paths (1) input data (2) clean data.
 data.folder <- file.path("..", "..", "..", "data", "ukb-restricted")
@@ -34,12 +36,12 @@ ukb_relatives.data <- input.folder %>%
 
 # Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
 ukb_edpgi.data <- input.folder %>%
-    file.path("ed-pgi-score.tsv") %>%
+    file.path("pgi", "raw-ed-pgi-p1clumped.tsv") %>%
     read_tsv()
 
 # Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
 ukb_imputed.data <- input.folder %>%
-    file.path("imputed-ed-pgi.pgs.txt") %>%
+    file.path("pgi", "imputed-ed-pgi-p1clumped.pgs.txt") %>%
     read_table()
 
 # Load the occupation-coded income data (thanks to Kweon Koellinger+ 2025).
@@ -131,8 +133,8 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         householdincome_cat    = as.integer(participant.p738_i0),
         recruitedage           = as.integer(participant.p21022),
         jobcode_soc            = as.integer(jobcode_soc),
-        employment             = as.integer(employment),
-        hours_workweek         = as.integer(hours_workweek),
+        #TODO: adjust python for lists.employment             = as.integer(employment),
+        hours_workweek         = as.numeric(hours_workweek),
         # Education info.
         edqual_highered        = as.integer(participant.edqual_highered),
         edqual_professional    = as.integer(participant.edqual_professional),
@@ -143,14 +145,14 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         edqual_missing         = as.integer(participant.edqual_missing),
         edyears                = as.integer(edyears),
         # Genetic variables.
-        genetic_race           = as.integer(participant.p22006),
-        PCA                    = as.integer(participant.p22020),
-        asthma_pgi             = as.integer(participant.p26210),  
-        bipolar_pgi            = as.integer(participant.p26214),  
-        bmi_pgi                = as.integer(participant.p26216),  
-        height_pgi             = as.integer(participant.p26240),  
-        schizophrenia_pgi      = as.integer(participant.p26275),  
-        t2diabetes_pgi         = as.integer(participant.p26285)
+        genetic_race           = as.numeric(participant.p22006),
+        PCA                    = as.numeric(participant.p22020),
+        asthma_pgi             = as.numeric(participant.p26210),
+        bipolar_pgi            = as.numeric(participant.p26214),
+        bmi_pgi                = as.numeric(participant.p26216),
+        height_pgi             = as.numeric(participant.p26240),
+        schizophrenia_pgi      = as.numeric(participant.p26275),
+        t2diabetes_pgi         = as.numeric(participant.p26285)
         ) %>%
     # Clean the resulting columns
     mutate(
@@ -172,26 +174,6 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         deathyear = as.integer(format(deathdate, "%Y")),
         visityear = as.integer(format(visitdate, "%Y")),
         hasdied = as.integer(!is.na(deathdate)))
-
-
-################################################################################
-## Connect UKB data with collected distance to nearest uni data.
-
-# Read the birth counties data.
-#TODO might not use this one.
-birth_counties.data <- read_csv(
-    file.path(input.folder, "birth-locations", "main_phase_locations.csv"))
-
-# Read the higher ed locations file.
-higher_loc.data <- read_csv(
-    file.path(input.folder, "..", "..", "uk-highered", "highered-compiled.csv"))
-
-#TODO: use the counties base map to assign counties to 
-#TODO: birth_n_coord, birth_e_coord
-
-#TODO: write merging code that gives the closest uni
-#TODO: (if currently founded in year aged 17).
-#TODO: Then a binary for whether there is a uni in your county, and distance to it.
 
 
 ################################################################################
@@ -398,7 +380,7 @@ final_pheno.data <- cleaned_pheno.data %>%
     tibble() %>%
     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
     mutate(analysis_sample = as.integer(
-        !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
+        !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
     # Select the relevant columns.
     select(eid, famid,
         # Demographic variables.
@@ -487,6 +469,123 @@ hist(analysis.data$edpgi_random)
 final_pheno.data <- analysis.data %>%
     select(eid, edpgi_random) %>%
     right_join(final_pheno.data, by = "eid")
+
+
+################################################################################
+## Connect UKB data with collected distance to nearest uni data.
+
+# Read the higher ed locations file.
+higher_loc.data <- read_csv(
+    file.path(input.folder, "..", "..", "uk-highered", "highered-compiled.csv"))
+
+# Get the subsample with birth locations.
+uni.age <- 15
+birth.data <- final_pheno.data %>%
+    filter(!is.na(birth_n_coord), !is.na(birth_e_coord),
+        !is.na(birthyear), analysis_sample == 1) %>%
+    mutate(year_ageuni = birthyear + uni.age) %>%
+    select(eid, birth_n_coord, birth_e_coord, year_ageuni)
+# Empty columns for uni data
+# Uni if open at age when deciding uni.
+birth.data$open_closest_uni_name <- NA
+birth.data$open_closest_uni_county <- NA
+birth.data$open_year_founded <- NA
+birth.data$open_uni_n_coord <- NA
+birth.data$open_uni_e_coord <- NA
+# all unis
+birth.data$all_closest_uni_name <- NA
+birth.data$all_closest_uni_county <- NA
+birth.data$all_year_founded <- NA
+birth.data$all_uni_n_coord <- NA
+birth.data$all_uni_e_coord <- NA
+
+# Loop across each individual.
+total.rows <- nrow(birth.data)
+for (i in 1:total.rows) {
+    if (round(100 * (i / total.rows), 2) %% 1 == 0) {~
+        print(paste0(i, " out of ", total.rows, ", ", 100 * (i / total.rows), "% done."))
+    }
+    individual.data <- birth.data[i, ]
+    # Get universities that existed when this person was 18
+    open_unis.data <- higher_loc.data[
+        higher_loc.data$year_founded <= individual.data$year_ageuni, ]
+    # Find which open uni is the closest to individual i 
+    open_uni_dist.list <- sqrt(
+        (open_unis.data$uni_n_coord - individual.data$birth_n_coord)^2 + (
+            open_unis.data$uni_e_coord - individual.data$birth_e_coord)^2)
+    closest_open_uni.index <- which.min(open_uni_dist.list)
+    # Save this info to the birth data file.
+    closest_open_uni.data <- open_unis.data[closest_open_uni.index, ]
+    birth.data[i, ]$open_closest_uni_name <- closest_open_uni.data$uni_name
+    birth.data[i, ]$open_closest_uni_county <- closest_open_uni.data$uni_county_name
+    birth.data[i, ]$open_year_founded <- closest_open_uni.data$year_founded
+    birth.data[i, ]$open_uni_n_coord <- closest_open_uni.data$uni_n_coord
+    birth.data[i, ]$open_uni_e_coord <- closest_open_uni.data$uni_e_coord
+    # Do the same for all universities (even if not open yet).
+    uni_dist.list <- sqrt(
+        (higher_loc.data$uni_n_coord - individual.data$birth_n_coord)^2 + (
+            higher_loc.data$uni_e_coord - individual.data$birth_e_coord)^2)
+    all_uni.index <- which.min(uni_dist.list)
+    # Save this info to the birth data file.
+    closest_all_uni.data <- higher_loc.data[all_uni.index, ]
+    birth.data[i, ]$all_closest_uni_name <- closest_all_uni.data$uni_name
+    birth.data[i, ]$all_closest_uni_county <- closest_all_uni.data$uni_county_name
+    birth.data[i, ]$all_year_founded <- closest_all_uni.data$year_founded
+    birth.data[i, ]$all_uni_n_coord <- closest_all_uni.data$uni_n_coord
+    birth.data[i, ]$all_uni_e_coord <- closest_all_uni.data$uni_e_coord
+}
+
+
+################################################################################
+## Add counties to birth places.
+
+# Read UK district (i.e., county) borders in 1971, from UK data service.
+# https://borders.ukdataservice.ac.uk/bds.html
+eng_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
+        "locations", "England_ct_1971", "england_ct_1971.shp") %>% 
+    st_read() %>%
+    mutate(country = "England")
+scot_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
+        "locations", "Scotland_ct_1971", "scotland_ct_1971.shp") %>% 
+    st_read()  %>%
+    mutate(country = "Scotland")
+wales_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
+        "locations", "Wales_ct_1971", "wales_ct_1971.shp") %>% 
+    st_read() %>%
+    mutate(country = "Wales")
+# Combine, to get entire UK data.
+uk_shape.data <- rbind(eng_shape.data, scot_shape.data, wales_shape.data)
+
+# Ensure both datasets use the same coordinate reference system
+print(paste("UKB birth data CRS:", st_crs(birth.data)$input))
+print(paste("County data CRS:", st_crs(uk_shape.data)$input))
+
+# Put the birth county onto the birth data.
+birth.data <- birth.data %>%
+    st_as_sf(coords = c("birth_e_coord", "birth_n_coord"),
+        crs = st_crs(uk_shape.data)) %>%
+    st_join(uk_shape.data, join = st_within)
+
+# Restrict to relevant columns
+birth.data <- birth.data %>%
+    rename(
+        #birth_county_label = label,
+        birth_county_name = name) %>%
+    tibble() %>%
+    select(-country, -label, -geometry, -year_ageuni)
+
+# Put the ed location data back on to the dataframe.
+final_pheno.data <- final_pheno.data %>%
+    left_join(birth.data, by = "eid")
+
+# How many have newly opened unis?
+final_pheno.data %>%
+    filter(analysis_sample == 1) %>%
+    print()
+final_pheno.data %>% 
+    filter(analysis_sample == 1) %>%
+    filter(open_closest_uni_name != all_closest_uni_name) %>%
+    print()
 
 
 ################################################################################

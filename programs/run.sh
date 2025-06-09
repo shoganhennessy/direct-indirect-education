@@ -8,20 +8,38 @@
 
 # Extract the relevant data files, from raw formats.
 python3 -u data-extract.py > data-extract.log
+
 # Calculate the Ed PGI, using Okbay+ (2022) weights and prs-pipeline.
-cd ../pgi-okbay-2022
+mkdir pgi-okbay-2022
+cd pgi-okbay-2022
 R CMD BATCH --no-save tsv-convert.R
+bash prs-pipeline.sh "EA4_additive_p1e-5_clumped.csv" "raw-ed-pgi-okbay-2022"
+bash prs-impute.sh "EA4_additive_p1e-5_clumped.csv" "imputed-ed-pgi-okbay-2022"
 cd ..
-bash prs-pipeline.sh
-# Impute the parents Ed PGI, using sibling data (Snipar, Young+ 2022).
-bash prs-impute.sh
+
+# Calculate the Okbay+ (2022) PGI, weights from the excluded subsample.
+cd pgi-okbay-excluded-2022
+R CMD BATCH --no-save tsv-convert.R
+bash prs-pipeline.sh "EA4_additive_excl_23andMe.csv" "raw-ed-pgi-okbay-exclude-2022"
+bash prs-impute.sh "EA4_additive_excl_23andMe.csv" "imputed-raw-ed-pgi-okbay-exclude-2022"
+cd ..
+
+# Calculate the separate Ed PGI, using Tan+ (2024) weights and prs-pipeline.
+mkdir pgi-tan-2024
+cd pgi-tan-2024
+dx download data-input/tan_2024_educational_attainment.tsv
+# R CMD BATCH --no-save tsv-convert.R
+dx download data-input/tan_2024_educational_attainment.csv
+bash prs-pipeline.sh "tan_2024_educational_attainment.csv" "raw-ed-pgi-tan-2024"
+bash prs-impute.sh "tan_2024_educational_attainment.csv" "imputed-ed-pgi-tan-2024"
+cd ..
 
 
 ################################################################################
 ## Build data sets of relevance
 
 cd ukb/data-build
-# Build the cross-section of phenotype data, with PGIs (base + parent imputed).
+# Build the cross-section of phenotype data, with PGIs (raw + parent imputed).
 R CMD BATCH --no-save ukb-build.R
 # Go back to base folder.
 cd ../..

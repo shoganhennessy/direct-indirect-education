@@ -19,7 +19,7 @@ Type 'q()' to quit R.
 > ## Senan Hogan-Hennessy, 11 March 2025.
 > ## Script to ingest raw UKB data, and output familiar tabular format.
 > print(Sys.time())
-[1] "2025-05-21 15:26:07 EDT"
+[1] "2025-05-29 15:06:34 EDT"
 > set.seed(47)
 > ## Packages:
 > # functions for data manipulation and visualisation
@@ -52,6 +52,9 @@ The following object is masked from ‘package:purrr’:
 
     transpose
 
+> # Geospatial filetypes.
+> library(sf)
+Linking to GEOS 3.12.1, GDAL 3.8.4, PROJ 9.4.0; sf_use_s2() is TRUE
 > 
 > # Define folder paths (1) input data (2) clean data.
 > data.folder <- file.path("..", "..", "..", "data", "ukb-restricted")
@@ -78,6 +81,7 @@ date  (6): participant.p53_i0, participant.p53_i1, participant.p53_i2, parti...
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 > 
+> # SHow how these data look.
 > print(ukb_pheno.data)
 # A tibble: 502,129 × 66
     ...1 participant.eid participant.p31 participant.p34 participant.p52
@@ -149,7 +153,7 @@ dbl (3): FID, ID1, ID2
 > 
 > # Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
 > ukb_edpgi.data <- input.folder %>%
-+     file.path("ed-pgi-score.tsv") %>%
++     file.path("pgi", "raw-ed-pgi-p1clumped.tsv") %>%
 +     read_tsv()
 Rows: 487409 Columns: 5
 ── Column specification ────────────────────────────────────────────────────────
@@ -161,7 +165,7 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 > 
 > # Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
 > ukb_imputed.data <- input.folder %>%
-+     file.path("imputed-ed-pgi.pgs.txt") %>%
++     file.path("pgi", "imputed-ed-pgi-p1clumped.pgs.txt") %>%
 +     read_table()
 
 ── Column specification ────────────────────────────────────────────────────────
@@ -208,9 +212,9 @@ dbl (2): year, cpi2015
 +             ifelse(!is.na(participant.p20277_i3), participant.p20277_i3, NA)))),
 +         # birth_n_coord
 +         birth_n_coord =
-+             ifelse(!is.na(participant.p129_i0), participant.p129_i0,
-+             ifelse(!is.na(participant.p129_i1), participant.p129_i1,
-+             ifelse(!is.na(participant.p129_i2), participant.p129_i2, NA))),
++             ifelse(!is.na(participant.p129_i0) & participant.p129_i0 != -1, participant.p129_i0,
++             ifelse(!is.na(participant.p129_i1) & participant.p129_i1 != -1, participant.p129_i1,
++             ifelse(!is.na(participant.p129_i2) & participant.p129_i2 != -1, participant.p129_i2, NA))),
 +         # birth_e_coord
 +         birth_e_coord =
 +             ifelse(!is.na(participant.p130_i0), participant.p130_i0,
@@ -343,8 +347,8 @@ dbl (2): year, cpi2015
 +         householdincome_cat    = as.integer(participant.p738_i0),
 +         recruitedage           = as.integer(participant.p21022),
 +         jobcode_soc            = as.integer(jobcode_soc),
-+         employment             = as.integer(employment),
-+         hours_workweek         = as.integer(hours_workweek),
++         #TODO: adjust python for lists.employment             = as.integer(employment),
++         hours_workweek         = as.numeric(hours_workweek),
 +         # Education info.
 +         edqual_highered        = as.integer(participant.edqual_highered),
 +         edqual_professional    = as.integer(participant.edqual_professional),
@@ -355,14 +359,14 @@ dbl (2): year, cpi2015
 +         edqual_missing         = as.integer(participant.edqual_missing),
 +         edyears                = as.integer(edyears),
 +         # Genetic variables.
-+         genetic_race           = as.integer(participant.p22006),
-+         PCA                    = as.integer(participant.p22020),
-+         asthma_pgi             = as.integer(participant.p26210),  
-+         bipolar_pgi            = as.integer(participant.p26214),  
-+         bmi_pgi                = as.integer(participant.p26216),  
-+         height_pgi             = as.integer(participant.p26240),  
-+         schizophrenia_pgi      = as.integer(participant.p26275),  
-+         t2diabetes_pgi         = as.integer(participant.p26285)
++         genetic_race           = as.numeric(participant.p22006),
++         PCA                    = as.numeric(participant.p22020),
++         asthma_pgi             = as.numeric(participant.p26210),
++         bipolar_pgi            = as.numeric(participant.p26214),
++         bmi_pgi                = as.numeric(participant.p26216),
++         height_pgi             = as.numeric(participant.p26240),
++         schizophrenia_pgi      = as.numeric(participant.p26275),
++         t2diabetes_pgi         = as.numeric(participant.p26285)
 +         ) %>%
 +     # Clean the resulting columns
 +     mutate(
@@ -384,11 +388,6 @@ dbl (2): year, cpi2015
 +         deathyear = as.integer(format(deathdate, "%Y")),
 +         visityear = as.integer(format(visitdate, "%Y")),
 +         hasdied = as.integer(!is.na(deathdate)))
-Warning message:
-There was 1 warning in `transmute()`.
-ℹ In argument: `employment = as.integer(employment)`.
-Caused by warning:
-! NAs introduced by coercion 
 > 
 > 
 > ################################################################################
@@ -404,10 +403,13 @@ Caused by warning:
 > cleaned_imputed.data <- ukb_imputed.data %>%
 +     transmute(
 +         eid                        = IID,
++         famid                      = FID,
 +         edpgi_imputed_self_raw     = proband,
 +         edpgi_imputed_sibling_raw  = sibling,
 +         edpgi_imputed_paternal_raw = paternal,
 +         edpgi_imputed_maternal_raw = maternal)
+> 
+> #TODO: get a second PGI measure for Ed PGI, to use ORIV.
 > 
 > 
 > ################################################################################
@@ -585,10 +587,10 @@ Caused by warning:
 # ℹ 36,446 more rows
 # ℹ 50 more variables: birth_country <int>, birthyear <int>, birthmonth <int>,
 #   householdincome_cat <int>, recruitedage <int>, jobcode_soc <int>,
-#   employment <int>, hours_workweek <int>, edqual_highered <int>,
-#   edqual_professional <int>, edqual_alevels <int>, edqual_vocational <int>,
-#   edqual_gcses <int>, edqual_minimum <int>, edqual_missing <int>,
-#   edyears <int>, genetic_race <int>, PCA <int>, asthma_pgi <int>, …
+#   hours_workweek <dbl>, edqual_highered <int>, edqual_professional <int>,
+#   edqual_alevels <int>, edqual_vocational <int>, edqual_gcses <int>,
+#   edqual_minimum <int>, edqual_missing <int>, edyears <int>,
+#   genetic_race <dbl>, PCA <dbl>, asthma_pgi <dbl>, bipolar_pgi <dbl>, …
 > cleaned_pheno.data %>% filter(!is.na(edpgi_all_norm)) %>% print()
 # A tibble: 408,625 × 57
        eid sex_male visitdate  deathdate  urban_cat birth_n_coord birth_e_coord
@@ -606,10 +608,10 @@ Caused by warning:
 # ℹ 408,615 more rows
 # ℹ 50 more variables: birth_country <int>, birthyear <int>, birthmonth <int>,
 #   householdincome_cat <int>, recruitedage <int>, jobcode_soc <int>,
-#   employment <int>, hours_workweek <int>, edqual_highered <int>,
-#   edqual_professional <int>, edqual_alevels <int>, edqual_vocational <int>,
-#   edqual_gcses <int>, edqual_minimum <int>, edqual_missing <int>,
-#   edyears <int>, genetic_race <int>, PCA <int>, asthma_pgi <int>, …
+#   hours_workweek <dbl>, edqual_highered <int>, edqual_professional <int>,
+#   edqual_alevels <int>, edqual_vocational <int>, edqual_gcses <int>,
+#   edqual_minimum <int>, edqual_missing <int>, edyears <int>,
+#   genetic_race <dbl>, PCA <dbl>, asthma_pgi <dbl>, bipolar_pgi <dbl>, …
 > 
 > # Validate the correlation between two different packages for computing Ed PGI.
 > print(cor(cleaned_pheno.data$edpgi_all_norm,
@@ -641,9 +643,9 @@ Caused by warning:
 +     tibble() %>%
 +     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
 +     mutate(analysis_sample = as.integer(
-+         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
++         !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
 +     # Select the relevant columns.
-+     select(eid,
++     select(eid, famid,
 +         # Demographic variables.
 +         sex_male,
 +         visityear,
@@ -700,7 +702,7 @@ Caused by warning:
 > final_pheno.data %>% NROW()
 [1] 502129
 > final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
-[1] 20630
+[1] 24781
 > 
 > # Similarly, for with SOC occ wage data.
 > final_pheno.data %>% filter(!is.na(soc_mean_hourly)) %>% NROW()
@@ -739,6 +741,197 @@ Caused by warning:
 > 
 > 
 > ################################################################################
+> ## Connect UKB data with collected distance to nearest uni data.
+> 
+> # Read the higher ed locations file.
+> higher_loc.data <- read_csv(
++     file.path(input.folder, "..", "..", "uk-highered", "highered-compiled.csv"))
+Rows: 134 Columns: 6
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (3): uni_name, uni_county_label, uni_county_name
+dbl (3): year_founded, uni_n_coord, uni_e_coord
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+> 
+> # Get the subsample with birth locations.
+> uni.age <- 15
+> birth.data <- final_pheno.data %>%
++     filter(!is.na(birth_n_coord), !is.na(birth_e_coord),
++         !is.na(birthyear), analysis_sample == 1) %>%
++     mutate(year_ageuni = birthyear + uni.age) %>%
++     select(eid, birth_n_coord, birth_e_coord, year_ageuni)
+> # Empty columns for uni data
+> # Uni if open at age when deciding uni.
+> birth.data$open_closest_uni_name <- NA
+> birth.data$open_closest_uni_county <- NA
+> birth.data$open_year_founded <- NA
+> birth.data$open_uni_n_coord <- NA
+> birth.data$open_uni_e_coord <- NA
+> # all unis
+> birth.data$all_closest_uni_name <- NA
+> birth.data$all_closest_uni_county <- NA
+> birth.data$all_year_founded <- NA
+> birth.data$all_uni_n_coord <- NA
+> birth.data$all_uni_e_coord <- NA
+> 
+> # Loop across each individual.
+> total.rows <- nrow(birth.data)
+> for (i in 1:total.rows) {
++     if (round(100 * (i / total.rows), 2) %% 1 == 0) {~
++         print(paste0(i, " out of ", total.rows, ", ", 100 * (i / total.rows), "% done."))
++     }
++     individual.data <- birth.data[i, ]
++     # Get universities that existed when this person was 18
++     open_unis.data <- higher_loc.data[
++         higher_loc.data$year_founded <= individual.data$year_ageuni, ]
++     # Find which open uni is the closest to individual i 
++     open_uni_dist.list <- sqrt(
++         (open_unis.data$uni_n_coord - individual.data$birth_n_coord)^2 + (
++             open_unis.data$uni_e_coord - individual.data$birth_e_coord)^2)
++     closest_open_uni.index <- which.min(open_uni_dist.list)
++     # Save this info to the birth data file.
++     closest_open_uni.data <- open_unis.data[closest_open_uni.index, ]
++     birth.data[i, ]$open_closest_uni_name <- closest_open_uni.data$uni_name
++     birth.data[i, ]$open_closest_uni_county <- closest_open_uni.data$uni_county_name
++     birth.data[i, ]$open_year_founded <- closest_open_uni.data$year_founded
++     birth.data[i, ]$open_uni_n_coord <- closest_open_uni.data$uni_n_coord
++     birth.data[i, ]$open_uni_e_coord <- closest_open_uni.data$uni_e_coord
++     # Do the same for all universities (even if not open yet).
++     uni_dist.list <- sqrt(
++         (higher_loc.data$uni_n_coord - individual.data$birth_n_coord)^2 + (
++             higher_loc.data$uni_e_coord - individual.data$birth_e_coord)^2)
++     all_uni.index <- which.min(uni_dist.list)
++     # Save this info to the birth data file.
++     closest_all_uni.data <- higher_loc.data[all_uni.index, ]
++     birth.data[i, ]$all_closest_uni_name <- closest_all_uni.data$uni_name
++     birth.data[i, ]$all_closest_uni_county <- closest_all_uni.data$uni_county_name
++     birth.data[i, ]$all_year_founded <- closest_all_uni.data$year_founded
++     birth.data[i, ]$all_uni_n_coord <- closest_all_uni.data$uni_n_coord
++     birth.data[i, ]$all_uni_e_coord <- closest_all_uni.data$uni_e_coord
++ }
+> 
+> 
+> ################################################################################
+> ## Add counties to birth places.
+> 
+> # Read UK district (i.e., county) borders in 1971, from UK data service.
+> # https://borders.ukdataservice.ac.uk/bds.html
+> eng_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
++         "locations", "England_ct_1971", "england_ct_1971.shp") %>% 
++     st_read() %>%
++     mutate(country = "England")
+Reading layer `england_ct_1971' from data source 
+  `/home/s/Dropbox/direct-indirect-education/data/uk-highered/locations/England_ct_1971/england_ct_1971.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 140 features and 2 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 86999 ymin: 7123 xmax: 655604 ymax: 658083.5
+Projected CRS: OSGB36 / British National Grid
+> scot_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
++         "locations", "Scotland_ct_1971", "scotland_ct_1971.shp") %>% 
++     st_read()  %>%
++     mutate(country = "Scotland")
+Reading layer `scotland_ct_1971' from data source 
+  `/home/s/Dropbox/direct-indirect-education/data/uk-highered/locations/Scotland_ct_1971/scotland_ct_1971.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 300 features and 2 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 7459 ymin: 372831.8 xmax: 469817 ymax: 1219574
+Projected CRS: OSGB36 / British National Grid
+> wales_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
++         "locations", "Wales_ct_1971", "wales_ct_1971.shp") %>% 
++     st_read() %>%
++     mutate(country = "Wales")
+Reading layer `wales_ct_1971' from data source 
+  `/home/s/Dropbox/direct-indirect-education/data/uk-highered/locations/Wales_ct_1971/wales_ct_1971.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 57 features and 2 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 169230 ymin: 164596 xmax: 354890 ymax: 395331
+Projected CRS: OSGB36 / British National Grid
+> # Combine, to get entire UK data.
+> uk_shape.data <- rbind(eng_shape.data, scot_shape.data, wales_shape.data)
+> 
+> # Ensure both datasets use the same coordinate reference system
+> print(paste("UKB birth data CRS:", st_crs(birth.data)$input))
+[1] "UKB birth data CRS: NA"
+> print(paste("County data CRS:", st_crs(uk_shape.data)$input))
+[1] "County data CRS: OSGB36 / British National Grid"
+> 
+> # Put the birth county onto the birth data.
+> birth.data <- birth.data %>%
++     st_as_sf(coords = c("birth_e_coord", "birth_n_coord"),
++         crs = st_crs(uk_shape.data)) %>%
++     st_join(uk_shape.data, join = st_within)
+> 
+> # Restrict to relevant columns
+> birth.data <- birth.data %>%
++     rename(
++         #birth_county_label = label,
++         birth_county_name = name) %>%
++     tibble() %>%
++     select(-country, -label, -geometry, -year_ageuni)
+> 
+> # Put the ed location data back on to the dataframe.
+> final_pheno.data <- final_pheno.data %>%
++     left_join(birth.data, by = "eid")
+> 
+> # How many have newly opened unis?
+> final_pheno.data %>%
++     filter(analysis_sample == 1) %>%
++     print()
+# A tibble: 24,781 × 60
+       eid edpgi_random famid sex_male visityear recruitedage genetic_euroancest
+     <dbl>        <dbl> <dbl>    <int>     <int>        <int>              <dbl>
+ 1 1000061        0.366 13256        0      2010           58                  1
+ 2 1002773       -0.311  3914        1      2007           49                  1
+ 3 1003004        0.134 17706        1      2009           48                  1
+ 4 1004438       -0.837   734        0      2009           64                  1
+ 5 1004734       -0.947 19414        1      2007           60                  1
+ 6 1005599       -0.682 13506        0      2008           59                  1
+ 7 1008723       -0.398  4494        0      2008           59                  1
+ 8 1011258        0.136 12919        1      2010           64                  1
+ 9 1013909        0.115  4457        1      2010           60                  1
+10 1014109        0.677  7224        0      2009           46                  1
+# ℹ 24,771 more rows
+# ℹ 53 more variables: urban_cat <int>, birth_n_coord <int>,
+#   birth_e_coord <int>, birth_country <int>, birthyear <int>,
+#   birthmonth <int>, edpgi_all <dbl>, edpgi_self <dbl>, edpgi_parents <dbl>,
+#   edpgi_father <dbl>, edpgi_mother <dbl>, asthma_pgi <dbl>,
+#   bipolar_pgi <dbl>, bmi_pgi <dbl>, height_pgi <dbl>,
+#   schizophrenia_pgi <dbl>, t2diabetes_pgi <dbl>, edqual_highered <int>, …
+> final_pheno.data %>% 
++     filter(analysis_sample == 1) %>%
++     filter(open_closest_uni_name != all_closest_uni_name) %>%
++     print()
+# A tibble: 11,243 × 60
+       eid edpgi_random famid sex_male visityear recruitedage genetic_euroancest
+     <dbl>        <dbl> <dbl>    <int>     <int>        <int>              <dbl>
+ 1 1000061       0.366  13256        0      2010           58                  1
+ 2 1003004       0.134  17706        1      2009           48                  1
+ 3 1004438      -0.837    734        0      2009           64                  1
+ 4 1008723      -0.398   4494        0      2008           59                  1
+ 5 1011258       0.136  12919        1      2010           64                  1
+ 6 1013909       0.115   4457        1      2010           60                  1
+ 7 1015807       0.333  11308        0      2009           60                  1
+ 8 1020333       0.401  12373        0      2010           64                  1
+ 9 1020985       0.120   6580        0      2009           57                  1
+10 1024481      -0.0832  7116        0      2008           61                  1
+# ℹ 11,233 more rows
+# ℹ 53 more variables: urban_cat <int>, birth_n_coord <int>,
+#   birth_e_coord <int>, birth_country <int>, birthyear <int>,
+#   birthmonth <int>, edpgi_all <dbl>, edpgi_self <dbl>, edpgi_parents <dbl>,
+#   edpgi_father <dbl>, edpgi_mother <dbl>, asthma_pgi <dbl>,
+#   bipolar_pgi <dbl>, bmi_pgi <dbl>, height_pgi <dbl>,
+#   schizophrenia_pgi <dbl>, t2diabetes_pgi <dbl>, edqual_highered <int>, …
+> 
+> 
+> ################################################################################
 > ## Save the resulting data file.
 > 
 > # Save the file.
@@ -747,4 +940,4 @@ Caused by warning:
 > 
 > proc.time()
    user  system elapsed 
- 31.813   2.494  28.371 
+257.373   4.256 255.152 

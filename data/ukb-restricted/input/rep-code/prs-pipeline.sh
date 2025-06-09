@@ -10,10 +10,24 @@
 # bash -x prs-pipeline.sh &> prs-pipeline.log 
 # bash prs-pipeline.sh 2>&1 | tee prs-pipeline.log
 
-# Input: OKbay+ (2022) GWAS summary stats, from SSGAC (made into a csv).
-gwasResultsCsv="EA4_additive_p1e-5_clumped.csv"
+# Input: GWAS summary stats, from SSGAC (made into a csv).
+#gwasResultsCsv=$1
+#gwasResultsCsv="EA4_additive_p1e-5_clumped.csv"
+#gwasResultsCsv="tan_2024_educational_attainment.csv"
+gwasResultsCsv="EA4_additive_excl_23andMe.csv"
+#gwasResultsCsv="ADHD1_multi_p5e-8_sumstats.csv"
+
 dx download data-input/$gwasResultsCsv
 head $gwasResultsCsv
+
+# Name of the output file.
+#gwasResultsOutput=$2
+#gwasResultsOutput="raw-ed-pgi-okbay-2022"
+gwasResultsOutput="raw-ed-pgi-okbay-exclude-2022"
+#gwasResultsOutput="raw-ed-pgi-tan-2024"
+#gwasResultsOutput="raw-adhd-pgi"
+
+
 # Adjust GWAS files to format needed.
 awk -F, '{ if (NR>1) { print $1 }}' $gwasResultsCsv > rsidlist.txt
 awk -F, '{ if (NR>1) { print sprintf("%02d", $2)":"$3"-"$3 }}' $gwasResultsCsv > chrposlist.txt
@@ -42,20 +56,15 @@ do
     bgen.tgz/build/apps/bgenix -g \
         "/mnt/project/Bulk/Imputation/UKB imputation from genotype/ukb22828_c${i}_b0_v3.bgen" \
         -incl-rsids rsidlist.txt \
-        -incl-range chrposlist.txt > chr_${i}.bgen
+        -incl-range chrposlist.txt > chr_${i}.bgen &
     # Concatenate names of completed files.
     cmd=$cmd"chr_${i}.bgen "
-    # Save each ngen file for the chromosomes.
-    dx upload chr_$i.bgen --path data-input/chr_$i.bgen
 done
 
 # Combine the .bgen files for each chromosome into one BGEN file
 bgen.tgz/build/apps/cat-bgen -g $cmd -og initial_chr.bgen
 # Write index file .bgen.bgi
 bgen.tgz/build/apps/bgenix -g initial_chr.bgen -index -clobber
-# Save the initial_chr.bgen for use in next script.
-dx upload initial_chr.bgen --path data-input/initial_chr.bgen
-dx upload initial_chr.bgen --path data-input/initial_chr.bgen.bgi
 
 
 # Import the GWAS estimates into the sqlite database as a table called Betas.
@@ -91,14 +100,18 @@ bgen.tgz/build/apps/bgenix -g single_allelic.bgen -index
 #----------------------- SNP QC -----------------------#
 ########################################################
 
-# Convert to plink2 format.
+# Get plink2, and save available ram (in Mb)
 apt-get install plink2
+freememory=$(free --mega | awk '/^Mem:/{print $7}')
+
+# Convert to plink2 format.
 plink2 --bgen single_allelic.bgen ref-first \
     --hard-call-threshold 0.1 \
     --sample "/mnt/project/Bulk/Imputation/UKB imputation from genotype/ukb22828_c1_b0_v3.sample" \
     --set-all-var-ids @:#_\$r_\$a \
     --freq \
     --make-pgen \
+    --memory $freememory \
     --out raw
 
 # Identify ambiguous SNPs
@@ -144,16 +157,4 @@ plink2 --pfile raw                              \
     --out      ed-pgi-score
 
 # Save the calculated PRS.
-dx upload ed-pgi-score.sscore --path data-clean/ed-pgi-score.sscore
-# Export the dosage file, too.
-plink2 --pfile raw           \
-    --extract  snpQC.snplist \
-    --keep     sampleQC.id   \
-    --recode   A             \
-    --out      ed-pgi-dosage
-tar --totals=USR1 -czvf ed-pgi-dosage.tar.gz ed-pgi-dosage.raw
-# dx upload ed-pgi-dosage.raw --path data-clean/ed-pgi-dosage.raw
-dx upload ed-pgi-dosage.tar.gz --path data-clean/ed-pgi-dosage.tar.gz
-
-# Save the log file, when done.
-dx upload prs-pipeline.log --path data-clean/prs-pipeline.log
+dx upload ed-pgi-score.sscore --path data-clean/$gwasResultsOutput.tsv
