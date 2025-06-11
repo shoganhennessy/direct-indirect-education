@@ -86,6 +86,13 @@ analysis.data <- ukb.data %>%
 #! Test.
 analysis.data %>% head(100) %>% View()
 
+# SHow me the first row of the dataset, to describe in the data section.
+analysis.data %>%
+    head(1) %>%
+    select(visityear, sex_male, recruitedage, jobcode_soc,
+        soc_mean_hourly, soc_mean_annual, hours_workweek) %>%
+    print()
+
 
 ################################################################################
 ## Show characteristics of the samples, in a summary table.
@@ -102,99 +109,41 @@ analysis.data %>% head(100) %>% View()
 #        | Obs                | Obs.
 
 summary.table <- function(given.data){
+    # Subset for useful variables.
+    table.data <- given.data %>%
+        transmute(
+            "Male" = sex_male,
+            "Age"  = recruitedage,
+            "Ethnicity $=$ European" = genetic_euroancest,
+            # Genetic variables.
+            #"Ed PGI" = edpgi_self,
+            #"Ed PGI, parental mean" = edpgi_parents,
+            # Education variables
+            "Education years" = edyears,
+            # Income variables
+            "Occupation hourly wage"      = soc_mean_hourly,
+            "Occupation annual income"    = soc_mean_annual,
+            "Average hours worked week"   = hours_workweek,
+            "Household income $< 18k$"    = householdincome_less18k,
+            "Household income $18--31k$"  = householdincome_18to31k,
+            "Household income $31--52k$"  = householdincome_31to52k,
+            "Household income $52--100k$" = householdincome_52to100k,
+            "Household income $100k <$"   = householdincome_above100k,
+            # Family designators
+            "Any siblings?"     = sibling_present,
+            "Count of siblings" = sibling_count)
     # Generate summary data, for provided data (MEAN)
-    summary.mean <- given.data %>%
+    summary.mean <- table.data %>%
         summarise_all(mean, na.rm = TRUE) %>%
         pivot_longer(cols = everything(),
             names_to = "variable", values_to = "mean")
-    summary.sd <- given.data %>%
+    summary.sd <- table.data %>%
         summarise_all(sd, na.rm = TRUE) %>%
         pivot_longer(cols = everything(),
             names_to = "variable", values_to = "sd")
     summary.mean$sd <- summary.sd$sd
     return(summary.mean)
 }
-
-# Summarise analysis sample
-analysis_summary.data <- analysis.data %>%
-    transmute(
-        "Male" = sex_male,
-        "Age"  = recruitedage,
-        "Ethnicity $=$ European" = genetic_euroancest,
-        # Genetic variables.
-        "Ed PGI" = edpgi_self,
-        "Ed PGI, parental mean" = edpgi_parents,
-        # Education variables
-        "Education years" = edyears,
-        # Income variables
-        "Occupation hourly wage"    = soc_mean_hourly,
-        "Occupation annual income"  = soc_mean_annual,
-        "Average hours worked week" = hours_workweek,
-        "Household income < 18k"    = householdincome_less18k,
-        "Household income 18--31k"  = householdincome_18to31k,
-        "Household income 31--52k"  = householdincome_31to52k,
-        "Household income 52--100k" = householdincome_52to100k,
-        "Household income 100k <"   = householdincome_above100k,
-        # Family designators
-        "Any siblings?"  = sibling_present,
-        "Count of siblings" = sibling_count) %>%
-    summary.table() %>%
-    transmute(variable = variable,
-        mean_analysis = mean,
-        sd_analysis = sd)
-# Summarise entire sample
-all_summary.data <- ukb.data %>%
-    # Make Ed PGI for parents missing in the entire data file summary table.
-    mutate(edpgi_parents = NA) %>%
-    transmute(
-        "Male" = sex_male,
-        "Age"  = recruitedage,
-        "Ethnicity $=$ European" = genetic_euroancest,
-        # Genetic variables.
-        "Ed PGI" = edpgi_all,
-        "Ed PGI, parental mean" = edpgi_parents,
-        # Education variables
-        "Education years" = edyears,
-        # Income variables
-        "Occ. hourly wage"          = soc_mean_hourly,
-        "Household income $<$ 18k"  = householdincome_less18k,
-        "Household income 18--31k"  = householdincome_18to31k,
-        "Household income 31--52k"  = householdincome_31to52k,
-        "Household income 52--100k" = householdincome_52to100k,
-        "Household income 100k $<$" = householdincome_above100k,
-        # Designators
-        "Any siblings" = sibling_present,
-        "Count siblings" = sibling_count) %>%
-    summary.table()
-
-# Combine into one file.
-summary.data <- analysis_summary.data
-summary.data$mean_all <- all_summary.data$mean
-summary.data$sd_all <- all_summary.data$sd
-
-# Save the summary table as LaTeX.
-summary.data %>%
-    xtable() %>%
-    print(
-        sanitize.colnames.function = identity,
-        sanitize.text.function = identity,
-        NA.string = " ",
-        include.colnames = FALSE,
-        include.rownames = FALSE,
-        only.contents = TRUE,
-        hline.after = NULL,
-        format.args = list(big.mark = ","),
-        file = file.path(tables.folder, "ukb-summary.tex"))
-
-# Save the observation count, to host in files.
-analysis.data %>%
-    nrow() %>%
-    prettyNum(big.mark = ",", scientific = FALSE) %>%
-    writeLines(file.path(tables.folder, "ukb-analysis-count.txt"))
-ukb.data %>%
-    nrow() %>%
-    prettyNum(big.mark = ",", scientific = FALSE) %>%
-    writeLines(file.path(tables.folder, "ukb-total-count.txt"))
 
 #TODO: funtionalise the above, and then make 4 panels.
 analysis.data %>%
@@ -225,6 +174,47 @@ analysis.data %>%
         "Ethnicity $=$ Caucasian" = genetic_euroancest,
         "Any siblings?"           = sibling_present,
         "Count of siblings"       = sibling_count)
+
+# Summarise analysis sample
+analysis_summary.data <- analysis.data %>%
+    summary.table() %>%
+    transmute(variable = variable,
+        mean_analysis = mean,
+        sd_analysis = sd)
+# Summarise entire sample
+all_summary.data <- ukb.data %>%
+    # Make Ed PGI for parents missing in the entire data file summary table.
+    mutate(edpgi_parents = NA) %>%
+    summary.table()
+
+# Combine into one file.
+summary.data <- analysis_summary.data
+summary.data$mean_all <- all_summary.data$mean
+summary.data$sd_all <- all_summary.data$sd
+
+# Save the summary table as LaTeX.
+summary.data %>%
+    xtable() %>%
+    print(
+        sanitize.colnames.function = identity,
+        sanitize.text.function = identity,
+        NA.string = " ",
+        include.colnames = FALSE,
+        include.rownames = FALSE,
+        only.contents = TRUE,
+        hline.after = NULL,
+        format.args = list(big.mark = ","),
+        file = file.path(tables.folder, "ukb-summary.tex"))
+
+# Save the observation count, to host in files.
+analysis.data %>%
+    nrow() %>%
+    prettyNum(big.mark = ",", scientific = FALSE) %>%
+    writeLines(file.path(tables.folder, "ukb-analysis-count.txt"))
+ukb.data %>%
+    nrow() %>%
+    prettyNum(big.mark = ",", scientific = FALSE) %>%
+    writeLines(file.path(tables.folder, "ukb-total-count.txt"))
 
 
 ################################################################################

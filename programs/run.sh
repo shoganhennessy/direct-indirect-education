@@ -28,7 +28,7 @@ cd ..
 mkdir pgi-tan-2024
 cd pgi-tan-2024
 dx download data-input/tan_2024_educational_attainment.tsv
-# R CMD BATCH --no-save tsv-convert.R
+R CMD BATCH --no-save tsv-convert.R
 dx download data-input/tan_2024_educational_attainment.csv
 bash prs-pipeline.sh "tan_2024_educational_attainment.csv" "raw-ed-pgi-tan-2024"
 bash prs-impute.sh "tan_2024_educational_attainment.csv" "imputed-ed-pgi-tan-2024"

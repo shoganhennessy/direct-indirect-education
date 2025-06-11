@@ -29,21 +29,6 @@ ukb_pheno.data <- input.folder %>%
 print(ukb_pheno.data)
 print(names(ukb_pheno.data))
 
-# Load the relative connections data
-ukb_relatives.data <- input.folder %>%
-    file.path("kinship-adjusted.dat") %>%
-    read_tsv()
-
-# Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
-ukb_edpgi.data <- input.folder %>%
-    file.path("pgi", "raw-ed-pgi-p1clumped.tsv") %>%
-    read_tsv()
-
-# Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
-ukb_imputed.data <- input.folder %>%
-    file.path("pgi", "imputed-ed-pgi-p1clumped.pgs.txt") %>%
-    read_table()
-
 # Load the occupation-coded income data (thanks to Kweon Koellinger+ 2025).
 load(file.path(input.folder, "earnings-imputed", "data_input.Rdata"))
 
@@ -52,6 +37,43 @@ load(file.path(input.folder, "earnings-imputed", "data_input.Rdata"))
 cpi.data <- input.folder %>%
     file.path("cpih-uk.csv") %>%
     read_csv()
+
+## Load each of the PGI data files.
+
+# Load the relative connections data
+ukb_relatives.data <- input.folder %>%
+    file.path("kinship-adjusted.dat") %>%
+    read_tsv()
+
+## Okbay+ (2022) Ed PGI, among the 23+Me sample.
+# Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
+ukb_raw_edpgi_all.data <- input.folder %>%
+    file.path("pgi", "pgi-okbay-all-2022", "raw-ed-pgi-okbay-all-2022.tsv") %>%
+    read_tsv()
+
+# Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
+ukb_imputed_edpgi_all.data <- input.folder %>%
+    file.path("pgi", "pgi-okbay-all-2022",
+        "imputed-ed-pgi-okbay-all-2022.pgs.txt") %>%
+    read_table()
+
+## Okbay+ (2022) Ed PGI, excluding the 23+Me sample.
+# Load the Ed PGI (Okbay+ 2022) data, raw format from UKB RAP servers.
+ukb_raw_edpgi_exclude.data <- input.folder %>%
+    file.path("pgi", "pgi-okbay-exclude-2022",
+        "raw-ed-pgi-okbay-exclude-2022.tsv") %>%
+    read_tsv()
+
+# Load the imputed Ed PGI (Young+ 2022), raw format from UKB RAP servers.
+ukb_imputed_edpgi_exclude.data <- input.folder %>%
+    file.path("pgi", "pgi-okbay-exclude-2022",
+        "imputed-ed-pgi-okbay-exclude-2022.pgs.txt") %>%
+    read_table()
+
+## ADHD PGI, hand computed (since not provided in UKB pheno data).
+ukb_raw_adhdpgi.data <- input.folder %>%
+    file.path("pgi", "ADHD", "raw-adhd-pgi.tsv") %>%
+    read_tsv()
 
 
 ################################################################################
@@ -167,6 +189,8 @@ cleaned_pheno.data <- ukb_pheno.data %>%
             as.integer(householdincome_cat == 4)),
         householdincome_above100k = ifelse(is.na(householdincome_cat), NA,
             as.integer(householdincome_cat == 5)),
+        householdincome_missing = ifelse(is.na(householdincome_cat) |
+            householdincome_cat == 6 | householdincome_cat == 7, 1, 0),
         # Replace missing values with binary values.
         genetic_euroancest = ifelse(is.na(genetic_race), 0, genetic_race),
         inPCA = ifelse(is.na(PCA), 0, PCA),
@@ -179,23 +203,42 @@ cleaned_pheno.data <- ukb_pheno.data %>%
 ################################################################################
 ## Clean PGI data files.
 
+# The raw PGIs, for (nearly) all 500,000 UKB people
 # Restrict Ed PGI to identifiers, and the score
-cleaned_edpgi.data <- ukb_edpgi.data %>%
+ukb_raw_edpgi_all.data <- ukb_raw_edpgi_all.data %>%
     transmute(
         eid = IID,
-        edpgi_all_raw = SCORE1_AVG)
+        edpgi_all_raw_self = SCORE1_AVG)
 
-# Restrict imputed variables identifiers, and the score
-cleaned_imputed.data <- ukb_imputed.data %>%
+ukb_raw_edpgi_exclude.data <- ukb_raw_edpgi_exclude.data %>%
+    transmute(
+        eid = IID,
+        edpgi_exclude_raw_self = SCORE1_AVG)
+
+ukb_raw_adhdpgi.data <- ukb_raw_adhdpgi.data %>%
+    transmute(
+        eid = IID,
+        adhd_pgi = SCORE1_AVG)
+
+## The two imputed Ed PGIs, for the sibling subsample.
+# Get the columns referring to own PGI, and family members' 
+ukb_imputed_edpgi_all.data <- ukb_imputed_edpgi_all.data  %>%
     transmute(
         eid                        = IID,
         famid                      = FID,
-        edpgi_imputed_self_raw     = proband,
-        edpgi_imputed_sibling_raw  = sibling,
-        edpgi_imputed_paternal_raw = paternal,
-        edpgi_imputed_maternal_raw = maternal)
+        edpgi_all_imputed_self     = proband,
+        #edpgi_all_imputed_sibling  = sibling,
+        edpgi_all_imputed_paternal = paternal,
+        edpgi_all_imputed_maternal = maternal)
 
-#TODO: get a second PGI measure for Ed PGI, to use ORIV.
+ukb_imputed_edpgi_exclude.data <- ukb_imputed_edpgi_exclude.data %>%
+    transmute(
+        eid                            = IID,
+        #famid                          = FID,
+        edpgi_exclude_imputed_self     = proband,
+        #edpgi_exclude_imputed_sibling  = sibling,
+        edpgi_exclude_imputed_paternal = paternal,
+        edpgi_exclude_imputed_maternal = maternal)
 
 
 ################################################################################
@@ -219,7 +262,10 @@ count_relatives.data <- ukb_relatives.data %>%
     ungroup()
 
 # Column to show whether mother + father are in the data.
-relatives_present.data <- ukb_imputed.data %>%
+relatives_present.data <- input.folder %>%
+    file.path("pgi", "pgi-okbay-all-2022",
+        "imputed-ed-pgi-okbay-all-2022.pgs.txt") %>%
+    read_table() %>%
     transmute(
         eid = IID,
         father_present  = as.integer(!is.na(FATHER_ID)),
@@ -270,13 +316,16 @@ ukb_soc.data <- ukb_soc.data %>%
 ################################################################################
 ## Merge data files.
 
-# Merge the Phenotype data with Ed PGI.
+# Merge the ADHD PGI.
 cleaned_pheno.data <- cleaned_pheno.data %>%
-    left_join(cleaned_edpgi.data, by = "eid")
+    left_join(ukb_raw_adhdpgi.data, by = "eid")
 
-# Merge the Phenotype data with parental imputed Ed PGI.
+# Merge the Ed PGIs (two different ones), both raw + imputed.
 cleaned_pheno.data <- cleaned_pheno.data %>%
-    left_join(cleaned_imputed.data, by = "eid")
+    left_join(ukb_raw_edpgi_all.data, by = "eid") %>%
+    left_join(ukb_raw_edpgi_exclude.data, by = "eid") %>%
+    left_join(ukb_imputed_edpgi_all.data, by = "eid") %>%
+    left_join(ukb_imputed_edpgi_exclude.data, by = "eid")
 
 # Get counts of relatives onto phenotype data.
 cleaned_pheno.data <- cleaned_pheno.data %>%
@@ -298,63 +347,103 @@ cleaned_pheno.data <- cleaned_pheno.data %>%
 ################################################################################
 ## Clean the Ed PGI data fields, within entire sample.
 
-# Standardise the Ed PGI.
-cleaned_pheno.data <- cleaned_pheno.data %>%
-    # PGI reliable for Euro ancestry, and reliable PCA data.
-    mutate(
-        edpgi_all_norm =
-            ifelse(genetic_euroancest == 0, NA, edpgi_all_raw),
-        edpgi_imputed_self_norm =
-            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_self_raw),
-        edpgi_imputed_sibling_norm =
-            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_sibling_raw),
-        edpgi_imputed_paternal_norm =
-            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_paternal_raw),
-        edpgi_imputed_maternal_norm =
-            ifelse(genetic_euroancest == 0, NA, edpgi_imputed_maternal_raw)
-    ) %>%
-    # Normalise to have 0 mean, 1 SD.
-    # The parent/sibling values are centred around proband mean, sd
-    mutate(
-        edpgi_all_norm = (edpgi_all_norm -
-            mean(edpgi_all_norm, na.rm = TRUE)) / sd(edpgi_all_norm, na.rm = TRUE),
-        edpgi_imputed_self_norm = (edpgi_imputed_self_norm -
-            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
-        edpgi_imputed_sibling_norm = (edpgi_imputed_sibling_norm -
-            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
-        edpgi_imputed_paternal_norm = (edpgi_imputed_paternal_norm -
-            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE),
-        edpgi_imputed_maternal_norm = (edpgi_imputed_maternal_norm -
-            mean(edpgi_imputed_self_norm, na.rm = TRUE)) / sd(edpgi_imputed_self_norm, na.rm = TRUE))
+# PGIs only reliable among the European ancestory (unfortunately).
+genetic_euro_NA <- ifelse(cleaned_pheno.data$genetic_euroancest == 0, NA,
+    cleaned_pheno.data$genetic_euroancest)
+cleaned_pheno.data$asthma_pgi <- (genetic_euro_NA * cleaned_pheno.data$asthma_pgi)
+cleaned_pheno.data$bipolar_pgi <- (genetic_euro_NA * cleaned_pheno.data$bipolar_pgi)                   
+cleaned_pheno.data$bmi_pgi <- (genetic_euro_NA * cleaned_pheno.data$bmi_pgi)
+cleaned_pheno.data$height_pgi <- (genetic_euro_NA * cleaned_pheno.data$height_pgi)                    
+cleaned_pheno.data$schizophrenia_pgi <- (genetic_euro_NA * cleaned_pheno.data$schizophrenia_pgi)
+cleaned_pheno.data$t2diabetes_pgi <- (genetic_euro_NA * cleaned_pheno.data$t2diabetes_pgi)                
+cleaned_pheno.data$adhd_pgi <- (genetic_euro_NA * cleaned_pheno.data$adhd_pgi)
+cleaned_pheno.data$edpgi_all_raw_self <- (genetic_euro_NA * cleaned_pheno.data$edpgi_all_raw_self)            
+cleaned_pheno.data$edpgi_exclude_raw_self <- (genetic_euro_NA * cleaned_pheno.data$edpgi_exclude_raw_self)
+cleaned_pheno.data$edpgi_all_imputed_self <- (genetic_euro_NA * cleaned_pheno.data$edpgi_all_imputed_self)
+cleaned_pheno.data$edpgi_all_imputed_paternal <- (genetic_euro_NA * cleaned_pheno.data$edpgi_all_imputed_paternal)
+cleaned_pheno.data$edpgi_all_imputed_maternal <- (genetic_euro_NA * cleaned_pheno.data$edpgi_all_imputed_maternal)    
+cleaned_pheno.data$edpgi_exclude_imputed_self <- (genetic_euro_NA * cleaned_pheno.data$edpgi_exclude_imputed_self)
+cleaned_pheno.data$edpgi_exclude_imputed_paternal <- (genetic_euro_NA * cleaned_pheno.data$edpgi_exclude_imputed_paternal)
+cleaned_pheno.data$edpgi_exclude_imputed_maternal <- (genetic_euro_NA * cleaned_pheno.data$edpgi_exclude_imputed_maternal)
 
-#! Test: did the rescaling work?
-cleaned_pheno.data %>%
-    summarise(
-        self_mean    = mean(edpgi_imputed_self_norm, na.rm = TRUE),
-        self_sd      = sd(edpgi_imputed_self_norm, na.rm = TRUE),
-        sibling_mean = mean(edpgi_imputed_sibling_norm, na.rm = TRUE),
-        sibling_sd   = sd(edpgi_imputed_sibling_norm, na.rm = TRUE),
-        father_mean  = mean(edpgi_imputed_paternal_norm, na.rm = TRUE),
-        father_sd    = sd(edpgi_imputed_paternal_norm, na.rm = TRUE),
-        mother_mean  = mean(edpgi_imputed_maternal_norm, na.rm = TRUE),
-        mother_sd    = sd(edpgi_imputed_maternal_norm, na.rm = TRUE)) %>%
+# Scale parental values by the children SD
+cleaned_pheno.data$edpgi_all_imputed_paternal <- (cleaned_pheno.data$edpgi_all_imputed_paternal
+    - mean(cleaned_pheno.data$edpgi_all_imputed_self, na.rm = TRUE)) / sd(cleaned_pheno.data$edpgi_all_imputed_self, na.rm = TRUE)
+cleaned_pheno.data$edpgi_all_imputed_maternal <- (cleaned_pheno.data$edpgi_all_imputed_maternal
+    - mean(cleaned_pheno.data$edpgi_all_imputed_self, na.rm = TRUE)) / sd(cleaned_pheno.data$edpgi_all_imputed_self, na.rm = TRUE)
+cleaned_pheno.data$edpgi_exclude_imputed_paternal <- (cleaned_pheno.data$edpgi_exclude_imputed_paternal
+    - mean(cleaned_pheno.data$edpgi_exclude_imputed_self, na.rm = TRUE)) / sd(cleaned_pheno.data$edpgi_exclude_imputed_self, na.rm = TRUE)
+cleaned_pheno.data$edpgi_exclude_imputed_maternal <- (cleaned_pheno.data$edpgi_exclude_imputed_maternal
+    - mean(cleaned_pheno.data$edpgi_exclude_imputed_self, na.rm = TRUE)) / sd(cleaned_pheno.data$edpgi_exclude_imputed_self, na.rm = TRUE)
+
+# Scale Raw PGIs by the wider distribution. 
+cleaned_pheno.data$asthma_pgi <- as.numeric(scale(cleaned_pheno.data$asthma_pgi))
+cleaned_pheno.data$bipolar_pgi <- as.numeric(scale(cleaned_pheno.data$bipolar_pgi))
+cleaned_pheno.data$bmi_pgi <- as.numeric(scale(cleaned_pheno.data$bmi_pgi))
+cleaned_pheno.data$height_pgi <- as.numeric(scale(cleaned_pheno.data$height_pgi))
+cleaned_pheno.data$schizophrenia_pgi <- as.numeric(scale(cleaned_pheno.data$schizophrenia_pgi))
+cleaned_pheno.data$t2diabetes_pgi <- as.numeric(scale(cleaned_pheno.data$t2diabetes_pgi))
+cleaned_pheno.data$adhd_pgi <- as.numeric(scale(cleaned_pheno.data$adhd_pgi))
+cleaned_pheno.data$edpgi_all_raw_self <- as.numeric(scale(cleaned_pheno.data$edpgi_all_raw_self))
+cleaned_pheno.data$edpgi_exclude_raw_self <- as.numeric(scale(cleaned_pheno.data$edpgi_exclude_raw_self))
+cleaned_pheno.data$edpgi_all_imputed_self <- as.numeric(scale(cleaned_pheno.data$edpgi_all_imputed_self))
+cleaned_pheno.data$edpgi_exclude_imputed_self <- as.numeric(scale(cleaned_pheno.data$edpgi_exclude_imputed_self))
+
+#! Test: the genetic first-stage
+lm(edpgi_all_imputed_self ~ 1 + I((edpgi_all_imputed_paternal + edpgi_all_imputed_maternal) / 2),
+    data = cleaned_pheno.data) %>%
+    summary() %>%
+    print()
+lm(edpgi_exclude_imputed_self ~ 1 + I((edpgi_exclude_imputed_paternal + edpgi_exclude_imputed_maternal) / 2),
+    data = cleaned_pheno.data) %>%
+    summary() %>%
+    print()
+lm(edpgi_all_imputed_self ~ 1 + I((edpgi_exclude_imputed_paternal + edpgi_exclude_imputed_maternal) / 2),
+    data = cleaned_pheno.data) %>%
+    summary() %>%
+    print()
+lm(edpgi_exclude_imputed_self ~ 1 + I((edpgi_all_imputed_paternal + edpgi_all_imputed_maternal) / 2),
+    data = cleaned_pheno.data) %>%
+    summary() %>%
     print()
 
-# Ensure outliers in PGIs do not persist.
-hist(cleaned_pheno.data$edpgi_all_raw)
-hist(cleaned_pheno.data$edpgi_all_norm)
-# Similarly for imputed version.
-hist(cleaned_pheno.data$edpgi_imputed_self_raw)
-hist(cleaned_pheno.data$edpgi_imputed_self_norm)
-
 # Show observation counts by both methods.
-cleaned_pheno.data %>% filter(!is.na(edpgi_imputed_self_norm)) %>% print()
-cleaned_pheno.data %>% filter(!is.na(edpgi_all_norm)) %>% print()
+cleaned_pheno.data %>% filter(!is.na(edpgi_all_raw_self)) %>% NROW() %>% print()
+cleaned_pheno.data %>% filter(!is.na(edpgi_all_imputed_self)) %>% NROW() %>% print()
 
 # Validate the correlation between two different packages for computing Ed PGI.
-print(cor(cleaned_pheno.data$edpgi_all_norm,
-    cleaned_pheno.data$edpgi_imputed_self_norm,
+print(cor(cleaned_pheno.data$edpgi_all_raw_self,
+    cleaned_pheno.data$edpgi_all_imputed_self,
     use = "pairwise.complete.obs"))
+print(cor(cleaned_pheno.data$edpgi_exclude_raw_self,
+    cleaned_pheno.data$edpgi_exclude_imputed_self,
+    use = "pairwise.complete.obs"))
+
+#TODO: find a way to do both predict, feasible FEs, and na exclude.
+# Fill in the hours work week variable, with imputed values.
+#hours.reg <- lm(hours_workweek ~ 1 + sex_male
+#    + edqual_highered                + edqual_professional           
+#    + edqual_alevels                 + edqual_vocational             
+#    + edqual_gcses                   + edqual_minimum                
+#    + edqual_missing                 + edyears                       
+#    + householdincome_less18k        + householdincome_18to31k
+#    + householdincome_31to52k        + householdincome_52to100k
+#    + householdincome_above100k      + householdincome_missing
+#    | birthyear + jobcode_soc,
+#    data = cleaned_pheno.data,
+#    na.action = na.exclude)
+#
+#cleaned_pheno.data[is.na(cleaned_pheno.data$hours_workweek), ]
+#table(round(predict(hours.reg, na.action = na.exclude,
+#    newdata = cleaned_pheno.data[is.na(cleaned_pheno.data$hours_workweek), ])),
+#    exclude = NULL)
+
+## Fill in missing values row by row
+#for (i in 1:nrow(cleaned_pheno.data)){
+#    if (!is.na(cleaned_pheno.data[i, "hours_workweek"])){
+#        next
+#    }
+#}
 
 
 ################################################################################
@@ -364,23 +453,29 @@ print(cor(cleaned_pheno.data$edpgi_all_norm,
 final_pheno.data <- cleaned_pheno.data %>%
     mutate(
         # Ed PGI among entire sample
-        edpgi_all     = edpgi_all_norm,
+        edpgi_all_raw_self = edpgi_all_raw_self,
+        edpgi_exclude_raw_self = edpgi_exclude_raw_self,
         # Ed PGI among sample with siblings -> main PGI in my analysis
-        edpgi_self    = edpgi_imputed_self_norm,
-        edpgi_father  = edpgi_imputed_paternal_norm,
-        edpgi_mother  = edpgi_imputed_maternal_norm,
+        edpgi_all_imputed_self = edpgi_all_imputed_self,
+        edpgi_all_imputed_paternal = edpgi_all_imputed_paternal,
+        edpgi_all_imputed_maternal = edpgi_all_imputed_maternal,
+        edpgi_exclude_imputed_self = edpgi_exclude_imputed_self,
+        edpgi_exclude_imputed_paternal = edpgi_exclude_imputed_paternal,
+        edpgi_exclude_imputed_maternal = edpgi_exclude_imputed_maternal,
         # Annual wage by hours worked
-        soc_mean_annual = 52.14 * soc_mean_hourly * hours_workweek) %>%
+        soc_mean_annual = soc_mean_hourly * hours_workweek * 52.14) %>%
     # Mean parental Ed PGI, scaled by 
     rowwise() %>%
-    mutate(edpgi_parents = mean(
-        c(edpgi_imputed_paternal_norm, edpgi_imputed_maternal_norm),
-            na.rm = TRUE)) %>%
+    mutate(edpgi_all_imputed_parental = mean(c(
+            edpgi_all_imputed_paternal, edpgi_all_imputed_maternal), na.rm = TRUE),
+        edpgi_exclude_imputed_parental = mean(c(
+            edpgi_exclude_imputed_paternal, edpgi_exclude_imputed_maternal), na.rm = TRUE),
+        ) %>%
     ungroup() %>%
     tibble() %>%
     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
-    mutate(analysis_sample = as.integer(
-        !is.na(edpgi_parents) & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
+    mutate(analysis_sample = as.integer(!is.na(edpgi_all_imputed_parental)
+        & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
     # Select the relevant columns.
     select(eid, famid,
         # Demographic variables.
@@ -395,12 +490,18 @@ final_pheno.data <- cleaned_pheno.data %>%
         birth_country,
         birthyear,
         birthmonth,
+        # Ed PGI variables.
+        edpgi_all_raw_self,
+        edpgi_all_imputed_self,
+        edpgi_all_imputed_parental,
+        edpgi_all_imputed_paternal,
+        edpgi_all_imputed_maternal,
+        edpgi_exclude_raw_self,
+        edpgi_exclude_imputed_self,
+        edpgi_exclude_imputed_parental,
+        edpgi_exclude_imputed_paternal,
+        edpgi_exclude_imputed_maternal,
         # Genetic variables.
-        edpgi_all,
-        edpgi_self,
-        edpgi_parents,
-        edpgi_father,
-        edpgi_mother,
         asthma_pgi,
         bipolar_pgi,
         bmi_pgi,
@@ -440,8 +541,12 @@ final_pheno.data %>% NROW()
 final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
 
 # Similarly, for with SOC occ wage data.
-final_pheno.data %>% filter(!is.na(soc_mean_hourly)) %>% NROW()
-final_pheno.data %>% filter(!is.na(edpgi_parents) & !is.na(edyears), !is.na(soc_mean_hourly)) %>% NROW()
+final_pheno.data %>% filter(!is.na(soc_mean_annual)) %>% NROW() %>% print()
+final_pheno.data %>%
+    filter(!is.na(edpgi_all_imputed_parental)
+        & !is.na(edyears), !is.na(soc_mean_annual)) %>%
+    NROW() %>%
+    print()
 
 
 ################################################################################
@@ -449,25 +554,49 @@ final_pheno.data %>% filter(!is.na(edpgi_parents) & !is.na(edyears), !is.na(soc_
 
 # Get the sample for whom we are getting mean expected PGI.
 analysis.data <- final_pheno.data %>%
-    filter(!is.na(edpgi_parents))
+    filter(analysis_sample == 1)
 
+# First the 23+me weights for the Ed PGI.
 # (1) Calculate E[ Ed PGI | parents]
-expected_pgi.reg <- analysis.data %>%
-    lm(edpgi_self ~ poly(edpgi_father, 3) * poly(edpgi_mother, 3
+expected_edpgi_all.reg <- analysis.data %>%
+    lm(edpgi_all_imputed_self ~ 1 + (
+        poly(edpgi_all_imputed_paternal, 3) * poly(edpgi_all_imputed_maternal, 3)
         ) * sex_male * father_present * mother_present,
+        na.action = na.exclude,
         data = .)
 # (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
-analysis.data$edpgi_random <-
-    analysis.data$edpgi_self - predict(expected_pgi.reg, analysis.data)
+analysis.data$edpgi_all_imputed_random <- (analysis.data$edpgi_all_imputed_self
+    - predict(expected_edpgi_all.reg, analysis.data))
+
+# Second the UKB weights for the Ed PGI.
+# (1) Calculate E[ Ed PGI | parents]
+expected_edpgi_exclude.reg <- analysis.data %>%
+    lm(edpgi_exclude_imputed_self ~ 1 + (
+        poly(edpgi_exclude_imputed_paternal, 3) * poly(edpgi_exclude_imputed_maternal, 3)
+        ) * sex_male * father_present * mother_present,
+        na.action = na.exclude,
+        data = .)
+# (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
+analysis.data$edpgi_exclude_imputed_random <- (analysis.data$edpgi_exclude_imputed_self
+    - predict(expected_edpgi_exclude.reg, analysis.data))
+
+
+#! Testing the first-stage ORIV
+analysis.data %>%
+    lm(edpgi_exclude_imputed_self ~ 1 + edpgi_all_imputed_random,
+        na.action = na.exclude,
+        data = .) %>%
+    summary() %>%
+    print()
 
 # Show summary statistics of the random component.
-print(mean(analysis.data$edpgi_random))
-print(sd(analysis.data$edpgi_random))
-hist(analysis.data$edpgi_random)
+print(mean(analysis.data$edpgi_all_imputed_random))
+print(sd(analysis.data$edpgi_all_imputed_random))
+hist(analysis.data$edpgi_all_imputed_random)
 
 # Put Ed PGi random component back onto the phenotype data file.
 final_pheno.data <- analysis.data %>%
-    select(eid, edpgi_random) %>%
+    select(eid, edpgi_all_imputed_random, edpgi_exclude_imputed_random) %>%
     right_join(final_pheno.data, by = "eid")
 
 
@@ -479,7 +608,7 @@ higher_loc.data <- read_csv(
     file.path(input.folder, "..", "..", "uk-highered", "highered-compiled.csv"))
 
 # Get the subsample with birth locations.
-uni.age <- 15
+uni.age <- 16
 birth.data <- final_pheno.data %>%
     filter(!is.na(birth_n_coord), !is.na(birth_e_coord),
         !is.na(birthyear), analysis_sample == 1) %>%
@@ -502,9 +631,10 @@ birth.data$all_uni_e_coord <- NA
 # Loop across each individual.
 total.rows <- nrow(birth.data)
 for (i in 1:total.rows) {
-    if (round(100 * (i / total.rows), 2) %% 1 == 0) {~
+    if (((100 * i / round(total.rows, -2)) %% 1) == 0) {
         print(paste0(i, " out of ", total.rows, ", ", 100 * (i / total.rows), "% done."))
     }
+    #print(paste0(i, " out of ", total.rows, ", ", 100 * (i / total.rows), "% done."))
     individual.data <- birth.data[i, ]
     # Get universities that existed when this person was 18
     open_unis.data <- higher_loc.data[
@@ -581,10 +711,12 @@ final_pheno.data <- final_pheno.data %>%
 # How many have newly opened unis?
 final_pheno.data %>%
     filter(analysis_sample == 1) %>%
+    NROW() %>%
     print()
 final_pheno.data %>% 
     filter(analysis_sample == 1) %>%
     filter(open_closest_uni_name != all_closest_uni_name) %>%
+    NROW() %>%
     print()
 
 

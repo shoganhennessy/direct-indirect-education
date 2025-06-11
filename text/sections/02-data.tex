@@ -6,20 +6,33 @@
 \subsection{UK Biobank (UKB)}
 \label{sec:data-UKB}
 
-The UK Biobank (UKB) is a longitudinal survey that studies the households of American adults over 50 years old, measuring health and economic outcomes for individuals and their family every second year from 1992, with most recent data available in 2020.\footnote{
-    The \cite{UKB2020} is sponsored by the National Institute on Ageing (grant number NIA U01AG009740) and is conducted by the University of Michigan.
-    I use the RAND corporation's compilation of UKB data.
+The UK Biobank (UKB) is a large-scale prospective cohort study comprising approximately half a million members of the British public, recruited between 2006 and 2010.
+Letters were sent to a random sample of address in the National Health Service registry, and those included in the final UKB data are those who voluntarily responded to these requests.\footnote{
+    The UKB may not be represenative of the entire UK population, as it only represents willing respondents.
+    As such, the findings of this paper should only be taken as internally valid among the UKB respondents, and sibling analysis sample mentioned.
 }
-I define the main analysis sample as household heads who provided genetic information, and who have non-missing measures on education attainment, and self-reported measures of annual income.
-These data form a panel for individuals, where each row is a household-head-year; from this panel, I take the maximum self-reported annual earnings at ages 50--65 (among those working), record the year this is reported in, the maximum years of education reported, and use this as the main analysis sample.
-I then restrict to individuals with race defined as ``White,'' as the genetic measures are calculated among populations of European ancestry (see \cite{UKB2020genes} for further details).
+Participants, aged 40-69 years at recruitment, underwent comprehensive baseline assessments, and DNA  that included extensive phenotyping and genotyping.
+The dataset also contains detailed socioeconomic information collected through questionnaires and interviews.
+Key socioeconomic variables include educational attainment (measured in education qualifications), household income brackets, employment status, and industry of employment.
+See \cite{sudlow2015uk} for a full description of the UKB, and the organisational structure.
 
+The UK Biobank collected detailed information on educational qualifications, including completion of primary school, GCSEs (typically completed at age 16), A-Levels (completed at age 18), and completiong of an higher education degrees.
+I convert these qualifications into education years based on each participant's highest reported qualification, following the International Standard Classification of Education.
+While the UK Biobank collected household income data, this information was recorded only in categorical bins, limiting its utility for continuous analysis.
+Following \cite{kweon2025associations}, I construct an individual-level income measure using participants' 4-digit Standard Occupational Classification (SOC) codes.
+Specifically, I impute occupation-based wages by estimating hourly earnings for each SOC category using data from the British Annual Survey of Hours and Earnings, conditional on age, gender, and year.
+This approach provides a more granular and continuous measure of economic status than the categorical household income variable (see Appendix \ref{sec:appendix-wage-impute} for details on the imputation procedure).
+I create the annual occupation income by multiplying this by the number of hours they reported working, times 52.14 weeks in the year.
+For an example, this procedure gives a female participant, age 58 in 2010 with SOC 2314 (i.e., a secondary education teacher by profession), an occupation hourly wage of $\pounds 29.20$ and annual income of $\pounds 68,476$ for 45 average hours worked each week (adjusted to 2025 \pounds GBP by CPI-H).
 
-\begin{table}[H]
+For the purposes of this study, the primary analysis sample is restricted to those with at least one family member, a sibling or a parent, also enrolled in the UKB, and non-missing data in occupation code plus education qualifications.
+This family-linked subsample enables the examination of within-family variation, allowing for more robust identification strategies that can account for unobserved family-level characteristics that may confound the relationships of interest; see \autoref{sec:imputing}.
+The presence of multiple family members within the dataset provides a unique opportunity to control for shared genetic and environmental factors that might otherwise bias estimates in standard cross-sectional analyses.
+
+\begin{table}[h!]
     \singlespacing
     \centering
     \caption{Descriptive Statistics, UK Biobank (UKB).}
-    % Load CSV data into memory once
     \begin{tabular}{l c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
             & \multicolumn{2}{c}{Analysis sample}
@@ -27,11 +40,6 @@ I then restrict to individuals with race defined as ``White,'' as the genetic me
         \cmidrule(lr){2-3} \cmidrule(lr){4-5}
         & Mean & (SD) & Mean & (SD) \\
         \midrule
-        %\textit{\textbf{Panel A.} Genetic measures.} \\
-        %\input{sections/tables/ukb-summary-panelA.tex} \\
-        % \textit{Panel B. Education.} \\
-        % \textit{Panel C. Income \& Labour Market outcomes.} \\
-        % \textit{Panel D. Demographics.} \\
         \input{sections/tables/ukb-summary.tex} \\
         \midrule
         Observations
@@ -45,16 +53,17 @@ I then restrict to individuals with race defined as ``White,'' as the genetic me
     \footnotesize
     \textbf{Note:}
     This table the Mean and Standard Deviation (SD) of UKB variables, comparing the analysis subsample and the entire UKB sample.
-    The analysis sample refers to any individual with at least one sibling in the UKB data.
-    \textbf{TODO: Add more variables in multiple panels.}
+    The analysis sample refers to individuals with at least one sibling in the UKB data, of European ancestory.
+    All genetic variables are only non-missing among those who report European ancestory.
 \end{table}
 
-%There are $\input{../text/sections/tables/ukb-obs-count.txt}$ individuals in this sample, a representative sample of retirement age, American household heads.
-Additionally, the UKB data include additional characteristics, including count of children, education years of their parents,\footnote{
-    I take the maximum between mother and father's years of education, and report this value thanks to missing values.
-} and the US region they reside in.
-I include these values in the analysis sample, taking values reported in the same year of the maximum annual earnings.
-\autoref{tab:ukb-summary} reports summary statistics for this sample, and \autoref{fig:ukb-edyears-hist} summarises the correlation between education years and my measure of later-life labour earnings.
+In addition, the sample is restricted to individuals who report to have primarily European ancestory.
+The genetic measures used in this paper have generally been constructing from primarily white, European descended populations, and have no predictive power out of sample, so are only relevant in this subsample.\footnote{
+    It is an unfortunate fact that systematic genetic measures, such as those considered in this paper, have only been constructed from Biobank samples where the vast majority are white and/or European descended; see \cite{martin2017human} for a further discussion.
+    Note that this implies this paper has nothing to say about race; see \autoref{sec:ethics}.
+}
+\autoref{tab:ukb-summary} summarises the UKB data, both among the entire sample and among the analysis subsample.
+\autoref{fig:ukb-edyears-hist} summarises the correlation between education years and my measure of later-life labour earnings.
 
 \begin{figure}[h!]
     \centering
@@ -82,7 +91,7 @@ I include these values in the analysis sample, taking values reported in the sam
 \end{figure}
 
 \subsection{Education Polygenic Score (Ed PGI)}
-\label{sec:data-genescore}
+\label{sec:ed-pgi}
 
 The UKB collected genetic information from survey respondents in the survey years 2006, 2008, 2010, 2012.
 This involves collecting respondents' saliva, and then measuring the respondent's genotype.
@@ -162,3 +171,11 @@ This graphically represents the first-stage estimates crucial in MR studies, whe
 
 The Ed PGI is calculated from 1,271 different genes \citep{lee2018gene}, each of which are found to significantly predict year of education.
 \cite{papageorge2020genes} document how the Ed PGI predicts earnings, even when controlling for education, and posit that the score contains genes that affect skills related to financial literacy.
+
+\subsection{Ethical Considerations}
+
+Parapgraph about the ethical considerations.
+Link to relavant literature passing caution on this area of research, but also noting that it is still important.
+
+Also note that these measures are only within European ancestory, so have no racial conotations.
+Indeed, any racial statements in genetic research (even with data from other groups) read out of the lines if so.

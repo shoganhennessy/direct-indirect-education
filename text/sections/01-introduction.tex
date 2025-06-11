@@ -36,8 +36,11 @@ Note: a major concern for the Ed PGI previous papers is that they have little ec
 This paper can be framed as changing that, investigating the economic system underlying the Ed PGI causal effects, giving economic credence where before there was merely concern.
 
 This paper proceeds as follows.
-\autoref{sec:data} describes the UKB, including labour market and genetic data, and the genetic context for Mendelian inheritance.
-\autoref{sec:genetics} shows results of the first-stage Mendelian inheritance approach, and causal effects of the PGI on labour market outcomes.
+\autoref{sec:data} summarises the UKB data, and explains how the Ed PGI is constructed.
+\autoref{sec:genetics} shows a causal research design, based on Mendelian independent in heritance, for estimating the causal effects of the Ed PGI; 
+\autoref{sec:genetic-results}
+
+shows estimates of the causal effects of the Ed PGI, on education and labour market outcomes.
 \autoref{sec:directindirect} gives a conceptual framework for estimating the direct and indirect effects of genetics and education, in this observational setting;
 \autoref{sec:results} gives the empirical results.
 %\autoref{sec:discussion} discusses the approach, and its applicability to other topics;
@@ -48,28 +51,7 @@ This paper proceeds as follows.
 
 \textbf{Re-write with this, \url{https://blogs.ubc.ca/khead/research/research-advice/formula}.}
 
-Recent advances in genetic technology have allowed researchers to identify and measure genetic locations in the human genome associated with health and social outcomes, such as education attainment.
-These measures are genetic scores, and a nascent economics literature documents how the education attainment genetic score (Ed PGI, \citealt{lee2018gene}) is related to many outcomes, including retirement wealth, life-cycle income, elementary school performance, and longevity
-\citep{barth2020genetic,marioni2016genetic,papageorge2020genes,houmark2022genetic}.
-This project reanalyses claims that the Ed PGI is associated with labour market outcomes, focusing on later-life labour earnings, through a direct genetic channel and indirect channel through take-up and returns to education.
 
-I use data from the Health and Retirement Study (HRS) to estimate the correlation between Ed PGI, education, and later life earnings among retirement-age Americans.
-A one standard deviation increase in Ed PGI is associated with +0.67 years of education, +7.2\% likelihood attending university, and +5.2\% annual earnings.
-A higher Ed PGI could lead to better labour market outcomes by inducing people to attend more years of education (and education returns via this channel), but it could be associated thanks to a direct genetic channel (independent of education).
-I employ Causal Mediation (CM) methods to decompose the association of Ed PGI $\to$ earnings into an indirect (education) and direct path (absent education).
-CM estimates in HRS data show that around 40--60\% of the association of Ed PGI to earnings operates via increased education attainment --- i.e., around half of the effect is because they attended more years of education.
-
-Conventional CM methods rely on a selection-on-observables assumption, which may not hold true in observational work.
-I explicitly connect the assumptions behind CM methods to those of selection into treatment in classic labour and observation economic research \citep{heckman2005structural}.
-When a mediator, here education, is not randomly assigned then conventional CM methods for estimating direct and indirect effects are contaminated by selection bias.
-I write this as both a non-parametric non-identification result, and with a model-based regression framework with a correlated error term(e.g., as in the \citealt{imai2010identification} linear model approach).
-Structural assumptions could solve the identification problem, for example if selection into education follows a Roy model or errors terms have a known distribution \citep{heckman1979sample}.
-Adjusting indirect and direct estimates with sample selection models gives estimates for the direct genetic channel indistinguishable from zero, assigning roughly all the association for Ed PGI to earnings by the education channel.
-
-This work adds to a growing literature of genetics in economics \citep{barth2020genetic}, and expands on mediation methods \citep{imai2010identification} which are rarely used in empirical economic research \citep{huber2020mediation}.
-The most similar papers have studied the association between Ed PGI and earnings \citep{papageorge2020genes}, and socioeconomic status \citep{carvalho2024genetics}.
-Another has considered a similar topic from the view of genes as instruments, when the exclusion restriction is violated \citep{spiller2019detecting,van2018pleiotropy}.
-To the best of my knowledge, this is the first work to explicitly decompose direct and indirect genetic associations, and the first to connect mediation methods (and its selection-on-observables assumptions) to the labour economics literature for selection into treatment.
 
 This paper proceeds as follows.
 \autoref{sec:data} describes the HRS, including labour market and genetic data, and the biological context behind Mendelian randomisation.

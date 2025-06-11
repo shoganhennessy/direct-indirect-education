@@ -98,7 +98,7 @@
     Zhuan Pei,
     and
     Evan Riehl.
-    I thank seminar participants at EALE Bergen NHH (2024), and Cornell University (2023, 2024) for helpful discussion.
+    I thank seminar participants at EALE Bergen NHH (2024), and Cornell University (2023, 2024, 2025) for helpful discussion.
     Any comments or suggestions may be sent to me at \href{mailto:seh325@cornell.edu}{\nolinkurl{seh325@cornell.edu}}.
     %, or raised as an issue on the Github project.
     } \\
@@ -132,27 +132,29 @@
 %% Starting the paper
 \newpage
 \setcounter{page}{1}
-\doublespacing
+\onehalfspacing
 % Introduction section
 \noindent
 \input{sections/01-introduction.tex}
-% Declare data + introduce genetic context.
+% Data section
 \input{sections/02-data.tex}
-% Section on (1) first-stage new Mendelian randomisation (2) genetic effects.
+% Framework for using random genetic variation.
 \input{sections/03-genetics.tex}
-% Direct and Indirect Effects, conceptual framework. (define estimands)
-\input{sections/04-directindirect.tex}
-% Mediation results (1) selection model approach
-\input{sections/05-results.tex}
-%% Conclusion Section
-\input{sections/06-conclusion.tex}
+% Causal genetic effects
+\input{sections/04-genetic-effects.tex}
+% Framework for doing a credible mediation analysis in this context
+\input{sections/05-direct.tex}
+% Mediation results.
+\input{sections/06-direct-results.tex}
+% Conclusion.
+\input{sections/07-conclusion.tex}
 
 % Bibliography
 \singlespacing
 \bibliographystyle{agsm}
-\bibliography{sections/07-bibliography.bib}
-%\bibliography{sections/07-bibliography-doi.bib}
+\bibliography{sections/08-bibliography.bib}
+%\bibliography{sections/08-bibliography-doi.bib}
 % Appendix
 \newpage
-\input{sections/08-appendix.tex}
+\input{sections/09-appendix.tex}
 \end{document}
