@@ -19,7 +19,7 @@ Type 'q()' to quit R.
 > ## Senan Hogan-Hennessy, 11 March 2025.
 > ## Script to ingest raw UKB data, and output familiar tabular format.
 > print(Sys.time())
-[1] "2025-06-10 15:07:14 EDT"
+[1] "2025-06-16 12:19:05 EDT"
 > set.seed(47)
 > ## Packages:
 > # functions for data manipulation and visualisation
@@ -441,6 +441,11 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 +         hasdied = as.integer(!is.na(deathdate)))
 > 
 > 
+> # TODO: recode inconsistencies in edquals:
+> # TODO: if highered == 1, then A-Levels and GCSES == 1, by necessity
+> # TODO: if A-Levels == 1, then GCSES == 1, by necessity
+> 
+> 
 > ################################################################################
 > ## Clean PGI data files.
 > 
@@ -849,8 +854,9 @@ F-statistic:  1047 on 1 and 36454 DF,  p-value: < 2.2e-16
 +         edpgi_exclude_imputed_self = edpgi_exclude_imputed_self,
 +         edpgi_exclude_imputed_paternal = edpgi_exclude_imputed_paternal,
 +         edpgi_exclude_imputed_maternal = edpgi_exclude_imputed_maternal,
-+         # Annual wage by hours worked
-+         soc_mean_annual = soc_mean_hourly * hours_workweek * 52.14) %>%
++         # Annual wage by hours worked, in thousands
++         #TODO: make this vary by full/part-time
++         soc_mean_annual = (soc_mean_hourly * hours_workweek * 35) / 1000) %>%
 +     # Mean parental Ed PGI, scaled by 
 +     rowwise() %>%
 +     mutate(edpgi_all_imputed_parental = mean(c(
@@ -1278,4 +1284,4 @@ Projected CRS: OSGB36 / British National Grid
 > 
 > proc.time()
    user  system elapsed 
-246.484   3.773 247.660 
+227.360   3.977 231.838 

@@ -71,6 +71,7 @@
 \renewcommand{\tilde}[1]{\widetilde{#1}}                                   % Make over tilde look better
 \newcommand{\indep}{\, \raisebox{0.05em}{\rotatebox[origin=c]{90}{$\models$}} \,}% Statistical independence symbol.
 \definecolor{ao(english)}{rgb}{0.0, 0.5, 0.0}                              % Define dark green colour 
+\newcommand{\appendixref}[1]{\hyperref[#1]{Appendix~\ref*{#1}}}
 % Citations
 \usepackage{natbib} %[longnamesfirst]                                  % Citation package, see https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management#Natbib
 \usepackage[backref=page]{hyperref}                                        % Allow for links across the text, with colour options
@@ -88,7 +89,7 @@
 % Author
 \author{Senan Hogan-Hennessy\thanks{
     UK Biobank Project \#335854.
-    This work has been supported by research grants from the Centre for the Study of Inequality and Economics Department, Cornell University.
+    This work has been supported by research grants from the Centre for the Study of Inequality and the Industrial Labour Relations School, Cornell University.
     For helpful comments I thank
     Ryan Dycus,
     Benny Goldman,

@@ -117,18 +117,35 @@ ukb_pheno.data <- ukb_pheno.data %>%
             ifelse(!is.na(participant.p767_i3) & participant.p767_i0 > 0, participant.p767_i3,
                 NA)))))
 
+# Recode inconsistencies in edquals.
+# GCSEs -> A-Levels -> Higher ed are sequentially dependent, so should be so.
+ukb_pheno.data <- ukb_pheno.data %>%
+    mutate(
+        # if highered == 1, then A-Levels and GCSES == 1, by necessity
+        participant.edqual_alevels = ifelse(participant.edqual_highered == 1,
+            1, participant.edqual_alevels),
+        participant.edqual_gcses = ifelse(participant.edqual_highered == 1,
+            1, participant.edqual_gcses),
+        # if A-Levels == 1, then GCSES == 1, by necessity
+        participant.edqual_gcses = ifelse(participant.edqual_alevels == 1,
+            1, participant.edqual_gcses))
+
+#TODO: assign education years as the age they reported leaving full-time 
+#TODO: education minus five for those with a vocational degree
+#TODO: as their highest qualification.  
+
 # Code edQuals -> Edyears Following ISCED
 ukb_pheno.data <- ukb_pheno.data %>%
     mutate(edyears =
         ifelse(participant.edqual_highered == 1,     18, # Uni degree -> 18
-        ifelse(participant.edqual_professional == 1, 15, # Professional post-secondary -> 15
+        ifelse(participant.edqual_professional == 1, 11, # Professional post-secondary -> 15
         ifelse(participant.edqual_alevels == 1,      14, # A Levels -> 14
-        ifelse(participant.edqual_vocational == 1,   14, # Vocational post-secondary -> 14 
+        ifelse(participant.edqual_vocational == 1,   11, # Vocational post-secondary -> 14 
         ifelse(participant.edqual_gcses == 1,        12, # GCSEs -> 12
         ifelse(participant.edqual_minimum == 1,      9,  # None of above -> lower secondary (i.e., legal minimum). 
         ifelse(participant.edqual_missing == 1,      NA, # Missing -> NA
             100)))))))) # End condition for everyone.
-# Ensure reasonable distribution for everyone (and end condition not met.)
+# Ensure reasonable distribution for everyone (and NA end condition not met.)
 ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
 ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
 
@@ -462,8 +479,9 @@ final_pheno.data <- cleaned_pheno.data %>%
         edpgi_exclude_imputed_self = edpgi_exclude_imputed_self,
         edpgi_exclude_imputed_paternal = edpgi_exclude_imputed_paternal,
         edpgi_exclude_imputed_maternal = edpgi_exclude_imputed_maternal,
-        # Annual wage by hours worked
-        soc_mean_annual = soc_mean_hourly * hours_workweek * 52.14) %>%
+        # Annual wage by hours worked, in thousands
+        #TODO: make this vary by full/part-time
+        soc_mean_annual = (soc_mean_hourly * hours_workweek * 40) / 1000) %>%
     # Mean parental Ed PGI, scaled by 
     rowwise() %>%
     mutate(edpgi_all_imputed_parental = mean(c(

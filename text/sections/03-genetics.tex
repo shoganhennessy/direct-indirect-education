@@ -1,12 +1,41 @@
 \subsection{Random Variation in Genetic Inheritance}
+\label{sec:genetics}
 Genes are not randomly assigned to children.
 Genes are inherited from parents, where children receive 13 chromosomes from each parent at conception --- half the genes from their mother, half from father.
 
 Parents' traits, such their socioeconomic status, may differ for parents with higher or lower PGI values, confounding association-based estimates of PGI genetic effects among their children.
 
-Cannot choose who your parents are, and you also cannot choose how much you inherit from them.
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Distribution of UKB Earnings.}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        \caption{Earnings.}
+        %\includegraphics[width=\textwidth]{sections/figures/earnings-hist.png}
+        \label{fig:earnings-hist}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        \caption{Ed PGI $+$ Earnings.}
+        %\includegraphics[width=\textwidth]{sections/figures/edpgi-earnings.png}
+        \label{fig:edpgi-earnings}
+    \end{subfigure}
+    \label{fig:ukb-edpgi-earnings}
+    \vspace{-1cm}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    This figure shows the marginal distribution of Ed PGI and education years among UKB household heads, in the analysis sample defined above.
+    Ed PGI is normalised within-in sample by the UKB to have mean 0, and standard deviation 1; the distribution shape is unaffected by the normalisation --- i.e., it is roughly normally distributed regardless.
+    3.4\% of the analysis sample reports education years less than 10 years (not included in panel b).
+\end{figure}
+
+\cite{papageorge2020genes} document how the Ed PGI predicts earnings, even when controlling for education, and posit that the index contains genes that affect skills related to financial literacy.
 
 \section{Mendelian Independent Inheritance}
+
+Cannot choose who your parents are, and you also cannot choose how much you inherit from them.
 
 Needs at least one cool TikZ figure, showing the design for one genetic variant.
 This should be a figure showing one copy on each parent's genome leads to a random distribution of children's genetic variant (2, 1, or 0 copies).
@@ -20,14 +49,8 @@ Eventually get to the following representation, which is a forumla instrument us
 
 Figure showing the correlation between Ed PGI and demographics, and other PGIs, then the random component in panel B (which no longer is).
 
-\subsection{Imputing Parental PGIs from Siblings}
-\label{sec:imputing}
-
-Explain this approach, for the benefit of Doug Miller.
-
-The UKB did not explicitly collect data on children linked to their parents, so we need to impute from their parents.
-
 \subsection{Addressing Measurement Error in the PGI}
 
 Mention that PGI weights are calculated with statistical error, so estimates of their effects are attentuated in un-normalised regressions.
 This can be ameliorated using two PGIs, with (supposedly) uncorrelated measurement errors, to instrument for eachother in the obviously related framework.
+
