@@ -14,7 +14,7 @@ Letters were sent to a random sample of addresses in the National Health Service
 Participants, aged 40-69 years at recruitment, underwent comprehensive baseline assessments, asked many questions for socioeconomic information either by interview, automated survey answers, or follow-up sessions.
 Key socioeconomic variables include educational attainment (measured in education qualifications), household income brackets, employment status, and industry of employment.
 % Participants also provided saliva samples, to collect DNA for genetic measures.
-See \cite{sudlow2015uk} for a full description of the UKB, and the organisational structure.
+See \cite{sudlow2015uk} for a full description of the UKB organisation and data.
 
 \begin{table}[h!]
     \singlespacing
@@ -110,7 +110,7 @@ Complex social behaviours, on the other hand, have no single genes with a known 
 Instead complex social behaviours are a result on thousands of genes, and their interactions with the environment.
 
 Rather than attempting to trace all of these intricate biological mechanisms, researchers have developed PolyGenic Indices (PGIs) as dimensional reduction tools that summarise the statistical relationship between thousands of genetic variants and outcomes of interest.\footnote{
-    See \cite{uffelmann2021genome} for a full explanation of the approach to calculating PGIs, and survey of the genetic research.
+    See \cite{uffelmann2021genome} for a full explanation of how a GWAS works, and the approach to calculating PGIs.
 }
 This aggregation approach is particularly valuable because individual genetic variants typically have tiny effects on complex traits like educational attainment --- often explaining less than 0.01\% of the variation.
 However, by combining information across hundreds of thousands of variants, each contributing a small effect, PGIs can capture meaningful portions of the genetic contribution to these outcomes.
@@ -123,9 +123,10 @@ In a GWAS, researchers test the association between each Single Nucleotide Polym
 I use the weights calculated in the GWAS conducted by \cite{okbay2022polygenic}, which used a sample of over 3 million individuals of European ancestry, primarily from 23\&Me data.
 
 The Ed PGI is defined as the weighted sum of whether individual $i$ has the relevant SNP at each DNA location $j$,
-\[ Z_i = \sum_{j = 1}^{J} w_j \indicator{\text{one-letter change at location  $j$}}. \]
+\[ Z_i = \sum_{j = 1}^{J} w_j
+    \indicator{\text{one-letter change at location  $j$}}. \]
 $w_j$ are the weights, provided in the supplementary data for \cite{okbay2022polygenic}, and I measure the presence of the relevant SNP at each location $j$ in UKB genetic data files.
-The \cite{okbay2022polygenic} GWAS found that over 8,000 individual SNPs were significant in predicting education years, after passing a battery of biostatistical tests.
+The \cite{okbay2022polygenic} GWAS found that over 8,000 individual SNPs were significant in predicting education years, in a roughly additive manner, after passing a battery of biostatistical tests and finding no evidence for significant interactions.
 The resulting Ed PGI is standardised to have mean zero and standard deviation one within the entire sample, making it interpretable as the number of standard deviations from the population mean.
 The Ed PGI captures approximately 12-15\% of the variation in educational attainment, making it one of the most predictive PGIs for any complex behavioural trait to date.
 
@@ -136,13 +137,13 @@ The Ed PGI captures approximately 12-15\% of the variation in educational attain
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Ed PGI.}
-        %\includegraphics[width=\textwidth]{sections/figures/edpgi-hist.png}
+        \includegraphics[width=\textwidth]{sections/figures/edpgi-hist.png}
         \label{fig:edpgi-hist}
     \end{subfigure}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
-        \caption{Ed PGI $+$ Education Years.}
-        %\includegraphics[width=\textwidth]{sections/figures/edpgi-edyears.png}
+        \caption{Ed PGI $+$ Education Years, Binscatter.}
+        \includegraphics[width=\textwidth]{sections/figures/edpgi-edyears.png}
         \label{fig:edpgi-edyears}
     \end{subfigure}
     \label{fig:ukb-hist}
@@ -150,34 +151,79 @@ The Ed PGI captures approximately 12-15\% of the variation in educational attain
     \justify
     \footnotesize
     \textbf{Note}:
-    This figure shows the marginal distribution of Ed PGI and education years among UKB household heads, in the analysis sample defined above.
-    Ed PGI is normalised to have mean 0 and standard deviation 1 among the entire UKB sample; the distribution is roughly normally regardless of this normalisation.
+    This figure shows the marginal distribution of Ed PGI and education years in the UKB analysis sample.
+    Ed PGI is normalised to have mean 0 and standard deviation 1 among the entire UKB sample; it is roughly normally distributed regardless of this normalisation.
 \end{figure}
 
-
-\textbf{One pargraph here describing its correlations.}
-Indeed, it is built to be correlated with education years.
-
-\textbf{Mention that weights are merely estimates, thus have measurement error.}
-
-Mention that my analysis include the PGIs for other factors, mainly as controls.
-
-
+The Ed PGI is highly correlated with education years, as it is constructed to be so.
+A one standard deviation increase in the Ed PGI is associated with 0.93 extra education years (standard error 0.02), with an $R^2$ value of 0.10 for the raw regression of education years on Ed PGI.
+It is roughly normally distributed, with standard deviation normalised to 1.
+It is not surprising that the Ed PGI is normally distributed; it is the weighted sum of thousands of binary variables, among a few thousand individuals, so we should expect the central limit theorem to apply (in the limit) for the Ed PGI.
+Additionally, it is not surprising that the Ed PGI is correlated with education years; it was literally constructed to be so.
+The main take-away is that the correlation is strong, and has meaningful predictive power for education years.
+If education had no relationship with genetic variants, then the correlation would be indistinguishable from zero.
 
 \subsection{Imputing Parental PGIs from Siblings}
-\label{sec:imputing}
+\label{sec:pgi-impute}
+It would be ideal if the UKB contained genetic information for the parents of every UKB participant.
+However, there are only $\approx 500$ participants with a parent also included in the UKB, and only 72 with both parents.
+To overcome this missing data problem, I use siblings' genetic data to impute the mean parental PGIs from the sample of \input{../text/sections/tables/ukb-analysis-count.txt} participants with at least one sibling also in the UKB --- the sibling analysis sample described above.
 
-Explain this approach, for the benefit of Doug Miller.
+I use the \cite{young2022mendelian} procedure, to impute mean parental PGI values using genetic data on participants' siblings.
+To briefly summarise how this works, consider that each person inherits exactly half their DNA from their mother and half from their father.
+When we observe two siblings, we can partially reconstruct their parents' genetic information because siblings share some DNA through their parents.
+Think of it like observing two different samples from the same underlying distribution --- the parents' genes.
+At some genetic locations, siblings inherited the same variant from a parent (like both getting mum's brown-eye gene), whilst at others they inherited different variants (one got mum's brown-eye gene, the other her blue-eye gene).
+By comparing siblings' genetics across thousands of genetic variants, we can recover about 75\% of their parents' combined genetic information --- enough to construct a reasonably accurate parental PGI.
 
-The UKB did not explicitly collect data on children linked to their parents, so we need to impute from their parents.
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Structural Causal Model for Causal Mediation.}
+    \label{fig:scm-model}
+    \begin{tikzpicture}
+        \node[state,thick,ForestGreen] (mediator) at (0,0) {$D_i$};
+        \node[state,thick,blue] (treatment) [left=3cm of mediator] {$Z_i$};
+        \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
+        % Label Z_i, D, Y_i
+        \node[color=ForestGreen] [above=0.1cm of mediator] {Mediator};
+        \node[color=blue] [left=0.1cm of treatment] {Treatment};
+        \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Outcome};
+        % Draw the causal arrows
+        \path[->, thick] (treatment) edge (mediator);
+        \path[->, thick] (mediator) edge (outcome);
+        \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
+        % Label direct and indirect effect
+        \node[color=orange] [below left=-0.3cm and 0.5cm of mediator] {First-stage};
+        \node[color=orange] [below right=-0.3cm and -0.05cm of mediator] {Compliers' AIE};
+        \node[color=orange] [below=1.125cm of mediator] {ADE};
+        % Add in the confounders
+        %\node[state,RoyalPurple] (confounderX) [above=1.5cm of mediator] {$\vec{X}$};
+        %\path[->,RoyalPurple] (confounderX) edge (mediator);
+        %\node[color=RoyalPurple] [left=0.1cm of confounderX] {Observed controls};
+        \node[state,thick,dashed,RoyalBlue] (confounderU) [above=0.75cm of outcome] {$\vec U_i$};
+        \path[->,thick,dashed,color=RoyalBlue] (confounderU) edge (mediator);
+        \path[->,thick,dashed,color=RoyalBlue] (confounderU) edge (outcome);
+        %\node[color=RoyalBlue] [right=0.1cm of confounderU] {Unobserved confounder};
+    \end{tikzpicture}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    Show here the reasoning of the imputation procedure.
+\end{figure}
 
-Describe the imputation procedure.
+In my implementation in the UKB analysis sample, the imputation procedure performs exceptionally well.
+Following the \cite{young2022mendelian} validation approach, I verify the accuracy by examining the small subset of families where parental genotypes are actually observed.
+The imputed parental PGIs show a correlation of over [X] with true parental PGIs, and regression coefficients are statistically indistinguishable from 1, confirming the imputation is unbiased.
+\appendixref{appendix:pgi-impute} describes the full technical detail behind the imputation procedure, and this validation exercise.
+This high accuracy means I can confidently use the imputed parental PGIs in place of directly observed parental PGI values.
+
 
 \subsection{Ethical Considerations}
 \label{sec:ethics}
 
 Parapgraph about the ethical considerations.
-Link to relavant literature passing caution on this area of research, but also noting that it is still important.
+Link to relevant literature passing caution on this area of research, but also noting that it is still important.
 
-Also note that these measures are only within European ancestory, so have no racial conotations.
+Also note that these measures are only within European ancestory, so have no racial connotations.
 Indeed, any racial statements in genetic research (even with data from other groups) read out of the lines if so.

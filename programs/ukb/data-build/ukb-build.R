@@ -292,8 +292,8 @@ relatives_present.data <- input.folder %>%
 # Show how many parents there are in the total data.
 print(sum(relatives_present.data$father_present))
 print(sum(relatives_present.data$mother_present))
-print(sum(relatives_present.data$father_present) +
-    sum(relatives_present.data$mother_present))
+print(sum((relatives_present.data$father_present +
+    relatives_present.data$mother_present) > 1))
 
 
 ################################################################################

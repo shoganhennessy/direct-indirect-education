@@ -1,37 +1,20 @@
-\subsection{Random Variation in Genetic Inheritance}
+\section{Random Variation in Genetic Inheritance}
 \label{sec:genetics}
 Genes are not randomly assigned to children.
 Genes are inherited from parents, where children receive 13 chromosomes from each parent at conception --- half the genes from their mother, half from father.
 
+
 Parents' traits, such their socioeconomic status, may differ for parents with higher or lower PGI values, confounding association-based estimates of PGI genetic effects among their children.
 
-\begin{figure}[h!]
-    \centering
-    \singlespacing
-    \caption{Distribution of UKB Earnings.}
-    \begin{subfigure}[b]{0.495\textwidth}
-        \centering
-        \caption{Earnings.}
-        %\includegraphics[width=\textwidth]{sections/figures/earnings-hist.png}
-        \label{fig:earnings-hist}
-    \end{subfigure}
-    \begin{subfigure}[b]{0.495\textwidth}
-        \centering
-        \caption{Ed PGI $+$ Earnings.}
-        %\includegraphics[width=\textwidth]{sections/figures/edpgi-earnings.png}
-        \label{fig:edpgi-earnings}
-    \end{subfigure}
-    \label{fig:ukb-edpgi-earnings}
-    \vspace{-1cm}
-    \justify
-    \footnotesize
-    \textbf{Note}:
-    This figure shows the marginal distribution of Ed PGI and education years among UKB household heads, in the analysis sample defined above.
-    Ed PGI is normalised within-in sample by the UKB to have mean 0, and standard deviation 1; the distribution shape is unaffected by the normalisation --- i.e., it is roughly normally distributed regardless.
-    3.4\% of the analysis sample reports education years less than 10 years (not included in panel b).
-\end{figure}
-
 \cite{papageorge2020genes} document how the Ed PGI predicts earnings, even when controlling for education, and posit that the index contains genes that affect skills related to financial literacy.
+
+The Education PGI is not the only PGI that can be constructed.
+Following the same methodology, I construct additional PGIs for six health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
+Each PGI is calculated using the same approach as the Ed PGI --- taking weights from published GWAS conducted on independent populations and computing weighted sums of the relevant genetic variants in the UKB data.
+These other PGIs serve as important control variables in my analysis for two reasons.
+First, genetic variants often exhibit pleiotropy, meaning a single variant can influence multiple traits simultaneously.
+For instance, genetic variants associated with education might also affect mental health conditions, which could independently influence labour market outcomes.
+Second, population stratification --- systematic differences in gene frequencies across ancestry groups --- can create spurious correlations between any PGI and outcomes if health conditions vary across these groups.
 
 \section{Mendelian Independent Inheritance}
 
@@ -49,8 +32,18 @@ Eventually get to the following representation, which is a forumla instrument us
 
 Figure showing the correlation between Ed PGI and demographics, and other PGIs, then the random component in panel B (which no longer is).
 
-\subsection{Addressing Measurement Error in the PGI}
+
+
+\subsection{Addressing Measurement Error in the Ed PGI}
 
 Mention that PGI weights are calculated with statistical error, so estimates of their effects are attentuated in un-normalised regressions.
 This can be ameliorated using two PGIs, with (supposedly) uncorrelated measurement errors, to instrument for eachother in the obviously related framework.
 
+An important econometric consideration is that the weights $w_j$ used to construct the Ed PGI are themselves statistical estimates rather than true population parameters.
+Although \cite{okbay2022polygenic} estimates these weights from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error.
+This measurement error in the weights propagates through to the constructed Ed PGI, resulting in classical attenuation bias when examining correlations between the PGI and outcomes of interest.
+To address this measurement error problem, I follow Muslimova (2024) and construct a second Ed PGI using alternative weights, also provided by Okbay et al. (2022), that were estimated exclusively from the UK Biobank non-sibling subsample.
+Crucially, because these two sets of weights were estimated from independent samples, their measurement errors are uncorrelated.
+This allows me to implement an Obviously Related Instrumental Variables (ORIV) approach, where each PGI serves as an instrument for the other, effectively trading off some statistical precision for reduced attenuation bias.
+The ORIV estimator provides consistent estimates of the relationship between the true (error-free) Ed PGI and outcomes, correcting for the downward bias that would otherwise affect my results.
+Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
