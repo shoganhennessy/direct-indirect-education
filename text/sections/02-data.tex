@@ -171,7 +171,7 @@ To overcome this missing data problem, I use siblings' genetic data to impute th
 
 I use the \cite{young2022mendelian} procedure, to impute mean parental PGI values using genetic data on participants' siblings.
 To briefly summarise how this works, consider that each person inherits exactly half their DNA from their mother and half from their father.
-When we observe two siblings, we can partially reconstruct their parents' genetic information because siblings share some DNA through their parents.
+When we observe two siblings, we can partially reconstruct their parents' genetic information because siblings both inherit their DNA from parents.
 Think of it like observing two different samples from the same underlying distribution --- the parents' genes.
 At some genetic locations, siblings inherited the same variant from a parent (like both getting mum's brown-eye gene), whilst at others they inherited different variants (one got mum's brown-eye gene, the other her blue-eye gene).
 By comparing siblings' genetics across thousands of genetic variants, we can recover about 75\% of their parents' combined genetic information --- enough to construct a reasonably accurate parental PGI.
@@ -179,51 +179,37 @@ By comparing siblings' genetics across thousands of genetic variants, we can rec
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Structural Causal Model for Causal Mediation.}
-    \label{fig:scm-model}
-    \begin{tikzpicture}
-        \node[state,thick,ForestGreen] (mediator) at (0,0) {$D_i$};
-        \node[state,thick,blue] (treatment) [left=3cm of mediator] {$Z_i$};
-        \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
-        % Label Z_i, D, Y_i
-        \node[color=ForestGreen] [above=0.1cm of mediator] {Mediator};
-        \node[color=blue] [left=0.1cm of treatment] {Treatment};
-        \node[text width=0.1cm, color=red] [right=-0.01cm of outcome] {Outcome};
-        % Draw the causal arrows
-        \path[->, thick] (treatment) edge (mediator);
-        \path[->, thick] (mediator) edge (outcome);
-        \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
-        % Label direct and indirect effect
-        \node[color=orange] [below left=-0.3cm and 0.5cm of mediator] {First-stage};
-        \node[color=orange] [below right=-0.3cm and -0.05cm of mediator] {Compliers' AIE};
-        \node[color=orange] [below=1.125cm of mediator] {ADE};
-        % Add in the confounders
-        %\node[state,RoyalPurple] (confounderX) [above=1.5cm of mediator] {$\vec{X}$};
-        %\path[->,RoyalPurple] (confounderX) edge (mediator);
-        %\node[color=RoyalPurple] [left=0.1cm of confounderX] {Observed controls};
-        \node[state,thick,dashed,RoyalBlue] (confounderU) [above=0.75cm of outcome] {$\vec U_i$};
-        \path[->,thick,dashed,color=RoyalBlue] (confounderU) edge (mediator);
-        \path[->,thick,dashed,color=RoyalBlue] (confounderU) edge (outcome);
-        %\node[color=RoyalBlue] [right=0.1cm of confounderU] {Unobserved confounder};
-    \end{tikzpicture}
+    \caption{Imputing One SNP for Parents from Sibling Data.}
+    \label{fig:pgi-imputing}
+    \input{sections/figures/imputing-pgi-tikz.tex}
     \justify
     \footnotesize
     \textbf{Note}:
-    Show here the reasoning of the imputation procedure.
+    This figure illustrates the logic of imputing parental genotypes from sibling data at a single SNP.
+    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a particular allele inherited from their parents.
 \end{figure}
 
-In my implementation in the UKB analysis sample, the imputation procedure performs exceptionally well.
+\autoref{fig:pgi-imputing} visualises the logic behind imputing parental SNP values based on an individual's, and their sibling(s)'s, genetic data.
+In the middle panel, the individual has genotype 1 and their sibling has genotype 0.
+Since the individual must have inherited their 1 allele from one parent and their "0" allele from the other, while the sibling inherited two 0 alleles, we can infer that one parent has genotype 0 (contributing 0 to both children) and the other has genotype 1 (contributing 1 to the individual and 0 to the sibling).
+The right panel shows an alternative configuration yielding the same sibling genotypes.
+When parental genotypes cannot be uniquely determined, the imputation uses the expected values based on observed alleles and population frequencies.
+By applying this logic across hundreds of thousands of SNPs and accounting for segments of DNA shared identically by descent between siblings, we can accurately reconstruct parental PGIs despite never observing the parents directly.
+
+The imputation procedure performs well in the UKB analysis sample.
 Following the \cite{young2022mendelian} validation approach, I verify the accuracy by examining the small subset of families where parental genotypes are actually observed.
 The imputed parental PGIs show a correlation of over [X] with true parental PGIs, and regression coefficients are statistically indistinguishable from 1, confirming the imputation is unbiased.
 \appendixref{appendix:pgi-impute} describes the full technical detail behind the imputation procedure, and this validation exercise.
 This high accuracy means I can confidently use the imputed parental PGIs in place of directly observed parental PGI values.
 
-
 \subsection{Ethical Considerations}
 \label{sec:ethics}
+It is crucial to emphasise that the genetic measures in this study should not be misinterpreted as evidence of genetic determinism.
+Having a higher Ed PGI does not destine someone to higher education or income; it merely represents only a small statistical tendency, not fate.
+These tendencies are fundamentally shaped by social policies, institutional structures, and cultural contexts that vary across time and place.
+Just as eye-sight correcting glasses  can eliminate the practical consequences of genetic variation in eyesight, education and economic policies can modify or eliminate the consequences of genetic variation in traits relevant to socioeconomic outcomes.
 
-Parapgraph about the ethical considerations.
-Link to relevant literature passing caution on this area of research, but also noting that it is still important.
-
-Also note that these measures are only within European ancestory, so have no racial connotations.
-Indeed, any racial statements in genetic research (even with data from other groups) read out of the lines if so.
+Furthermore, this research provides no support whatsoever for ideas about ``natural'' social hierarchies or genetic justifications for inequality.
+In addition, genetic associations identified within one ancestry group cannot be meaningfully compared across groups due to different genetic architectures, environmental contexts, and historical experiences.
+Any claim using the measures consider in this paper for inference across racial groups, or different racial groups would be both scientifically invalid, and ethically deficient.
+The appropriate interpretation of these results is that they highlight how both social and genetic  factors influence socioeconomic outcomes, which should inspire greater solidarity and support for policies that promote equality of opportunity rather than acceptance of inequality as natural or inevitable.
