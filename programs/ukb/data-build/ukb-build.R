@@ -103,12 +103,11 @@ ukb_pheno.data <- ukb_pheno.data %>%
             ifelse(!is.na(participant.p1647_i0), participant.p1647_i0,
             ifelse(!is.na(participant.p1647_i1), participant.p1647_i1,
             ifelse(!is.na(participant.p1647_i2), participant.p1647_i2, NA))),
-        # employment
-        employment =
-            ifelse(!is.na(participant.p6142_i0), participant.p6142_i0,
-            ifelse(!is.na(participant.p6142_i1), participant.p6142_i1,
-            ifelse(!is.na(participant.p6142_i2), participant.p6142_i2,
-            ifelse(!is.na(participant.p6142_i3), participant.p6142_i3, NA)))),
+        # agefinishededuc
+        agefinishededuc =
+            ifelse(!is.na(participant.p845_i0), participant.p845_i0,
+            ifelse(!is.na(participant.p845_i1), participant.p845_i1,
+            ifelse(!is.na(participant.p845_i2), participant.p845_i2, NA))),
         # hours_workweek
         hours_workweek =
             ifelse(!is.na(participant.p767_i0) & participant.p767_i0 > 0, participant.p767_i0,
@@ -130,21 +129,27 @@ ukb_pheno.data <- ukb_pheno.data %>%
         participant.edqual_gcses = ifelse(participant.edqual_alevels == 1,
             1, participant.edqual_gcses))
 
-#TODO: assign education years as the age they reported leaving full-time 
-#TODO: education minus five for those with a vocational degree
-#TODO: as their highest qualification.  
-
-# Code edQuals -> Edyears Following ISCED
+# Code edQuals -> Edyears Following ISCED.
+# Note voational degrees give age finished ed minus 5. 
 ukb_pheno.data <- ukb_pheno.data %>%
     mutate(edyears =
         ifelse(participant.edqual_highered == 1,     18, # Uni degree -> 18
-        ifelse(participant.edqual_professional == 1, 11, # Professional post-secondary -> 15
         ifelse(participant.edqual_alevels == 1,      14, # A Levels -> 14
-        ifelse(participant.edqual_vocational == 1,   11, # Vocational post-secondary -> 14 
+        ifelse(participant.edqual_professional == 1, agefinishededuc - 5, # Professional post-secondary -> 15
+        ifelse(participant.edqual_vocational == 1,   agefinishededuc - 5, # Vocational post-secondary -> 14 
         ifelse(participant.edqual_gcses == 1,        12, # GCSEs -> 12
         ifelse(participant.edqual_minimum == 1,      9,  # None of above -> lower secondary (i.e., legal minimum). 
-        ifelse(participant.edqual_missing == 1,      NA, # Missing -> NA
-            100)))))))) # End condition for everyone.
+        ifelse(participant.edqual_missing == 1,      agefinishededuc - 5, # Missing -> NA
+            NA)))))))) # End condition for everyone.
+
+# Fix inconsistencies from age finished ed minus 5.
+ukb_pheno.data <- ukb_pheno.data %>%
+    mutate(edyears = ifelse(edyears == -7, 0, edyears)) %>% # "Never went to school"
+    mutate(edyears = ifelse(edyears == -6, NA, edyears)) %>% # "Do not know"
+    mutate(edyears = ifelse(edyears == -8, NA, edyears)) %>% # "Prefer not to answer"
+    mutate(edyears = ifelse(edyears > 18, 18, edyears)) %>% # years above maximum ed equal.
+    filter(!is.na(edyears)) # Missing values are those who cannot be assigned at all, after all this.
+
 # Ensure reasonable distribution for everyone (and NA end condition not met.)
 ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
 ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
@@ -172,7 +177,8 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         householdincome_cat    = as.integer(participant.p738_i0),
         recruitedage           = as.integer(participant.p21022),
         jobcode_soc            = as.integer(jobcode_soc),
-        #TODO: adjust python for lists.employment             = as.integer(employment),
+        #TODO: uncomment after re-running the pheno extract.
+        #employed               = as.integer(participant.employed),
         hours_workweek         = as.numeric(hours_workweek),
         # Education info.
         edqual_highered        = as.integer(participant.edqual_highered),
@@ -579,7 +585,7 @@ analysis.data <- final_pheno.data %>%
 expected_edpgi_all.reg <- analysis.data %>%
     lm(edpgi_all_imputed_self ~ 1 + (
         poly(edpgi_all_imputed_paternal, 3) * poly(edpgi_all_imputed_maternal, 3)
-        ) * sex_male * father_present * mother_present,
+        ) * sex_male * father_present * mother_present * sibling_count,
         na.action = na.exclude,
         data = .)
 # (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
@@ -597,7 +603,6 @@ expected_edpgi_exclude.reg <- analysis.data %>%
 # (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
 analysis.data$edpgi_exclude_imputed_random <- (analysis.data$edpgi_exclude_imputed_self
     - predict(expected_edpgi_exclude.reg, analysis.data))
-
 
 #! Testing the first-stage ORIV
 analysis.data %>%

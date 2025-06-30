@@ -1,49 +1,120 @@
 \section{Random Variation in Genetic Inheritance}
 \label{sec:genetics}
-Genes are not randomly assigned to children.
-Genes are inherited from parents, where children receive 13 chromosomes from each parent at conception --- half the genes from their mother, half from father.
+Genetic variants are not randomly assigned, which means that simple correlations between the Ed PGI and outcomes cannot be interpreted as causal relationships.
+Genes are inherited from parents, where children receive 23 chromosomes from each parent at conception --- half the genes from their mother, half from father.
+This inheritance pattern creates systematic associations between an individual's genetics and their family environment, as children who inherit certain genetic variants also inherit the familial circumstances from parents carrying those variants.
+Consequently, observed associations between the Ed PGIs and labour market outcomes may reflect not only the causal effect of the Ed PGI, but also the correlated environments and advantages that are transmitted alongside genes within families.
 
+\subsection{Mendelian Independent Inheritance}
+I use variation away from parental values to estimate causal effects of having a higher versus lower Ed PGI.
+This approach leverages the fundamental randomness in genetic inheritance, first described by Mendel's laws \citep{mendel1865versuche}.
 
-Parents' traits, such their socioeconomic status, may differ for parents with higher or lower PGI values, confounding association-based estimates of PGI genetic effects among their children.
+%\begin{figure}[h!]
+%    \centering
+%    \singlespacing
+%    \caption{Mendelian Independent Inheritance of One Genetic Variant.}
+%    \label{fig:mendelian-indep}
+%    \input{sections/figures/mendelian-indep.tex}
+%    \justify
+%    \footnotesize
+%    \textbf{Note}:
+%    This figure illustrates the process of Mendelian Independent Inheritance of genetic variants, for parents with each one copy of a variant (red) and the resulting possibilities for their child's inherited variants.
+%\end{figure}
 
-\cite{papageorge2020genes} document how the Ed PGI predicts earnings, even when controlling for education, and posit that the index contains genes that affect skills related to financial literacy.
+Each parent has 0, 1, or 2 copies of each genetic variant --- corresponding to presence on each of their chromosomes.
+When a father and mother's sex cells are formed, exactly one of the two copies is sorted into each reproductive cell, and is then inherited by their resulting child.
+A parent with one copy therefore passes it on half the time, whereas a parent with 0 or 2 copies transmits their genetic variant with certainty.
+At conception, the child receives one draw from the mother and one from the father, so the child's copy-count is simply the sum of two independent draws.
 
-The Education PGI is not the only PGI that can be constructed.
-Following the same methodology, I construct additional PGIs for six health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
-Each PGI is calculated using the same approach as the Ed PGI --- taking weights from published GWAS conducted on independent populations and computing weighted sums of the relevant genetic variants in the UKB data.
-These other PGIs serve as important control variables in my analysis for two reasons.
-First, genetic variants often exhibit pleiotropy, meaning a single variant can influence multiple traits simultaneously.
-For instance, genetic variants associated with education might also affect mental health conditions, which could independently influence labour market outcomes.
-Second, population stratification --- systematic differences in gene frequencies across ancestry groups --- can create spurious correlations between any PGI and outcomes if health conditions vary across these groups.
+Write $x_{i,j}^\text{\textcolor{ForestGreen}{Child}}$ for the number of copies of variant $j$ that individual $i$ has (0, 1, or 2), and 
+$x_{m(i),j}^\text{\textcolor{orange}{Mother}}, x_{f(i),j}^\text{\textcolor{blue}{Father}}$ for their respective parents $m(i), f(i)$.
+If the mother has two copies of variant $j$ then they bequeath one copy to their child with certainty; if the father has one, then they bequeath one copy with probability $\frac 12$; if no copies, then they bequeath none with certainty.
+\[ \Egiven{x_{i,j}^\text{\textcolor{ForestGreen}{Child}}}{
+    x_{m(i),j}^\text{\textcolor{orange}{Mother}},
+        x_{f(i),j}^\text{\textcolor{blue}{Father}}}
+    = \Egiven{x_{i,j}^\text{\textcolor{ForestGreen}{Child}}}{
+        x_{f(i),j}^\text{\textcolor{blue}{Father}}}
+    + \begin{cases}
+        0, &\text{ if } x_{m(i),j}^\text{\textcolor{orange}{Mother}} = 0 \\
+        \frac 12, &\text{ if } x_{m(i),j}^\text{\textcolor{orange}{Mother}} = 1 \\
+        1, &\text{ if } x_{m(i),j}^\text{\textcolor{orange}{Mother}} = 2.
+    \end{cases} \]
+The child then receives their other copy from their father, by the same process, giving the following representation in expectation,
+\[ \Egiven{x_{i,j}^\text{\textcolor{ForestGreen}{Child}}}{
+    x_{m(i),j}^\text{\textcolor{orange}{Mother}}, x_{f(i),j}^\text{\textcolor{blue}{Father}}}
+    = \frac 12 \Big( x_{m(i),j}^\text{\textcolor{orange}{Mother}}
+        + x_{f(i),j}^\text{\textcolor{blue}{Father}} \Big). \]
 
-\section{Mendelian Independent Inheritance}
+After conception, the child has inherited genetic variants from both parents --- the discrete realisation, and not the expected value.
+This result came about purely from random chance, conditional on at least one of parent having exactly one copy of the SNP, $x_{m(i),j}^\text{\textcolor{orange}{Mother}} = 1$ and/or $x_{f(i),j}^\text{\textcolor{blue}{Father}} = 1$.\footnote{
+    Note both parents having 0 or 2 copies leaves $x_{i',j'}^\text{\textcolor{red}{Random}} = 0$, so that individual $i'$ inherited no random variation in variant $j'$.
+}
+\[ x_{i,j}^\text{\textcolor{red}{Random}}
+    \coloneqq x_{i,j}^\text{\textcolor{ForestGreen}{Child}}
+    - \Egiven{x_{i,j}^\text{\textcolor{ForestGreen}{Child}}}{
+        x_{m(i),j}^\text{\textcolor{orange}{Mother}},
+            x_{f(i),j}^\text{\textcolor{blue}{Father}}}
+    \;\; \longrightarrow \;\; \text{Independently assigned.} \]
+$x_{i,j}^\text{\textcolor{red}{Random}}$ is the random variation in presence of SNP at position $j$.
+From the possible values of the parents' variants, $x_{i,j}^\text{\textcolor{red}{Random}}$ equals zero if both parents have 0 or 2 copies, equals $\frac 12$ if the child actually inherited 1 copy when both parents had one copy each ($- \frac 12$ if they did not inherit), and 1 if they inherited 2 copies and the parents had one each ($-1$ if they inherited 0).
 
-Cannot choose who your parents are, and you also cannot choose how much you inherit from them.
+\subsection{Mendelian Independent Inheritance in the Ed PGI}
 
-Needs at least one cool TikZ figure, showing the design for one genetic variant.
-This should be a figure showing one copy on each parent's genome leads to a random distribution of children's genetic variant (2, 1, or 0 copies).
+Moving from a single variant to the PGI simply means summing across the same random-segregation for all the variants.
+The Ed PGI is constructed by summing the 0, 1, or 2 copy indicators across the $J \approx 8,000$ different SNPs, each multiplied by the externally estimated weights $w_{i,j}$ that capture how strongly each SNP predicts education years.
+Because every variant copy enters the child's genome through an independent random draw (conditional on parental values), the child's Ed PGI is the weighted sum of thousands of such draws.
 
-Eventually get to the following representation, which is a forumla instrument using the random component as an instrument 
+This means the Ed PGI can be decomposed into the component that was inherited as a result of a random draws from parent(s) who had 1 copy of the variant, and the certainty component from draws where parent(s) had 0 or 2 copies.
 \[ Z_i^\text{\textcolor{ForestGreen}{Child}}
-    - \Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
-        Z^\text{\textcolor{blue}{Father}}_i,
-            Z^\text{\textcolor{orange}{Mother}}_i
-    } \;\; \longrightarrow \;\; \text{Independently assigned.} \]
+    = Z_i^\text{\textcolor{red}{Random}}
+        + \Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
+            Z_{m(i)}^\text{\textcolor{orange}{Mother}},
+                Z_{f(i)}^\text{\textcolor{blue}{Father}}}, \]
+where $Z_i^\text{\textcolor{red}{Random}} = \sum_{j = 1}^J w_j x_{i,j}^\text{\textcolor{red}{Random}}$ is the random component of the Ed PGI for individual $i$, and similarly for their parents' Ed PGI values $Z_{m(i)}^\text{\textcolor{orange}{Mother}}, Z_{f(i)}^\text{\textcolor{blue}{Father}}$.
+$Z_i^\text{\textcolor{red}{Random}}$ is the random component because it was the result of Mendelian independent inheritance, and its only determining factor was the parental genetic values.
 
-Figure showing the correlation between Ed PGI and demographics, and other PGIs, then the random component in panel B (which no longer is).
+\subsection{Imputed Parental Ed PGI Values}
+The parental Ed PGI values are not directly observed in UKB data, so I impute the mean of the parents value, $\frac 12 \big( Z_{m(i),j}^\text{\textcolor{orange}{Mother}} + Z_{f(i),j}^\text{\textcolor{blue}{Father}} \big)$.
+This uses the method proposed by \cite{young2022mendelian}, who showed that the genotypes of a pair of siblings contain almost all the information needed.
+For any given SNP the two children collectively reveal between two and four of the four parental variants, depending on how many variants the siblings share identically-by-descent (IBD).
+Averaging over the three possible IBD states, the analyst observed 3 out of 4 alleles in expectation; the final unobserved variant is imputed with its population frequency.
+Taking weighted sums across the thousands of variants therefore yields imputed parental PGIs that are extremely highly correlated with the true parental values --- see \autoref{sec:pgi-impute}.
 
+Substituting these imputed values in place of the missing parental values does not bias the downstream regression; \cite{young2022mendelian} the resulting estimators of the effects remain unbiased and consistent, and that the usual robust variance formula is valid.
+The chief cost is a modest loss of precision: depending on genetic data availability, and the proportion of siblings' genetic variants that end up being identical-by-descent, the effective sample size is one-half to one-sixth of what it would be if both parents were actually observed.
+Even so, this represents a substantial gain over the classical sibling-difference design.
 
+\textbf{Senan note: this needs expanding, and deeper thinking on where the random variation comes from}
+\begin{itemize}
+    \item It comes from siblings who randomly inherited more away from the individual
+    \item If your sibling inherited basically the same as you, then they contribute little to this.
+    \item This means the random component is a noisy measure of the Mendelian independent variation, and weights higher the siblings who get higher values (in the sense that OLS is a variance weighted estimator, see Angrist 2008(?)).
+\end{itemize}
 
-\subsection{Addressing Measurement Error in the Ed PGI}
-
-Mention that PGI weights are calculated with statistical error, so estimates of their effects are attentuated in un-normalised regressions.
-This can be ameliorated using two PGIs, with (supposedly) uncorrelated measurement errors, to instrument for eachother in the obviously related framework.
-
-An important econometric consideration is that the weights $w_j$ used to construct the Ed PGI are themselves statistical estimates rather than true population parameters.
-Although \cite{okbay2022polygenic} estimates these weights from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error.
+\subsection{Measurement Error in the Ed PGI}
+An important econometric consideration is that the Ed PGI weights, $w_{j'}$, are themselves statistical estimates rather than true population parameters.
+Although the \cite{okbay2022polygenic} weights are estimates from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error.
 This measurement error in the weights propagates through to the constructed Ed PGI, resulting in classical attenuation bias when examining correlations between the PGI and outcomes of interest.
-To address this measurement error problem, I follow Muslimova (2024) and construct a second Ed PGI using alternative weights, also provided by Okbay et al. (2022), that were estimated exclusively from the UK Biobank non-sibling subsample.
+
+To address this measurement error problem, I follow Muslimova (2024) and construct a second Ed PGI using alternative weights, also provided by Okbay et al.
+(2022), that were estimated exclusively from the UK Biobank non-sibling subsample.
 Crucially, because these two sets of weights were estimated from independent samples, their measurement errors are uncorrelated.
 This allows me to implement an Obviously Related Instrumental Variables (ORIV) approach, where each PGI serves as an instrument for the other, effectively trading off some statistical precision for reduced attenuation bias.
 The ORIV estimator provides consistent estimates of the relationship between the true (error-free) Ed PGI and outcomes, correcting for the downward bias that would otherwise affect my results.
 Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
+
+\subsection{First-Stage Effects}
+
+Draw the estimating first-stage equation,
+\[ Z_i^\text{\textcolor{ForestGreen}{Child}}
+    = \gamma + \theta Z_i^\text{\textcolor{red}{Random}}
+        + \zeta Z_i^\text{Imputed}
+            + \eta_i \]
+
+
+Show first-stage estimates of random component on child PGI, show it using the random component of one Ed PGI onto the other.
+First-column 1 on 2, second 2 on 1, third stacked obviously related.
+This is then showing results which are not mechanical; in doing so I can also replace the empirical expectation with the raw mean imputed value (if it improves the F stats).
+
+
+\textbf{TODO:} a LaTeX table summarising the results, too.

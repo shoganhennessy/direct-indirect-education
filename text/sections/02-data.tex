@@ -87,8 +87,7 @@ The UKB does not personally identify participants, nor their family members, so 
     This is because study enrolment letters were sent to households, and the household head (or to whomever the letter was addressed) could optionally enrol their family members in addition to themselves.
     \appendixref{appendix:identifying-families} describes the family cluster identification procedure in detail, which has been used in previous social science genetic studies (see e.g., \citealt{muslimova2025environment}). 
 }
-This family-linked subsample enables the examination of within-family variation, allowing for more robust identification strategies that can account for unobserved family-level characteristics that may confound the relationships of interest; see \autoref{sec:imputing}.
-The presence of multiple family members within the dataset provides a unique opportunity to control for shared genetic and environmental factors that might otherwise bias estimates in standard cross-sectional analyses.
+The presence of multiple family members within the dataset provides a unique opportunity to control for shared genetic factors that might otherwise bias estimates in standard cross-sectional analyses.
 
 The analysis sample is also restricted to individuals who report to have primarily European ancestry.
 The genetic measures used in this paper have generally been constructing from primarily white, European descended populations, and have no predictive power out of sample, so are only relevant in this subsample.\footnote{
@@ -118,15 +117,17 @@ These indices are fundamentally correlational measures: they capture statistical
 The weights used to construct PGIs reflect population-level correlations that may arise through various channels, including biological effects, gene-environment correlations, and population stratification.
 
 The Education PGI (Ed PGI) is a summary measure that aggregates genetic information across thousands of genetic variants into a single index predictive of educational attainment.
-The construction of the Ed PGI relies on weights derived from a Genome-Wide Association Study (GWAS), which analyse the relationship between genetic variants and education years.
-In a GWAS, researchers test the association between each Single Nucleotide Polymorphism (SNP) --- a one-letter change in the DNA sequence at a specific location --- and the outcome of interest, in this case education years.
+The construction of the Ed PGI relies on weights derived from a Genome-Wide Association Study (GWAS), which analyse the correlation between genetic variants and education years.
+In a GWAS, researchers test the correlation between each Single Nucleotide Polymorphism (SNP) --- a one-letter change in the DNA sequence at a specific location --- and the outcome of interest, in this case education years.
 I use the weights calculated in the GWAS conducted by \cite{okbay2022polygenic}, which used a sample of over 3 million individuals of European ancestry, primarily from 23\&Me data.
 
 The Ed PGI is defined as the weighted sum of whether individual $i$ has the relevant SNP at each DNA location $j$,
-\[ Z_i = \sum_{j = 1}^{J} w_j
-    \indicator{\text{one-letter change at location  $j$}}. \]
-$w_j$ are the weights, provided in the supplementary data for \cite{okbay2022polygenic}, and I measure the presence of the relevant SNP at each location $j$ in UKB genetic data files.
-The \cite{okbay2022polygenic} GWAS found that over 8,000 individual SNPs were significant in predicting education years, in a roughly additive manner, after passing a battery of biostatistical tests and finding no evidence for significant interactions.
+\[ Z_i = \sum_{j = 1}^{J} w_j x_{i,j} \]
+where $w_j$ are the Ed PGI weights (provided in the supplementary data to \citealt{okbay2022polygenic}), and $x_{i,j}$ is an indicator of whether individual $i$ has the relevant SNP at DNA location $j$.\footnote{
+    Every person has two copies of each chromosome, so that $x_{i,j}$ takes values 0, 1, 2 corresponding to how many copies of the SNP $i$ has.
+    The genetics literature has generally accepted that complex social behaviours are explained by additive effects (see \citealt{hill2008data}), and \cite{okbay2022polygenic} found little evidence for dominance in the Ed PGI SNPs.
+}
+The \cite{okbay2022polygenic} GWAS found that over 8,000 individual SNPs were significant in predicting education years, after passing a battery of biostatistical tests and finding no evidence for significant interactions.
 The resulting Ed PGI is standardised to have mean zero and standard deviation one within the entire sample, making it interpretable as the number of standard deviations from the population mean.
 The Ed PGI captures approximately 12-15\% of the variation in educational attainment, making it one of the most predictive PGIs for any complex behavioural trait to date.
 
@@ -161,7 +162,15 @@ It is roughly normally distributed, with standard deviation normalised to 1.
 It is not surprising that the Ed PGI is normally distributed; it is the weighted sum of thousands of binary variables, among a few thousand individuals, so we should expect the central limit theorem to apply (in the limit) for the Ed PGI.
 Additionally, it is not surprising that the Ed PGI is correlated with education years; it was literally constructed to be so.
 The main take-away is that the correlation is strong, and has meaningful predictive power for education years.
-If education had no relationship with genetic variants, then the correlation would be indistinguishable from zero.
+If education had no relationship with genetic variants, then we may expect the correlation would be indistinguishable from zero.
+
+The Ed PGI is not the only PGI that can be constructed.
+Following the same methodology, I construct additional PGIs for six health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
+Each PGI is calculated using the same approach as the Ed PGI --- taking weights from published GWAS conducted on independent populations and computing weighted sums of the relevant genetic variants in the UKB data.
+These other PGIs serve as control variables in my analysis for two reasons.
+First, genetic variants often exhibit pleiotropy, meaning a single variant can influence multiple traits simultaneously.
+For instance, genetic variants associated with education might also affect other factors (e.g., mental health conditions), which could independently influence labour market outcomes.
+Second, systematic differences in gene frequencies across ancestry groups can create spurious correlations between any PGI and outcomes if health conditions vary across these groups for unrelated reasons.
 
 \subsection{Imputing Parental PGIs from Siblings}
 \label{sec:pgi-impute}
@@ -172,8 +181,8 @@ To overcome this missing data problem, I use siblings' genetic data to impute th
 I use the \cite{young2022mendelian} procedure, to impute mean parental PGI values using genetic data on participants' siblings.
 To briefly summarise how this works, consider that each person inherits exactly half their DNA from their mother and half from their father.
 When we observe two siblings, we can partially reconstruct their parents' genetic information because siblings both inherit their DNA from parents.
-Think of it like observing two different samples from the same underlying distribution --- the parents' genes.
-At some genetic locations, siblings inherited the same variant from a parent (like both getting mum's brown-eye gene), whilst at others they inherited different variants (one got mum's brown-eye gene, the other her blue-eye gene).
+Consider observing two different samples from the same underlying distribution --- the parents' genetics.
+At some genetic locations, siblings inherited the same variant from a parent (like both getting mum's brown-eye variant), whilst at others they inherited different variants (one got mum's brown-eye variant, the other her blue-eye variant).
 By comparing siblings' genetics across thousands of genetic variants, we can recover about 75\% of their parents' combined genetic information --- enough to construct a reasonably accurate parental PGI.
 
 \begin{figure}[h!]
@@ -207,7 +216,7 @@ This high accuracy means I can confidently use the imputed parental PGIs in plac
 It is crucial to emphasise that the genetic measures in this study should not be misinterpreted as evidence of genetic determinism.
 Having a higher Ed PGI does not destine someone to higher education or income; it merely represents only a small statistical tendency, not fate.
 These tendencies are fundamentally shaped by social policies, institutional structures, and cultural contexts that vary across time and place.
-Just as eye-sight correcting glasses  can eliminate the practical consequences of genetic variation in eyesight, education and economic policies can modify or eliminate the consequences of genetic variation in traits relevant to socioeconomic outcomes.
+Just as eyesight correcting glasses  can eliminate the practical consequences of genetic variation in eyesight, education and economic policies can modify or eliminate the consequences of genetic variation in traits relevant to socioeconomic outcomes.
 
 Furthermore, this research provides no support whatsoever for ideas about ``natural'' social hierarchies or genetic justifications for inequality.
 In addition, genetic associations identified within one ancestry group cannot be meaningfully compared across groups due to different genetic architectures, environmental contexts, and historical experiences.

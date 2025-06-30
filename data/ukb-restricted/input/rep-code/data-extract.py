@@ -130,7 +130,7 @@ edQualsLists = [edQualsLists_i0[i] + edQualsLists_i1[i] +
     for i in range(0, len(edQualsLists_i0))]
 # Remove duplicates within each list 
 edQualsLists = [list(dict.fromkeys(edQualsLists[i]))
-    for i in range(0, len(edQualsLists_i0))]
+    for i in range(0, len(edQualsLists))]
 
 # Get binary values for level of education.
 # qual == -7    None of above, given mandatory min   -> edYears =  7    
@@ -172,13 +172,6 @@ print(phenoData[[
     "participant.edqual_minimum",
     "participant.edqual_missing"]])
 
-# Save (with the adjusted columns).
-phenoData.to_csv("phenotype-extract.csv")
-# Upload to clean data output.
-uploadCall = ["dx", "upload", "phenotype-extract.csv",
-    "--path", "data-clean/phenotype-extract.csv"]
-subprocess.check_call(uploadCall)
-
 #! Test: this should have zero rows -> everyone has ed value, or marked as missing.
 phenoData["participant.edqual_any"] = (
     phenoData["participant.edqual_highered"] +
@@ -190,6 +183,32 @@ phenoData["participant.edqual_any"] = (
 phenoData[["participant.eid","participant.edqual_any"]][
     (phenoData["participant.edqual_any"] == 1) &
     (phenoData["participant.edqual_missing"] == 1)]
+
+# Similar adjustment for the employment variable
+employmentLists_i0 = [literal_eval(row)
+    for row in phenoData["participant.p6142_i0"].fillna("[]").tolist()]
+employmentLists_i1 = [literal_eval(row)
+    for row in phenoData["participant.p6142_i1"].fillna("[]").tolist()]
+employmentLists_i2 = [literal_eval(row)
+    for row in phenoData["participant.p6142_i2"].fillna("[]").tolist()]
+employmentLists_i3 = [literal_eval(row)
+    for row in phenoData["participant.p6142_i3"].fillna("[]").tolist()]
+# Put these lists to one.
+employmentLists = [employmentLists_i0[i] + employmentLists_i1[i] +
+    employmentLists_i2[i] + employmentLists_i3[i]
+    for i in range(0, len(employmentLists))]
+# Remove duplicates within each list 
+employmentLists = [list(dict.fromkeys(edQualsLists[i]))
+    for i in range(0, len(employmentLists))]
+# Values for employed.
+phenoData["participant.employed"] = [int(1 in employmentList) for employmentList in employmentLists]
+
+# Save (with the adjusted columns).
+phenoData.to_csv("phenotype-extract.csv")
+# Upload to clean data output.
+uploadCall = ["dx", "upload", "phenotype-extract.csv",
+    "--path", "data-clean/phenotype-extract.csv"]
+subprocess.check_call(uploadCall)
 
 
 ################################################################################

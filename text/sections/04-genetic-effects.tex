@@ -5,6 +5,22 @@ Section to show the results of the Ed PGI $\to$ Education, labour earnings.
 Clearly define the estimands, and then the estimating equations.
 
 
+Write $D_i$ for education years, and $D_i(z')$ the potential outcome for Ed PGI value $z'$.
+
+Write $Y_i$ for resulting labour market income, and $Y_i(z',d')$ the associated potential outcome for Ed PGI value $z'$ and education years $d'$.
+
+
+Assumptions,
+\[ Z_i^\text{\textcolor{red}{Random}} \indep D_i(.), Y_i(.,.) \]
+and
+\[ Z_i^\text{\textcolor{red}{Random}}
+    \text{ is a good instrument for }
+    Z_i^\text{\textcolor{ForestGreen}{Child}} \]
+
+This gives identification for the effects of the Ed PGI on education years and labour market income,
+\[ \partialdiff{z'} \E{D_i(z')}, \text{ and } \partialdiff{z'} \E{Y_i(z', D_i(z'))}. \]
+Note that this is standard; the random component is strong instrument by design (a formula instrument), and everyone is a complier --- though the OLS estimate gives more weights to those with higher $Z_i^\text{\textcolor{red}{Random}}$ values.
+
 \subsection{Genetic Results}
 
 This will require using the random components as obviously related instruments for the other PGIs, respectively.
