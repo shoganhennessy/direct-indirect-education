@@ -148,6 +148,7 @@ ukb_pheno.data <- ukb_pheno.data %>%
     mutate(edyears = ifelse(edyears == -6, NA, edyears)) %>% # "Do not know"
     mutate(edyears = ifelse(edyears == -8, NA, edyears)) %>% # "Prefer not to answer"
     mutate(edyears = ifelse(edyears > 18, 18, edyears)) %>% # years above maximum ed equal.
+    mutate(edyears = ifelse(edyears < 8, 8, edyears)) %>% # years below minimum ed equal.
     filter(!is.na(edyears)) # Missing values are those who cannot be assigned at all, after all this.
 
 # Ensure reasonable distribution for everyone (and NA end condition not met.)
@@ -214,6 +215,11 @@ cleaned_pheno.data <- ukb_pheno.data %>%
             as.integer(householdincome_cat == 5)),
         householdincome_missing = ifelse(is.na(householdincome_cat) |
             householdincome_cat == 6 | householdincome_cat == 7, 1, 0),
+        # Urban category
+        urban = ifelse(urban_cat %in% c(3, 5, 11, 12), 1,
+            ifelse(is.na(urban_cat), 0, 0)),
+        scotland = ifelse(urban_cat >= 11, 1,
+            ifelse(is.na(urban_cat), 0, 0)),    
         # Replace missing values with binary values.
         genetic_euroancest = ifelse(is.na(genetic_race), 0, genetic_race),
         inPCA = ifelse(is.na(PCA), 0, PCA),
@@ -507,7 +513,7 @@ final_pheno.data <- cleaned_pheno.data %>%
         visityear,
         recruitedage,
         genetic_euroancest,
-        urban_cat,
+        urban,
         # Birth variables.
         birth_n_coord,
         birth_e_coord,
@@ -526,6 +532,7 @@ final_pheno.data <- cleaned_pheno.data %>%
         edpgi_exclude_imputed_paternal,
         edpgi_exclude_imputed_maternal,
         # Genetic variables.
+        adhd_pgi,
         asthma_pgi,
         bipolar_pgi,
         bmi_pgi,
@@ -604,13 +611,38 @@ expected_edpgi_exclude.reg <- analysis.data %>%
 analysis.data$edpgi_exclude_imputed_random <- (analysis.data$edpgi_exclude_imputed_self
     - predict(expected_edpgi_exclude.reg, analysis.data))
 
+# Replace the complictaed empirical expectation with the simple imputed mean.
+analysis.data$edpgi_all_imputed_random <- (
+    analysis.data$edpgi_all_imputed_self - analysis.data$edpgi_all_imputed_parental)
+analysis.data$edpgi_exclude_imputed_random <- (
+    analysis.data$edpgi_exclude_imputed_self - analysis.data$edpgi_exclude_imputed_parental)
+
+
 #! Testing the first-stage ORIV
 analysis.data %>%
-    lm(edpgi_exclude_imputed_self ~ 1 + edpgi_all_imputed_random,
+    lm(edpgi_all_imputed_self ~ 1 +
+        edpgi_all_imputed_random + edpgi_all_imputed_parental,
         na.action = na.exclude,
         data = .) %>%
     summary() %>%
     print()
+
+analysis.data %>%
+    lm(edpgi_all_imputed_self ~ 1 +
+        edpgi_exclude_imputed_random + edpgi_exclude_imputed_parental,
+        na.action = na.exclude,
+        data = .) %>%
+    summary() %>%
+    print()
+
+analysis.data %>%
+    lm(edpgi_exclude_imputed_self ~ 1 +
+        edpgi_all_imputed_random + edpgi_all_imputed_parental,
+        na.action = na.exclude,
+        data = .) %>%
+    summary() %>%
+    print()
+
 
 # Show summary statistics of the random component.
 print(mean(analysis.data$edpgi_all_imputed_random))

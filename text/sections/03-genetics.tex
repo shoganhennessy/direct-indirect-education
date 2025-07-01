@@ -3,23 +3,23 @@
 Genetic variants are not randomly assigned, which means that simple correlations between the Ed PGI and outcomes cannot be interpreted as causal relationships.
 Genes are inherited from parents, where children receive 23 chromosomes from each parent at conception --- half the genes from their mother, half from father.
 This inheritance pattern creates systematic associations between an individual's genetics and their family environment, as children who inherit certain genetic variants also inherit the familial circumstances from parents carrying those variants.
-Consequently, observed associations between the Ed PGIs and labour market outcomes may reflect not only the causal effect of the Ed PGI, but also the correlated environments and advantages that are transmitted alongside genes within families.
+However, this inheritance pattern also involves independent random variation, which I use to instrument for changes in the Ed PGI and thus estimate causal effects.
 
 \subsection{Mendelian Independent Inheritance}
 I use variation away from parental values to estimate causal effects of having a higher versus lower Ed PGI.
 This approach leverages the fundamental randomness in genetic inheritance, first described by Mendel's laws \citep{mendel1865versuche}.
 
-%\begin{figure}[h!]
-%    \centering
-%    \singlespacing
-%    \caption{Mendelian Independent Inheritance of One Genetic Variant.}
-%    \label{fig:mendelian-indep}
-%    \input{sections/figures/mendelian-indep.tex}
-%    \justify
-%    \footnotesize
-%    \textbf{Note}:
-%    This figure illustrates the process of Mendelian Independent Inheritance of genetic variants, for parents with each one copy of a variant (red) and the resulting possibilities for their child's inherited variants.
-%\end{figure}
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Mendelian Independent Inheritance of One Genetic Variant.}
+    \label{fig:mendelian-indep}
+    \input{sections/figures/mendelian-indep.tex}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    This figure illustrates the process of Mendelian Independent Inheritance of genetic variants, for parents with each one copy of a variant (red) and the resulting possibilities for their child's inherited variants.
+\end{figure}
 
 Each parent has 0, 1, or 2 copies of each genetic variant --- corresponding to presence on each of their chromosomes.
 When a father and mother's sex cells are formed, exactly one of the two copies is sorted into each reproductive cell, and is then inherited by their resulting child.
@@ -58,8 +58,7 @@ This result came about purely from random chance, conditional on at least one of
 $x_{i,j}^\text{\textcolor{red}{Random}}$ is the random variation in presence of SNP at position $j$.
 From the possible values of the parents' variants, $x_{i,j}^\text{\textcolor{red}{Random}}$ equals zero if both parents have 0 or 2 copies, equals $\frac 12$ if the child actually inherited 1 copy when both parents had one copy each ($- \frac 12$ if they did not inherit), and 1 if they inherited 2 copies and the parents had one each ($-1$ if they inherited 0).
 
-\subsection{Mendelian Independent Inheritance in the Ed PGI}
-
+\subsubsection{Mendelian Independent Inheritance in the Ed PGI}
 Moving from a single variant to the PGI simply means summing across the same random-segregation for all the variants.
 The Ed PGI is constructed by summing the 0, 1, or 2 copy indicators across the $J \approx 8,000$ different SNPs, each multiplied by the externally estimated weights $w_{i,j}$ that capture how strongly each SNP predicts education years.
 Because every variant copy enters the child's genome through an independent random draw (conditional on parental values), the child's Ed PGI is the weighted sum of thousands of such draws.
@@ -70,26 +69,48 @@ This means the Ed PGI can be decomposed into the component that was inherited as
         + \Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
             Z_{m(i)}^\text{\textcolor{orange}{Mother}},
                 Z_{f(i)}^\text{\textcolor{blue}{Father}}}, \]
-where $Z_i^\text{\textcolor{red}{Random}} = \sum_{j = 1}^J w_j x_{i,j}^\text{\textcolor{red}{Random}}$ is the random component of the Ed PGI for individual $i$, and similarly for their parents' Ed PGI values $Z_{m(i)}^\text{\textcolor{orange}{Mother}}, Z_{f(i)}^\text{\textcolor{blue}{Father}}$.
-$Z_i^\text{\textcolor{red}{Random}}$ is the random component because it was the result of Mendelian independent inheritance, and its only determining factor was the parental genetic values.
+where $Z_i^\text{\textcolor{red}{Random}} = \sum_{j = 1}^J w_j x_{i,j}^\text{\textcolor{red}{Random}}$ is the random component of the Ed PGI for individual $i$, and similarly for their parents' Ed PGI values, $Z_{m(i)}^\text{\textcolor{orange}{Mother}}$ and $Z_{f(i)}^\text{\textcolor{blue}{Father}}$.
+$Z_i^\text{\textcolor{red}{Random}}$ is the random component because it was the result of Mendelian independent inheritance, and its only determining factor was having at least one parent with exactly one copy for relevant genetic variants --- and nothing else.
 
-\subsection{Imputed Parental Ed PGI Values}
-The parental Ed PGI values are not directly observed in UKB data, so I impute the mean of the parents value, $\frac 12 \big( Z_{m(i),j}^\text{\textcolor{orange}{Mother}} + Z_{f(i),j}^\text{\textcolor{blue}{Father}} \big)$.
-This uses the method proposed by \cite{young2022mendelian}, who showed that the genotypes of a pair of siblings contain almost all the information needed.
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Correlation for Ed PGI, or Random Component, and Demographic Variables.}
+    \label{fig:demographic-correlates}
+    \includegraphics[width=0.85\textwidth]{sections/figures/demographic-correlates.png}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    Multivariate regression estimates for the linear model $Z_i = \beta\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
+\end{figure}
+
+\textbf{Describe the random component.
+What is its distribution.
+It is not correlated with other demographic variables, and less so with the other PGIs.}
+\autoref{fig:demographic-correlates} shows what the Ed PGI, and the calculated random component is correlated with.
+
+\subsubsection{Using Imputed Parental Ed PGI Values}
+The random component is a function of parental PGI values, which are not directly observed in the UKB data.
+I impute the mean of the parents value, $\frac 12 \big( Z_{m(i),j}^\text{\textcolor{orange}{Mother}} + Z_{f(i),j}^\text{\textcolor{blue}{Father}} \big)$, using the genetic data from individuals who have siblings in the UKB.
+This is the method proposed by \cite{young2022mendelian}, who showed that the genotypes of a pair of siblings contain almost all the information needed.
 For any given SNP the two children collectively reveal between two and four of the four parental variants, depending on how many variants the siblings share identically-by-descent (IBD).
-Averaging over the three possible IBD states, the analyst observed 3 out of 4 alleles in expectation; the final unobserved variant is imputed with its population frequency.
+Averaging over the three possible IBD states, the analyst observed 3 out of 4 variants in expectation; the final unobserved variant is imputed with its population frequency.
 Taking weighted sums across the thousands of variants therefore yields imputed parental PGIs that are extremely highly correlated with the true parental values --- see \autoref{sec:pgi-impute}.
 
 Substituting these imputed values in place of the missing parental values does not bias the downstream regression; \cite{young2022mendelian} the resulting estimators of the effects remain unbiased and consistent, and that the usual robust variance formula is valid.
 The chief cost is a modest loss of precision: depending on genetic data availability, and the proportion of siblings' genetic variants that end up being identical-by-descent, the effective sample size is one-half to one-sixth of what it would be if both parents were actually observed.
 Even so, this represents a substantial gain over the classical sibling-difference design.
 
-\textbf{Senan note: this needs expanding, and deeper thinking on where the random variation comes from}
-\begin{itemize}
-    \item It comes from siblings who randomly inherited more away from the individual
-    \item If your sibling inherited basically the same as you, then they contribute little to this.
-    \item This means the random component is a noisy measure of the Mendelian independent variation, and weights higher the siblings who get higher values (in the sense that OLS is a variance weighted estimator, see Angrist 2008(?)).
-\end{itemize}
+The random genetic variation leveraged in this analysis fundamentally arises from siblings who inherit different sets of variants from their parents.
+An individual and their sibling may inherit Ed PGI values far apart, from randomly one inheriting more copies of relevant variants from their than their sibling.
+The resulting variation provides a natural experiment, offering a source of quasi-experimental variation.
+In contrast, sibling pairs whose inherited Ed PGI values close to each other (or equal) produce minimal informative variation.
+Thus, the effective random variation in this framework predominantly stems from sibling pairs whose genetic inheritance diverges notably.
+
+Consequently, the derived random genetic component is inherently a noisy measure of true Mendelian random variation.
+Its precision depends on how genetically distinct each sibling pair is: sibling pairs who differ widely provide clearer signals, while genetically similar pairs introduce greater measurement noise.
+For estimation, an Ordinary Least Squares (OLS) regression estimate will implicitly weight observations by variance \citep{angrist1998estimating}, meaning sibling pairs with larger genetic differences carry greater influence on estimated effects.
+The resulting estimates disproportionately reflect families where sibling genetic inheritance diverged substantially, potentially affecting generalisability if sibling genetic divergence correlates systematically with family characteristics.
 
 \subsection{Measurement Error in the Ed PGI}
 An important econometric consideration is that the Ed PGI weights, $w_{j'}$, are themselves statistical estimates rather than true population parameters.
@@ -116,5 +137,28 @@ Show first-stage estimates of random component on child PGI, show it using the r
 First-column 1 on 2, second 2 on 1, third stacked obviously related.
 This is then showing results which are not mechanical; in doing so I can also replace the empirical expectation with the raw mean imputed value (if it improves the F stats).
 
-
-\textbf{TODO:} a LaTeX table summarising the results, too.
+\begin{table}[h!]
+    \singlespacing
+    \centering
+    \small
+    \caption{First-stage Genetic Estimates,
+        $Z_i^\text{\textcolor{red}{Random}} \to Z_i^\text{\textcolor{ForestGreen}{Child}}$ Independently and with ORIV.}
+    \begin{tabular}{l c c c c c c}
+        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+        & \multicolumn{6}{c}{Outcome:} \\
+        & \multicolumn{3}{c}{Primary Ed PGI}
+            & \multicolumn{3}{c}{Secondary Ed PGI} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        & (1) & (2) & (3) & (4) & (5) & (6) \\
+        \midrule
+        %\\[-1.8ex]\hline \\[-1.8ex]
+        \input{sections/tables/genetic-firststage.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+    \end{tabular}
+    \vspace{-0.25cm}
+    \label{tab:genetic-firststage}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    This table ...
+\end{table}

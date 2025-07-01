@@ -126,7 +126,7 @@ summary.table <- function(given.data){
             # Education variables
             "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{Education:}" = NA,
             "Ed PGI" = edpgi_all_imputed_self,
-            "Ed PGI, parental mean" = edpgi_all_imputed_parental,
+            "Ed PGI, imputed parental mean" = edpgi_all_imputed_parental,
             "Education years" = edyears,
             "Qualification, University degree" = edqual_highered,
             "Qualification, A-Levels" = edqual_alevels,
@@ -211,7 +211,7 @@ edpgi.plot <- analysis.data %>%
     theme_bw() +
     geom_vline(xintercept = 0, linetype = "dashed") +
     annotate("text", colour = colour.list[1],
-        x = -3.45, y = 8250,
+        x = -3.55, y = 8250,
         fontface = "bold",
         label = "Mean Ed PGI \n               = 0",
         size = 4.25,  hjust = 0, vjust = 0) +
@@ -236,24 +236,25 @@ ggsave(file.path(presentation.folder, "edpgi-hist.png"),
 
 # Show the histogram of ed years.
 mean.edyears <- analysis.data %>% pull(edyears) %>% mean(na.rm = TRUE)
+analysis.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
 edyears.plot <- analysis.data %>%
-    #filter(edyears >= 10) %>%
     ggplot(aes(x = edyears)) +
     geom_bar(aes(y = after_stat(count)),
         fill = colour.list[2], colour = 1) +
     #geom_vline(xintercept = mean.edyears, linetype = "dashed") +
     annotate("text", colour = colour.list[2], x = 16, y = 5000,
         fontface = "bold",
-        label = "Mean Ed years \n= 14.5 (College)",
+        label = paste0("Mean Ed years \n= ", round(mean.edyears, 2), " (Sec. school)"),
         size = 4.25, hjust = 1, vjust = 0) +
     theme_bw() +
-    scale_x_continuous(expand = c(0, 0.01),
+    scale_x_continuous(expand = c(0.01, 0.01),
+        limits = c(8.5, 18.5),
         name = "Education Years",
         breaks = seq(0, 20, by = 1)) +
     scale_y_continuous(expand = c(0, 0),
         name = "",
         breaks = seq(0, 10000, by = 1000),
-        limits = c(0, 7000)) +
+        limits = c(0, 7500)) +
     ggtitle(TeX(r"(Observations, \textit{N})")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
@@ -291,10 +292,9 @@ ggsave(file.path(figures.folder, "earnings-hist.png"),
     units = "cm", width = fig.width, height = fig.height)
 
 # Show correlation between edyears and income
-analysis.data %>%
-    lm(log(soc_mean_annual) ~ 1 + edyears, data = .) %>%
-    summary() %>%
-    print()
+edyears.reg <- lm(log(soc_mean_annual) ~ 1 + edyears, data = analysis.data)
+edyears.point <- coef(summary(edyears.reg))["edyears", "Estimate"]
+edyears.se <- coef(summary(edyears.reg))["edyears", "Std. Error"]
 # Scatter plot of edyears + earnings.
 edyears_earnings.plot <- analysis.data %>%
     group_by(edyears) %>%
@@ -306,11 +306,13 @@ edyears_earnings.plot <- analysis.data %>%
     annotate("text", colour = colour.list[2],
         x = 13.5, y = 40,
         fontface = "bold",
-        label = "Slope = +7.4% \n (0.001)",
+        label = paste0("Slope = +", round(100 * edyears.point, 2),
+            "% \n ", "(", round(edyears.se, 3), ")"),
         size = 4.25, hjust = 1, vjust = 0) +
     theme_bw() +
     scale_x_continuous(
-        expand = c(0.05, 0.05),
+        expand = c(0.01, 0.01),
+        limits = c(8, 18),
         name = "Education Years",
         breaks = seq(0, 20, by = 1)) +
     scale_y_continuous(expand = c(0, 1),
