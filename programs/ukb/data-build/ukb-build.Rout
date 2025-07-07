@@ -19,7 +19,7 @@ Type 'q()' to quit R.
 > ## Senan Hogan-Hennessy, 11 March 2025.
 > ## Script to ingest raw UKB data, and output familiar tabular format.
 > print(Sys.time())
-[1] "2025-06-30 16:00:32 EDT"
+[1] "2025-07-05 14:50:23 EDT"
 > set.seed(47)
 > ## Packages:
 > # functions for data manipulation and visualisation
@@ -186,6 +186,7 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 > ukb_imputed_edpgi_all.data <- input.folder %>%
 +     file.path("pgi", "pgi-okbay-all-2022",
 +         "imputed-ed-pgi-okbay-all-2022.pgs.txt") %>%
++         #"phased-imputed-ed-pgi-okbay-all-2022.pgs.txt") %>%
 +     read_table()
 
 ── Column specification ────────────────────────────────────────────────────────
@@ -319,15 +320,14 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 +     mutate(edyears = ifelse(edyears == -6, NA, edyears)) %>% # "Do not know"
 +     mutate(edyears = ifelse(edyears == -8, NA, edyears)) %>% # "Prefer not to answer"
 +     mutate(edyears = ifelse(edyears > 18, 18, edyears)) %>% # years above maximum ed equal.
++     mutate(edyears = ifelse(edyears < 8, 8, edyears)) %>% # years below minimum ed equal.
 +     filter(!is.na(edyears)) # Missing values are those who cannot be assigned at all, after all this.
 > 
 > # Ensure reasonable distribution for everyone (and NA end condition not met.)
 > ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
 .
-     0      1      2      3      4      5      6      7      8      9     10 
-   115     10     18      4     14     34     33     40     62  85155  25868 
-    11     12     13     14     15     16     17     18 
- 37692  94926  11100  58986   2870   6644   2401 170232 
+     8      9     10     11     12     13     14     15     16     17     18 
+   330  85155  25868  37692  94926  11100  58986   2870   6644   2401 170232 
 > ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
 .
   1111   1112   1113   1114   1121   1122   1123   1131   1132   1133   1134 
@@ -420,7 +420,7 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 +         householdincome_cat    = as.integer(participant.p738_i0),
 +         recruitedage           = as.integer(participant.p21022),
 +         jobcode_soc            = as.integer(jobcode_soc),
-+         #TODO: uncomment after re-running the pheno extract.
++         #TODO: uncomment after getting new UKB the pheno extract.
 +         #employed               = as.integer(participant.employed),
 +         hours_workweek         = as.numeric(hours_workweek),
 +         # Education info.
@@ -457,6 +457,11 @@ dbl (5): #FID, IID, ALLELE_CT, NAMED_ALLELE_DOSAGE_SUM, SCORE1_AVG
 +             as.integer(householdincome_cat == 5)),
 +         householdincome_missing = ifelse(is.na(householdincome_cat) |
 +             householdincome_cat == 6 | householdincome_cat == 7, 1, 0),
++         # Urban category
++         urban = ifelse(urban_cat %in% c(3, 5, 11, 12), 1,
++             ifelse(is.na(urban_cat), 0, 0)),
++         scotland = ifelse(urban_cat >= 11, 1,
++             ifelse(is.na(urban_cat), 0, 0)),    
 +         # Replace missing values with binary values.
 +         genetic_euroancest = ifelse(is.na(genetic_race), 0, genetic_race),
 +         inPCA = ifelse(is.na(PCA), 0, PCA),
@@ -888,7 +893,7 @@ F-statistic:  1041 on 1 and 36238 DF,  p-value: < 2.2e-16
 +     tibble() %>%
 +     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
 +     mutate(analysis_sample = as.integer(!is.na(edpgi_all_imputed_parental)
-+         & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
++         & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
 +     # Select the relevant columns.
 +     select(eid, famid,
 +         # Demographic variables.
@@ -896,7 +901,7 @@ F-statistic:  1041 on 1 and 36238 DF,  p-value: < 2.2e-16
 +         visityear,
 +         recruitedage,
 +         genetic_euroancest,
-+         urban_cat,
++         urban,
 +         # Birth variables.
 +         birth_n_coord,
 +         birth_e_coord,
@@ -915,6 +920,7 @@ F-statistic:  1041 on 1 and 36238 DF,  p-value: < 2.2e-16
 +         edpgi_exclude_imputed_paternal,
 +         edpgi_exclude_imputed_maternal,
 +         # Genetic variables.
++         adhd_pgi,
 +         asthma_pgi,
 +         bipolar_pgi,
 +         bmi_pgi,
@@ -953,7 +959,7 @@ F-statistic:  1041 on 1 and 36238 DF,  p-value: < 2.2e-16
 > final_pheno.data %>% NROW()
 [1] 496204
 > final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
-[1] 20602
+[1] 24755
 > 
 > # Similarly, for with SOC occ wage data.
 > final_pheno.data %>% filter(!is.na(soc_mean_annual)) %>% NROW() %>% print()
@@ -978,7 +984,7 @@ F-statistic:  1041 on 1 and 36238 DF,  p-value: < 2.2e-16
 > expected_edpgi_all.reg <- analysis.data %>%
 +     lm(edpgi_all_imputed_self ~ 1 + (
 +         poly(edpgi_all_imputed_paternal, 3) * poly(edpgi_all_imputed_maternal, 3)
-+         ) * sex_male * father_present * mother_present,
++         ) * sex_male * father_present * mother_present * sibling_count,
 +         na.action = na.exclude,
 +         data = .)
 > # (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
@@ -997,40 +1003,107 @@ F-statistic:  1041 on 1 and 36238 DF,  p-value: < 2.2e-16
 > analysis.data$edpgi_exclude_imputed_random <- (analysis.data$edpgi_exclude_imputed_self
 +     - predict(expected_edpgi_exclude.reg, analysis.data))
 > 
+> # Replace the complictaed empirical expectation with the simple imputed mean.
+> analysis.data$edpgi_all_imputed_random <- (
++     analysis.data$edpgi_all_imputed_self - analysis.data$edpgi_all_imputed_parental)
+> analysis.data$edpgi_exclude_imputed_random <- (
++     analysis.data$edpgi_exclude_imputed_self - analysis.data$edpgi_exclude_imputed_parental)
+> 
 > 
 > #! Testing the first-stage ORIV
 > analysis.data %>%
-+     lm(edpgi_exclude_imputed_self ~ 1 + edpgi_all_imputed_random,
++     lm(edpgi_all_imputed_self ~ 1 +
++         edpgi_all_imputed_random + edpgi_all_imputed_parental,
 +         na.action = na.exclude,
 +         data = .) %>%
 +     summary() %>%
 +     print()
 
 Call:
-lm(formula = edpgi_exclude_imputed_self ~ 1 + edpgi_all_imputed_random, 
-    data = ., na.action = na.exclude)
+lm(formula = edpgi_all_imputed_self ~ 1 + edpgi_all_imputed_random + 
+    edpgi_all_imputed_parental, data = ., na.action = na.exclude)
 
 Residuals:
-    Min      1Q  Median      3Q     Max 
--3.8000 -0.7140  0.1787  0.7515  2.5063 
+       Min         1Q     Median         3Q        Max 
+-3.176e-13 -4.000e-17  1.000e-17  7.000e-17  7.300e-16 
 
 Coefficients:
-                         Estimate Std. Error t value Pr(>|t|)    
-(Intercept)              0.005864   0.006950   0.844    0.399    
-edpgi_all_imputed_random 0.214734   0.012944  16.590   <2e-16 ***
+                             Estimate Std. Error    t value Pr(>|t|)    
+(Intercept)                -2.258e-17  1.462e-17 -1.544e+00    0.123    
+edpgi_all_imputed_random    1.000e+00  2.692e-17  3.715e+16   <2e-16 ***
+edpgi_all_imputed_parental  1.000e+00  1.973e-17  5.069e+16   <2e-16 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-Residual standard error: 0.9976 on 20600 degrees of freedom
-Multiple R-squared:  0.01318,	Adjusted R-squared:  0.01314 
-F-statistic: 275.2 on 1 and 20600 DF,  p-value: < 2.2e-16
+Residual standard error: 2.283e-15 on 24752 degrees of freedom
+Multiple R-squared:      1,	Adjusted R-squared:      1 
+F-statistic: 2.373e+33 on 2 and 24752 DF,  p-value: < 2.2e-16
 
+> 
+> analysis.data %>%
++     lm(edpgi_all_imputed_self ~ 1 +
++         edpgi_exclude_imputed_random + edpgi_exclude_imputed_parental,
++         na.action = na.exclude,
++         data = .) %>%
++     summary() %>%
++     print()
+
+Call:
+lm(formula = edpgi_all_imputed_self ~ 1 + edpgi_exclude_imputed_random + 
+    edpgi_exclude_imputed_parental, data = ., na.action = na.exclude)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.7429 -0.6648 -0.0050  0.6636  3.6898 
+
+Coefficients:
+                               Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                    0.035596   0.006228   5.715 1.11e-08 ***
+edpgi_exclude_imputed_random   0.177295   0.011106  15.964  < 2e-16 ***
+edpgi_exclude_imputed_parental 0.235336   0.012082  19.478  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.9784 on 24752 degrees of freedom
+Multiple R-squared:  0.04252,	Adjusted R-squared:  0.04244 
+F-statistic: 549.6 on 2 and 24752 DF,  p-value: < 2.2e-16
+
+> 
+> analysis.data %>%
++     lm(edpgi_exclude_imputed_self ~ 1 +
++         edpgi_all_imputed_random + edpgi_all_imputed_parental,
++         na.action = na.exclude,
++         data = .) %>%
++     summary() %>%
++     print()
+
+Call:
+lm(formula = edpgi_exclude_imputed_self ~ 1 + edpgi_all_imputed_random + 
+    edpgi_all_imputed_parental, data = ., na.action = na.exclude)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.5833 -0.7054  0.1815  0.7474  2.6267 
+
+Coefficients:
+                             Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                -0.0005103  0.0062898  -0.081    0.935    
+edpgi_all_imputed_random    0.2166446  0.0115808  18.707   <2e-16 ***
+edpgi_all_imputed_parental  0.1999570  0.0084865  23.562   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.9822 on 24752 degrees of freedom
+Multiple R-squared:  0.04222,	Adjusted R-squared:  0.04215 
+F-statistic: 545.6 on 2 and 24752 DF,  p-value: < 2.2e-16
+
+> 
 > 
 > # Show summary statistics of the random component.
 > print(mean(analysis.data$edpgi_all_imputed_random))
-[1] -5.96964e-13
+[1] 0.06120129
 > print(sd(analysis.data$edpgi_all_imputed_random))
-[1] 0.5369564
+[1] 0.547407
 > hist(analysis.data$edpgi_all_imputed_random)
 > 
 > # Put Ed PGi random component back onto the phenotype data file.
@@ -1111,106 +1184,105 @@ dbl (3): year_founded, uni_n_coord, uni_e_coord
 +     birth.data[i, ]$all_uni_n_coord <- closest_all_uni.data$uni_n_coord
 +     birth.data[i, ]$all_uni_e_coord <- closest_all_uni.data$uni_e_coord
 + }
-[1] "200 out of 20011, 0.999450302333716% done."
-[1] "400 out of 20011, 1.99890060466743% done."
-[1] "600 out of 20011, 2.99835090700115% done."
-[1] "800 out of 20011, 3.99780120933487% done."
-[1] "1000 out of 20011, 4.99725151166858% done."
-[1] "1200 out of 20011, 5.9967018140023% done."
-[1] "1400 out of 20011, 6.99615211633602% done."
-[1] "1600 out of 20011, 7.99560241866973% done."
-[1] "1800 out of 20011, 8.99505272100345% done."
-[1] "2000 out of 20011, 9.99450302333717% done."
-[1] "2200 out of 20011, 10.9939533256709% done."
-[1] "2400 out of 20011, 11.9934036280046% done."
-[1] "2600 out of 20011, 12.9928539303383% done."
-[1] "2800 out of 20011, 13.992304232672% done."
-[1] "3000 out of 20011, 14.9917545350057% done."
-[1] "3200 out of 20011, 15.9912048373395% done."
-[1] "3400 out of 20011, 16.9906551396732% done."
-[1] "3600 out of 20011, 17.9901054420069% done."
-[1] "3800 out of 20011, 18.9895557443406% done."
-[1] "4000 out of 20011, 19.9890060466743% done."
-[1] "4200 out of 20011, 20.988456349008% done."
-[1] "4400 out of 20011, 21.9879066513418% done."
-[1] "4600 out of 20011, 22.9873569536755% done."
-[1] "4800 out of 20011, 23.9868072560092% done."
-[1] "5000 out of 20011, 24.9862575583429% done."
-[1] "5200 out of 20011, 25.9857078606766% done."
-[1] "5400 out of 20011, 26.9851581630103% done."
-[1] "5600 out of 20011, 27.9846084653441% done."
-[1] "5800 out of 20011, 28.9840587676778% done."
-[1] "6000 out of 20011, 29.9835090700115% done."
-[1] "6200 out of 20011, 30.9829593723452% done."
-[1] "6400 out of 20011, 31.9824096746789% done."
-[1] "6600 out of 20011, 32.9818599770126% done."
-[1] "6800 out of 20011, 33.9813102793464% done."
-[1] "7000 out of 20011, 34.9807605816801% done."
-[1] "7200 out of 20011, 35.9802108840138% done."
-[1] "7400 out of 20011, 36.9796611863475% done."
-[1] "7600 out of 20011, 37.9791114886812% done."
-[1] "7800 out of 20011, 38.9785617910149% done."
-[1] "8000 out of 20011, 39.9780120933487% done."
-[1] "8200 out of 20011, 40.9774623956824% done."
-[1] "8400 out of 20011, 41.9769126980161% done."
-[1] "8600 out of 20011, 42.9763630003498% done."
-[1] "8800 out of 20011, 43.9758133026835% done."
-[1] "9000 out of 20011, 44.9752636050172% done."
-[1] "9200 out of 20011, 45.974713907351% done."
-[1] "9400 out of 20011, 46.9741642096847% done."
-[1] "9600 out of 20011, 47.9736145120184% done."
-[1] "9800 out of 20011, 48.9730648143521% done."
-[1] "10000 out of 20011, 49.9725151166858% done."
-[1] "10200 out of 20011, 50.9719654190195% done."
-[1] "10400 out of 20011, 51.9714157213533% done."
-[1] "10600 out of 20011, 52.970866023687% done."
-[1] "10800 out of 20011, 53.9703163260207% done."
-[1] "11000 out of 20011, 54.9697666283544% done."
-[1] "11200 out of 20011, 55.9692169306881% done."
-[1] "11400 out of 20011, 56.9686672330218% done."
-[1] "11600 out of 20011, 57.9681175353556% done."
-[1] "11800 out of 20011, 58.9675678376893% done."
-[1] "12000 out of 20011, 59.967018140023% done."
-[1] "12200 out of 20011, 60.9664684423567% done."
-[1] "12400 out of 20011, 61.9659187446904% done."
-[1] "12600 out of 20011, 62.9653690470241% done."
-[1] "12800 out of 20011, 63.9648193493578% done."
-[1] "13000 out of 20011, 64.9642696516916% done."
-[1] "13200 out of 20011, 65.9637199540253% done."
-[1] "13400 out of 20011, 66.963170256359% done."
-[1] "13600 out of 20011, 67.9626205586927% done."
-[1] "13800 out of 20011, 68.9620708610264% done."
-[1] "14000 out of 20011, 69.9615211633601% done."
-[1] "14200 out of 20011, 70.9609714656939% done."
-[1] "14400 out of 20011, 71.9604217680276% done."
-[1] "14600 out of 20011, 72.9598720703613% done."
-[1] "14800 out of 20011, 73.959322372695% done."
-[1] "15000 out of 20011, 74.9587726750287% done."
-[1] "15200 out of 20011, 75.9582229773625% done."
-[1] "15400 out of 20011, 76.9576732796962% done."
-[1] "15600 out of 20011, 77.9571235820299% done."
-[1] "15800 out of 20011, 78.9565738843636% done."
-[1] "16000 out of 20011, 79.9560241866973% done."
-[1] "16200 out of 20011, 80.955474489031% done."
-[1] "16400 out of 20011, 81.9549247913647% done."
-[1] "16600 out of 20011, 82.9543750936985% done."
-[1] "16800 out of 20011, 83.9538253960322% done."
-[1] "17000 out of 20011, 84.9532756983659% done."
-[1] "17200 out of 20011, 85.9527260006996% done."
-[1] "17400 out of 20011, 86.9521763030333% done."
-[1] "17600 out of 20011, 87.9516266053671% done."
-[1] "17800 out of 20011, 88.9510769077008% done."
-[1] "18000 out of 20011, 89.9505272100345% done."
-[1] "18200 out of 20011, 90.9499775123682% done."
-[1] "18400 out of 20011, 91.9494278147019% done."
-[1] "18600 out of 20011, 92.9488781170356% done."
-[1] "18800 out of 20011, 93.9483284193693% done."
-[1] "19000 out of 20011, 94.9477787217031% done."
-[1] "19200 out of 20011, 95.9472290240368% done."
-[1] "19400 out of 20011, 96.9466793263705% done."
-[1] "19600 out of 20011, 97.9461296287042% done."
-[1] "19800 out of 20011, 98.9455799310379% done."
-[1] "20000 out of 20011, 99.9450302333716% done."
+[1] "241 out of 24085, 1.00062279427029% done."
+[1] "482 out of 24085, 2.00124558854059% done."
+[1] "723 out of 24085, 3.00186838281088% done."
+[1] "964 out of 24085, 4.00249117708117% done."
+[1] "1205 out of 24085, 5.00311397135146% done."
+[1] "1446 out of 24085, 6.00373676562176% done."
+[1] "1687 out of 24085, 7.00435955989205% done."
+[1] "1928 out of 24085, 8.00498235416234% done."
+[1] "2169 out of 24085, 9.00560514843263% done."
+[1] "2410 out of 24085, 10.0062279427029% done."
+[1] "2651 out of 24085, 11.0068507369732% done."
+[1] "2892 out of 24085, 12.0074735312435% done."
+[1] "3133 out of 24085, 13.0080963255138% done."
+[1] "3374 out of 24085, 14.0087191197841% done."
+[1] "3615 out of 24085, 15.0093419140544% done."
+[1] "3856 out of 24085, 16.0099647083247% done."
+[1] "4097 out of 24085, 17.010587502595% done."
+[1] "4338 out of 24085, 18.0112102968653% done."
+[1] "4579 out of 24085, 19.0118330911356% done."
+[1] "4820 out of 24085, 20.0124558854059% done."
+[1] "5061 out of 24085, 21.0130786796761% done."
+[1] "5302 out of 24085, 22.0137014739464% done."
+[1] "5543 out of 24085, 23.0143242682167% done."
+[1] "5784 out of 24085, 24.014947062487% done."
+[1] "6025 out of 24085, 25.0155698567573% done."
+[1] "6266 out of 24085, 26.0161926510276% done."
+[1] "6507 out of 24085, 27.0168154452979% done."
+[1] "6748 out of 24085, 28.0174382395682% done."
+[1] "6989 out of 24085, 29.0180610338385% done."
+[1] "7230 out of 24085, 30.0186838281088% done."
+[1] "7471 out of 24085, 31.0193066223791% done."
+[1] "7712 out of 24085, 32.0199294166494% done."
+[1] "7953 out of 24085, 33.0205522109197% done."
+[1] "8194 out of 24085, 34.02117500519% done."
+[1] "8435 out of 24085, 35.0217977994602% done."
+[1] "8676 out of 24085, 36.0224205937305% done."
+[1] "8917 out of 24085, 37.0230433880008% done."
+[1] "9158 out of 24085, 38.0236661822711% done."
+[1] "9399 out of 24085, 39.0242889765414% done."
+[1] "9640 out of 24085, 40.0249117708117% done."
+[1] "9881 out of 24085, 41.025534565082% done."
+[1] "10122 out of 24085, 42.0261573593523% done."
+[1] "10363 out of 24085, 43.0267801536226% done."
+[1] "10604 out of 24085, 44.0274029478929% done."
+[1] "10845 out of 24085, 45.0280257421632% done."
+[1] "11086 out of 24085, 46.0286485364335% done."
+[1] "11327 out of 24085, 47.0292713307038% done."
+[1] "11568 out of 24085, 48.029894124974% done."
+[1] "11809 out of 24085, 49.0305169192443% done."
+[1] "12050 out of 24085, 50.0311397135146% done."
+[1] "12291 out of 24085, 51.0317625077849% done."
+[1] "12532 out of 24085, 52.0323853020552% done."
+[1] "12773 out of 24085, 53.0330080963255% done."
+[1] "13014 out of 24085, 54.0336308905958% done."
+[1] "13255 out of 24085, 55.0342536848661% done."
+[1] "13496 out of 24085, 56.0348764791364% done."
+[1] "13737 out of 24085, 57.0354992734067% done."
+[1] "13978 out of 24085, 58.036122067677% done."
+[1] "14219 out of 24085, 59.0367448619473% done."
+[1] "14460 out of 24085, 60.0373676562176% done."
+[1] "14701 out of 24085, 61.0379904504879% done."
+[1] "14942 out of 24085, 62.0386132447581% done."
+[1] "15183 out of 24085, 63.0392360390284% done."
+[1] "15424 out of 24085, 64.0398588332987% done."
+[1] "15665 out of 24085, 65.040481627569% done."
+[1] "15906 out of 24085, 66.0411044218393% done."
+[1] "16147 out of 24085, 67.0417272161096% done."
+[1] "16388 out of 24085, 68.0423500103799% done."
+[1] "16629 out of 24085, 69.0429728046502% done."
+[1] "16870 out of 24085, 70.0435955989205% done."
+[1] "17111 out of 24085, 71.0442183931908% done."
+[1] "17352 out of 24085, 72.0448411874611% done."
+[1] "17593 out of 24085, 73.0454639817314% done."
+[1] "17834 out of 24085, 74.0460867760017% done."
+[1] "18075 out of 24085, 75.046709570272% done."
+[1] "18316 out of 24085, 76.0473323645422% done."
+[1] "18557 out of 24085, 77.0479551588125% done."
+[1] "18798 out of 24085, 78.0485779530828% done."
+[1] "19039 out of 24085, 79.0492007473531% done."
+[1] "19280 out of 24085, 80.0498235416234% done."
+[1] "19521 out of 24085, 81.0504463358937% done."
+[1] "19762 out of 24085, 82.051069130164% done."
+[1] "20003 out of 24085, 83.0516919244343% done."
+[1] "20244 out of 24085, 84.0523147187046% done."
+[1] "20485 out of 24085, 85.0529375129749% done."
+[1] "20726 out of 24085, 86.0535603072452% done."
+[1] "20967 out of 24085, 87.0541831015155% done."
+[1] "21208 out of 24085, 88.0548058957858% done."
+[1] "21449 out of 24085, 89.055428690056% done."
+[1] "21690 out of 24085, 90.0560514843263% done."
+[1] "21931 out of 24085, 91.0566742785966% done."
+[1] "22172 out of 24085, 92.0572970728669% done."
+[1] "22413 out of 24085, 93.0579198671372% done."
+[1] "22654 out of 24085, 94.0585426614075% done."
+[1] "22895 out of 24085, 95.0591654556778% done."
+[1] "23136 out of 24085, 96.0597882499481% done."
+[1] "23377 out of 24085, 97.0604110442184% done."
+[1] "23618 out of 24085, 98.0610338384887% done."
+[1] "23859 out of 24085, 99.061656632759% done."
 > 
 > 
 > ################################################################################
@@ -1286,13 +1358,13 @@ Projected CRS: OSGB36 / British National Grid
 +     filter(analysis_sample == 1) %>%
 +     NROW() %>%
 +     print()
-[1] 20602
+[1] 24755
 > final_pheno.data %>% 
 +     filter(analysis_sample == 1) %>%
 +     filter(open_closest_uni_name != all_closest_uni_name) %>%
 +     NROW() %>%
 +     print()
-[1] 8380
+[1] 10939
 > 
 > 
 > ################################################################################
@@ -1304,4 +1376,4 @@ Projected CRS: OSGB36 / British National Grid
 > 
 > proc.time()
    user  system elapsed 
-201.630   3.448 198.782 
+279.339   3.361 276.395 

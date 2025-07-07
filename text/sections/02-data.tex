@@ -16,7 +16,7 @@ Key socioeconomic variables include educational attainment (measured in educatio
 % Participants also provided saliva samples, to collect DNA for genetic measures.
 See \cite{sudlow2015uk} for a full description of the UKB organisation and data.
 
-\begin{table}[h!]
+\begin{table}[!htbp]
     \singlespacing
     \centering
     \small
@@ -159,14 +159,14 @@ The Ed PGI captures approximately 12-15\% of the variation in educational attain
 The Ed PGI is highly correlated with education years, as it is constructed to be so.
 A one standard deviation increase in the Ed PGI is associated with 0.93 extra education years (standard error 0.02), with an $R^2$ value of 0.10 for the raw regression of education years on Ed PGI.
 It is roughly normally distributed, with standard deviation normalised to 1.
-It is not surprising that the Ed PGI is normally distributed; it is the weighted sum of thousands of binary variables, among a few thousand individuals, so we should expect the central limit theorem to apply (in the limit) for the Ed PGI.
+It is not surprising that the Ed PGI is normally distributed; it is the weighted sum of thousands of binary variables, among a few thousand individuals, so we should expect the central limit theorem to apply.
 Additionally, it is not surprising that the Ed PGI is correlated with education years; it was literally constructed to be so.
 The main take-away is that the correlation is strong, and has meaningful predictive power for education years.
 If education had no relationship with genetic variants, then we may expect the correlation would be indistinguishable from zero.
 
 The Ed PGI is not the only PGI that can be constructed.
 Following the same methodology, I construct additional PGIs for six health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
-Each PGI is calculated using the same approach as the Ed PGI --- taking weights from published GWAS conducted on independent populations and computing weighted sums of the relevant genetic variants in the UKB data.
+Each PGI is calculated using the same approach as the Ed PGI --- taking weights from a published GWAS, conducted on independent populations, and computing weighted sums of the relevant genetic variants in the UKB data.
 These other PGIs serve as control variables in my analysis for two reasons.
 First, genetic variants often exhibit pleiotropy, meaning a single variant can influence multiple traits simultaneously.
 For instance, genetic variants associated with education might also affect other factors (e.g., mental health conditions), which could independently influence labour market outcomes.
@@ -175,7 +175,7 @@ Second, systematic differences in gene frequencies across ancestry groups can cr
 \subsection{Imputing Parental PGIs from Siblings}
 \label{sec:pgi-impute}
 It would be ideal if the UKB contained genetic information for the parents of every UKB participant.
-However, there are only $\approx 500$ participants with a parent also included in the UKB, and only 72 with both parents.
+While there are 6,239 participants with a parent also included in the UKB, there are only 72 with both parents.
 To overcome this missing data problem, I use siblings' genetic data to impute the mean parental PGIs from the sample of \input{../text/sections/tables/ukb-analysis-count.txt} participants with at least one sibling also in the UKB --- the sibling analysis sample described above.
 
 I use the \cite{young2022mendelian} procedure, to impute mean parental PGI values using genetic data on participants' siblings.

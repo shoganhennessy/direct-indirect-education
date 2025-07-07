@@ -55,6 +55,7 @@ ukb_raw_edpgi_all.data <- input.folder %>%
 ukb_imputed_edpgi_all.data <- input.folder %>%
     file.path("pgi", "pgi-okbay-all-2022",
         "imputed-ed-pgi-okbay-all-2022.pgs.txt") %>%
+        #"phased-imputed-ed-pgi-okbay-all-2022.pgs.txt") %>%
     read_table()
 
 ## Okbay+ (2022) Ed PGI, excluding the 23+Me sample.
@@ -178,7 +179,7 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         householdincome_cat    = as.integer(participant.p738_i0),
         recruitedage           = as.integer(participant.p21022),
         jobcode_soc            = as.integer(jobcode_soc),
-        #TODO: uncomment after re-running the pheno extract.
+        #TODO: uncomment after getting new UKB the pheno extract.
         #employed               = as.integer(participant.employed),
         hours_workweek         = as.numeric(hours_workweek),
         # Education info.
@@ -505,7 +506,7 @@ final_pheno.data <- cleaned_pheno.data %>%
     tibble() %>%
     # Mark the analysis sample, those with imputed Ed PGI + Ed + SOC data.
     mutate(analysis_sample = as.integer(!is.na(edpgi_all_imputed_parental)
-        & !is.na(edyears) & !is.na(soc_mean_annual))) %>%
+        & !is.na(edyears) & !is.na(soc_mean_hourly))) %>%
     # Select the relevant columns.
     select(eid, famid,
         # Demographic variables.
@@ -611,12 +612,13 @@ expected_edpgi_exclude.reg <- analysis.data %>%
 analysis.data$edpgi_exclude_imputed_random <- (analysis.data$edpgi_exclude_imputed_self
     - predict(expected_edpgi_exclude.reg, analysis.data))
 
-# Replace the complictaed empirical expectation with the simple imputed mean.
-analysis.data$edpgi_all_imputed_random <- (
-    analysis.data$edpgi_all_imputed_self - analysis.data$edpgi_all_imputed_parental)
-analysis.data$edpgi_exclude_imputed_random <- (
-    analysis.data$edpgi_exclude_imputed_self - analysis.data$edpgi_exclude_imputed_parental)
-
+# Option: Replace the complictaed empirical expectation with the simple imputed mean.
+#analysis.data$edpgi_all_imputed_random <- (
+#    analysis.data$edpgi_all_imputed_self - analysis.data$edpgi_all_imputed_parental)
+#analysis.data$edpgi_exclude_imputed_random <- (
+#    analysis.data$edpgi_exclude_imputed_self - analysis.data$edpgi_exclude_imputed_parental)
+# Note: this gives the same results, but a recentred approach (as above) sticks
+#       better to Boru Hull (2023) IV reasoning, so move forward with that.
 
 #! Testing the first-stage ORIV
 analysis.data %>%

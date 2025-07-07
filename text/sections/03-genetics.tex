@@ -59,6 +59,7 @@ $x_{i,j}^\text{\textcolor{red}{Random}}$ is the random variation in presence of 
 From the possible values of the parents' variants, $x_{i,j}^\text{\textcolor{red}{Random}}$ equals zero if both parents have 0 or 2 copies, equals $\frac 12$ if the child actually inherited 1 copy when both parents had one copy each ($- \frac 12$ if they did not inherit), and 1 if they inherited 2 copies and the parents had one each ($-1$ if they inherited 0).
 
 \subsubsection{Mendelian Independent Inheritance in the Ed PGI}
+\label{sec:mendel-pgi}
 Moving from a single variant to the PGI simply means summing across the same random-segregation for all the variants.
 The Ed PGI is constructed by summing the 0, 1, or 2 copy indicators across the $J \approx 8,000$ different SNPs, each multiplied by the externally estimated weights $w_{i,j}$ that capture how strongly each SNP predicts education years.
 Because every variant copy enters the child's genome through an independent random draw (conditional on parental values), the child's Ed PGI is the weighted sum of thousands of such draws.
@@ -77,11 +78,11 @@ $Z_i^\text{\textcolor{red}{Random}}$ is the random component because it was the 
     \singlespacing
     \caption{Correlation for Ed PGI, or Random Component, and Demographic Variables.}
     \label{fig:demographic-correlates}
-    \includegraphics[width=0.85\textwidth]{sections/figures/demographic-correlates.png}
+    \includegraphics[width=\textwidth]{sections/figures/demographic-correlates.png}
     \justify
     \footnotesize
     \textbf{Note}:
-    Multivariate regression estimates for the linear model $Z_i = \beta\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
+    Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
 \end{figure}
 
 \textbf{Describe the random component.
@@ -114,28 +115,42 @@ The resulting estimates disproportionately reflect families where sibling geneti
 
 \subsection{Measurement Error in the Ed PGI}
 An important econometric consideration is that the Ed PGI weights, $w_{j'}$, are themselves statistical estimates rather than true population parameters.
-Although the \cite{okbay2022polygenic} weights are estimates from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error.
-This measurement error in the weights propagates through to the constructed Ed PGI, resulting in classical attenuation bias when examining correlations between the PGI and outcomes of interest.
+Although the \cite{okbay2022polygenic} weights are estimates from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error; the sample size if large, but the number of estimated parameters is similarly large ($w_{j'}$ for around 8,000 different values), making estimation error a sufficient concern.
+This measurement error in the weights propagates through the observed Ed PGI, resulting in classical attenuation bias when examining correlations between the PGI and outcomes of interest.
 
-To address this measurement error problem, I follow Muslimova (2024) and construct a second Ed PGI using alternative weights, also provided by Okbay et al.
-(2022), that were estimated exclusively from the UK Biobank non-sibling subsample.
-Crucially, because these two sets of weights were estimated from independent samples, their measurement errors are uncorrelated.
-This allows me to implement an Obviously Related Instrumental Variables (ORIV) approach, where each PGI serves as an instrument for the other, effectively trading off some statistical precision for reduced attenuation bias.
-The ORIV estimator provides consistent estimates of the relationship between the true (error-free) Ed PGI and outcomes, correcting for the downward bias that would otherwise affect my results.
-Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
+To address this measurement error problem, I follow \cite{van2023overcoming} and construct a secondary Ed PGI using alternative weights, also provided by \cite{okbay2022polygenic}, that were estimated exclusively from the UK Biobank non-sibling subsample.
+This Secondary Ed PGI is noisier, and has a lower correlation with education years than the Primary Ed PGI described above, because it was calculated on a smaller sample size --- and so has higher measurement error.
+However, this measurement error comes from estimating on a different sample to the Primary Ed PGI, so their respective measurement errors are uncorrelated.
+Thus, I use the Ed PGI random component, calculated with weights from the secondary Ed PGI, as an instrument for the child's Ed PGI, calcuated with weights from the primary Ed PGI.
 
-\subsection{First-Stage Effects}
+This approach trades off bias for higher variance, where the measurement error was causing attenuation bias, but introducing a secondary Ed PGI increases the variance from implementing the IV procedure.
+To alleviate increasing variance, I estimate the approach using Obviously Related Instrumental Variables (ORIV, \citealt{gillen2019experimenting}).
+ORIV works as follows: calculate the IV results with the secondary Ed PGI instrumenting for the primary Ed PGI ($1 \to 2$), and similarly calculate the IV results with the primary Ed PGI instrumenting for the secondary Ed PGI ($2 \to 1$).
+Then stack together these results, and adjust the standard errors for their stacked combination.
+This approach uses the primary and secondary Ed PGIs as instruments for each other, overcoming attenuation bias in the most efficient way possible by combining IV first-stages.
+To my knowledge, this is the first use of this method to estimate causal PGI effects (while also using the random component and/or controlling for parental values),\footnote{
+    Previous use of ORIV in the context of PGIs uses the approach to purge attenuation bias in correlational estimates, not causal effects (as in this paper).
+} and so updates the literature regarding the size of PGI causal effects.
+% Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
 
-Draw the estimating first-stage equation,
-\[ Z_i^\text{\textcolor{ForestGreen}{Child}}
-    = \gamma + \theta Z_i^\text{\textcolor{red}{Random}}
-        + \zeta Z_i^\text{Imputed}
-            + \eta_i \]
+\subsection{Genetic First-Stage Effects}
+The Ed PGI random component, $Z_i^\text{\textcolor{red}{Random}}$, serves as a formula instrument for an individuals' Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+\autoref{sec:mendel-pgi} derived the random component, and its formula relating it to an individual's PGI.
 
-
-Show first-stage estimates of random component on child PGI, show it using the random component of one Ed PGI onto the other.
-First-column 1 on 2, second 2 on 1, third stacked obviously related.
-This is then showing results which are not mechanical; in doing so I can also replace the empirical expectation with the raw mean imputed value (if it improves the F stats).
+I estimate the genetic first-stage as follows, 
+\begin{equation}
+    \label{eqn:genetic-firststage}
+    Z_i^\text{\textcolor{ForestGreen}{Child}}
+        = \gamma + \theta Z_i^\text{\textcolor{red}{Random}}
+            + \vec\zeta' \vec X_i + \eta_i,
+\end{equation}
+where $\theta$ is the first-stage average parameter, and $\vec X_i$ is a vector of controls including parental imputed PGI levels, gender, age, sibling count, in city indicator, and the other PGIs (i.e., all demographic variables in \autoref{fig:demographic-correlates}).
+Since $Z_i^\text{\textcolor{red}{Random}}$ serves is a formula instrument, it must be re-centred with respect to the control variables to produce valid causal effects \citep{borusyak2023nonrandom}.
+I do this by calculating
+$\Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
+    Z_{m(i)}^\text{\textcolor{orange}{Mother}},
+        Z_{f(i)}^\text{\textcolor{blue}{Father}}}$
+with interactions for the imputed parental PGI values and demographic variables.
 
 \begin{table}[h!]
     \singlespacing
@@ -146,8 +161,10 @@ This is then showing results which are not mechanical; in doing so I can also re
     \begin{tabular}{l c c c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
         & \multicolumn{6}{c}{Outcome:} \\
-        & \multicolumn{3}{c}{Primary Ed PGI}
-            & \multicolumn{3}{c}{Secondary Ed PGI} \\
+        & \multicolumn{3}{c}{Primary Ed PGI,
+            $Z_i^\text{\textcolor{ForestGreen}{Child}}$}
+            & \multicolumn{3}{c}{Secondary Ed PGI,
+                $Z_i^\text{\textcolor{ForestGreen}{Child}}$} \\
         \cmidrule(lr){2-4} \cmidrule(lr){5-7}
         & (1) & (2) & (3) & (4) & (5) & (6) \\
         \midrule
@@ -160,5 +177,16 @@ This is then showing results which are not mechanical; in doing so I can also re
     \justify
     \footnotesize
     \textbf{Note:}
-    This table ...
+    Shows estimates of the genetic first-stage, \eqref{eqn:genetic-firststage},
+    using the random component as an instrument for the Ed PGI.
+    The first three columns using the primary Ed PGI as the outcome, while the next use the secondary Ed PGI.
+    The row marked ORIV uses the combined estimates of the primary and secondary Ed PGI random component on the Ed PGI, estimated using ORIV.
 \end{table}
+
+The Ed PGI random component is a strong instrument for the Ed PGI, even when using the primary as an instrument for the secondary ($1 \to 2$, and visa versa).
+\autoref{tab:genetic-firststage} summarises estimates of the genetic first-stage defined in equation \eqref{eqn:genetic-firststage}.
+Columns (1) and (4) show mechanical results, equal to one by construction, as the random component is calculated from the primary and secondary Ed PGIs respectively.
+Columns (2) and (3) show that the random component is a strong instrument for the Ed PGI, calculated using weights from the other sample (primary or secondary), confirming that the random component from one PGI retains predictive power for the other, independently calculated PGIs.
+The fact that these cross-PGI coefficients are not equal to one indicates substantial measurement error in both PGIs, which would lead to attenuation bias in standard IV estimation.
+The ORIV estimates (columns 3 and 6) explicitly addresses this measurement error by combining information from both primary and secondary first-stages.
+Although ORIV estimates recover unbiased coefficients, this approach necessarily comes at the expense of greater variance.

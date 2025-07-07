@@ -17,10 +17,10 @@ library(ivreg)
 # Define number of digits in tables and graphs
 digits.no <- 3
 # Size for figures
-fig.width <- 7.5
-fig.height <- fig.width
+fig.height <- 10
+fig.width <- 1.5 * fig.height
 presentation.width <- (3 / 2) * fig.width
-presentation.height <- (2 / 3) * presentation.width
+presentation.height <- presentation.width
 # List of 3 default colours.
 colour.list <- c(
     "#1f77b4", # Blue
@@ -32,6 +32,20 @@ data.folder <- file.path("..", "..", "..", "data", "ukb-restricted", "cleaned")
 presentation.folder <- file.path("..", "..", "..", "text", "presentation-files")
 figures.folder <- file.path("..", "..", "..", "text", "sections", "figures")
 tables.folder <- file.path("..", "..", "..", "text", "sections", "tables")
+
+# Define a function to get the F stat of a specific variable
+fstat.get <- function(input.reg, variable.name){
+    # Get the variable specific F stats.
+    f.test <- car::linearHypothesis(input.reg, test = "F",
+        c(paste0(variable.name, "=0")))
+    # Extract the statistic.
+    f.stat <- f.test["F"] %>%
+        unlist() %>%
+        nth(2) %>%
+        as.numeric() %>%
+        round()
+    return(f.stat)
+}
 
 
 ################################################################################
@@ -48,11 +62,35 @@ print(analysis.data)
 print(names(analysis.data))
 
 
+#! Test: make the random component recentred.
+# First the 23+me weights for the Ed PGI.
+# (1) Calculate E[ Ed PGI | parents]
+expected_edpgi_all.reg <- analysis.data %>%
+    lm(edpgi_all_imputed_self ~ 1 + (
+        poly(edpgi_all_imputed_paternal, 3) * poly(edpgi_all_imputed_maternal, 3)
+        ) * sex_male * father_present * mother_present * sibling_count,
+        na.action = na.exclude,
+        data = .)
+# (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
+analysis.data$edpgi_all_imputed_random <- (analysis.data$edpgi_all_imputed_self
+    - predict(expected_edpgi_all.reg, analysis.data))
+
+# Second the UKB weights for the Ed PGI.
+# (1) Calculate E[ Ed PGI | parents]
+expected_edpgi_exclude.reg <- analysis.data %>%
+    lm(edpgi_exclude_imputed_self ~ 1 + (
+        poly(edpgi_exclude_imputed_paternal, 3) * poly(edpgi_exclude_imputed_maternal, 3)
+        ) * sex_male * father_present * mother_present,
+        na.action = na.exclude,
+        data = .)
+# (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
+analysis.data$edpgi_exclude_imputed_random <- (
+    analysis.data$edpgi_exclude_imputed_self
+        - predict(expected_edpgi_exclude.reg, analysis.data))
+
+
 ################################################################################
 ## Plot: correlates with the Ed PGI, and whether they are for random component.
-
-# Show how Ed PGI is related to demographics, lm(Z ~ 1 + X)
-
 
 # Get the demographic possible confounders.
 demographic.data <- analysis.data %>%
@@ -62,8 +100,8 @@ demographic.data <- analysis.data %>%
         sex_male,
         recruitedage,
         sibling_count,
-        #TODO: urban,
-        #TODO: adhd_pgi,
+        urban,
+        adhd_pgi,
         asthma_pgi,
         bipolar_pgi,
         bmi_pgi,
@@ -99,7 +137,7 @@ demographic.plot <- modelplot(demographic.reg,
         coef_omit = "Intercept", colour = "blue", size = 1) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     scale_x_continuous(expand = c(0.005, 0.005),
-        name = TeX(r"(Association Estimates $Z_i = \beta\,' \, X_i + \epsilon_i$)"),
+        name = "Correlation Estimate, and 95% Confidence Interval",
         breaks = seq(-1, 1, by = 0.05)) +
     ggtitle(TeX("Demographic Information")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
@@ -115,20 +153,20 @@ combined.plot <- list(
     scale_color_manual(values = colour.list[c(2, 3)]) +
     geom_vline(xintercept = 0, linetype = "dashed") +
     scale_x_continuous(expand = c(0.005, 0.005),
-        #name = TeX(r"(Association Estimates $Z_i = \beta\,' \, X_i + \epsilon_i$)"),
+        name = "Correlation Estimate",
         breaks = seq(-1, 1, by = 0.05)) +
     ggtitle(TeX("Demographic Information")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"),
-        legend.position = c(0.85, 0.95),
+        legend.position = "bottom", #c(0.25, 0.95),
         axis.text.y = element_text(hjust = 0))
 
 # Save this plot
 ggsave(file.path(figures.folder, "demographic-correlates.png"),
     plot = combined.plot,
-    units = "cm",
-    width = 1.25 * presentation.width, height = presentation.height)
+    dpi = 300, units = "cm",
+    width = fig.width, height = fig.height)
 
 
 ################################################################################
@@ -137,50 +175,64 @@ ggsave(file.path(figures.folder, "demographic-correlates.png"),
 # and Ztilde for the supplementary Ed PGI from UKB subsample.
 
 # Random component Z -> Z
-Z_Z_random.reg <- lm(edpgi_all_imputed_self ~ 1 + 
-    edpgi_all_imputed_random,# + edpgi_all_imputed_parental,
+Z_Z_random.reg <- lm(edpgi_all_imputed_self ~ 1 +
+    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
+    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi +
+    edpgi_all_imputed_random + edpgi_all_imputed_parental,
     data = analysis.data)
 Z_Z_random.reg %>% summary() %>% print()
 
 # Random component Ztilde -> Z
-Ztilde_Z_random.reg <- lm(edpgi_all_imputed_self ~ 1 + 
-    edpgi_exclude_imputed_random,# + edpgi_exclude_imputed_parental,
+Ztilde_Z_random.reg <- lm(edpgi_all_imputed_self ~ 1 +
+    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
+    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi + 
+    edpgi_exclude_imputed_random + edpgi_exclude_imputed_parental,
     data = analysis.data)
 Ztilde_Z_random.reg %>% summary() %>% print()
 
 # Random component Z -> Ztilde
-Z_Ztilde_random.reg <- lm(edpgi_exclude_imputed_self ~ 1 + 
-    edpgi_all_imputed_random,# + edpgi_all_imputed_parental,
+Z_Ztilde_random.reg <- lm(edpgi_exclude_imputed_self ~ 1 +
+    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
+    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi + 
+    edpgi_all_imputed_random + edpgi_all_imputed_parental,
     data = analysis.data)
 Z_Ztilde_random.reg %>% summary() %>% print()
 
 # Random component Ztilde -> Ztilde
 Ztilde_Ztilde_random.reg <- lm(edpgi_exclude_imputed_self ~ 1 +
-    edpgi_exclude_imputed_random,# + edpgi_exclude_imputed_parental,
+    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
+    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi +
+    edpgi_exclude_imputed_random + edpgi_exclude_imputed_parental,
     data = analysis.data)
 Ztilde_Ztilde_random.reg %>% summary() %>% print()
 
 ## Estimate as an ORIV first-stage (stacked).
 source("oriv.R")
 # Z main
-oriv_Z_random.reg <- GORIV(edpgi_all_imputed_self ~ 1,# +
-    #edpgi_all_imputed_parental + edpgi_exclude_imputed_parental,
+oriv_Z_random.reg <- GORIV(edpgi_all_imputed_self ~ 1 +
+    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
+    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
     "edpgi_all_imputed_random", "edpgi_exclude_imputed_random",
-    IID = "eid", FID = "famid",
+    IV.list = c(
+        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
+    control.list = c(
+        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
+    IID = "eid",
     data = analysis.data)
 oriv_Z_random.reg %>% summary() %>% print()
 # Z tilde
-oriv_Ztilde_random.reg <- GORIV(edpgi_exclude_imputed_self ~ 1,
+oriv_Ztilde_random.reg <- GORIV(edpgi_exclude_imputed_self ~ 1 +
+    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
+    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
     "edpgi_all_imputed_random", "edpgi_exclude_imputed_random",
-    IID = "eid", FID = "famid",
+    IV.list = c(
+        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
+    control.list = c(
+        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
+    IID = "eid",
     data = analysis.data)
 oriv_Ztilde_random.reg %>% summary() %>% print()
 
-#TODO: Adjust the ORIV to have PGI^random as the IV 
-#TODO: and the PGI as the treatment (thus 4 components instead of 2).
-
-#TODO: Put everything into a LaTeX table (see notes for shape).
-#TODO: Adjust the UKB code so that chr_ data are phased.
 
 ################################################################################
 ## LaTeX Table of the genetic first-stage.
@@ -192,7 +244,7 @@ point_est.data <- data.frame(
         coef(summary(Z_Z_random.reg))["edpgi_all_imputed_random", "Estimate"],
         coef(summary(Z_Z_random.reg))["edpgi_all_imputed_random", "Std. Error"],
         NA, NA, NA, NA,
-        round(as.numeric(summary(Z_Z_random.reg)$fstatistic["value"])),
+        NA, # fstat.get(Z_Z_random.reg, "edpgi_all_imputed_random"),
         summary(Z_Z_random.reg)$r.squared,
         NROW(analysis.data)),
     # column 2: Ztilde -> Z
@@ -200,14 +252,14 @@ point_est.data <- data.frame(
         coef(summary(Ztilde_Z_random.reg))["edpgi_exclude_imputed_random", "Estimate"],
         coef(summary(Ztilde_Z_random.reg))["edpgi_exclude_imputed_random", "Std. Error"],
         NA, NA,
-        round(as.numeric(summary(Ztilde_Z_random.reg)$fstatistic["value"])),
+        fstat.get(Ztilde_Z_random.reg, "edpgi_exclude_imputed_random"),
         summary(Ztilde_Z_random.reg)$r.squared,
         NROW(analysis.data)),
     # column 3: obviously related Z, Ztilde -> Z
     col3 = c(NA, NA, NA, NA,
         coeftable(oriv_Z_random.reg)["fit_PGI_MAIN", "Estimate"],
         coeftable(oriv_Z_random.reg)["fit_PGI_MAIN", "Std. Error"],
-        round(fitstat(oriv_Z_random.reg, "ivf")[1]$`ivf1::PGI_MAIN`$stat),
+        fstat.get(oriv_Z_random.reg, "fit_PGI_MAIN"),
         NA,
         NROW(analysis.data)),
     # Column 4: Z -> Ztilde
@@ -223,14 +275,14 @@ point_est.data <- data.frame(
         coef(summary(Ztilde_Ztilde_random.reg))["edpgi_exclude_imputed_random", "Estimate"],
         coef(summary(Ztilde_Ztilde_random.reg))["edpgi_exclude_imputed_random", "Std. Error"],
         NA, NA,
-        round(as.numeric(summary(Ztilde_Ztilde_random.reg)$fstatistic["value"])),
+        NA, # fstat.get(Ztilde_Ztilde_random.reg, "edpgi_exclude_imputed_random"),
         summary(Ztilde_Ztilde_random.reg)$r.squared,
         NROW(analysis.data)),
     # column 6: obviously related Z, Ztilde -> Z
     col6 = c(NA, NA, NA, NA,
         coeftable(oriv_Ztilde_random.reg)["fit_PGI_MAIN", "Estimate"],
         coeftable(oriv_Ztilde_random.reg)["fit_PGI_MAIN", "Std. Error"],
-        round(fitstat(oriv_Ztilde_random.reg, "ivf")[1]$`ivf1::PGI_MAIN`$stat),
+        fstat.get(oriv_Ztilde_random.reg, "fit_PGI_MAIN"),
         NA,
         NROW(analysis.data))
     )
@@ -265,12 +317,13 @@ for (col.index in 1:3){
         paste0("(", ., ")")
 }
 # Add on variable names (first column)
-point_est.data$names = c("Primary Ed PGI", " ",
-        "Secondary Ed PGI", " ",
-        "Combined (Obvious Related)", " ",
-        "\\\\[-1.8ex]\\hline \\\\[-1.8ex] $F$-statistics",
-        "$R^2$",
-        "Observations")
+point_est.data$names = c(
+    r"(Primary Ed PGI, $Z_i^\text{\textcolor{red}{Random}}$)", " ",
+    r"(Secondary Ed PGI, $Z_i^\text{\textcolor{red}{Random}}$)", " ",
+    "Combined, ORIV", " ",
+    r"(\\[-1.8ex]\hline \\[-1.8ex] $F$-statistics)",
+    "$R^2$",
+    "Observations")
 point_est.data <- point_est.data[, c(7, 1:6)]
 
 # Show the LaTeX table
@@ -293,10 +346,84 @@ point_est.data %>%
 ## Genetic effects
 
 ## OLS versus random component.
+lm(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data) %>% summary()
+lm(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
+ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
+    edpgi_all_imputed_random  + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
+
+ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
+    edpgi_exclude_imputed_random  + edpgi_exclude_imputed_parental, data = analysis.data) %>% summary()
+
+
+ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
+    edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
+#! About twice as large as literature estimates, when using diferent weights for imputed random/parental component.
+
+
+# Family FEs?
+fam.data <- analysis.data %>%
+    group_by(famid) %>%
+    mutate(fam_count = 1) %>%
+    mutate(fam_count = sum(fam_count)) %>%
+    ungroup() %>%
+    filter(fam_count > 1) %>%
+    select(-fam_count)
+
+# Base line: which Ed PGI is most predictive (within families) of Ed years?
+feols(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data) %>% summary()
+feols(edyears ~ 1 + edpgi_all_imputed_self | famid,
+    #famid | edpgi_all_imputed_self ~ edpgi_all_imputed_random,
+    data = fam.data) %>% summary()
+# Ed PGI (all raw)              gives 1.09, 0.54
+# Phased Ed PGI (all imputed)   gives 1.1, 0.54
+# Unphased Ed PGI (all imputed) gives ?, ?
+# Ed PGI (exclude raw)          gives 0.186, 0.111
+# Ed PGI (exclude imputed)      gives 0.19, 0.116
+#! Conclusion: use the unphased Ed PGI.
+fam.data
+
+
+lm(edpgi_all_imputed_self ~ 1 + edpgi_exclude_imputed_random, data = analysis.data) %>% summary()
+
+
+
+ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental | edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
+
+ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self | edpgi_all_imputed_random , data = analysis.data) %>% summary()
+
+
+# The gain from ORIV (correlation)
 summary(lm(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data))
 summary(GORIV(edyears ~ 1,
     "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    data = analysis.data, IID = "eid", FID = "famid"))
+    data = analysis.data, IID = "eid"))
+
+# The gain from ORIV (causal)
+source("oriv.R")
+summary(lm(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental,
+    data = analysis.data))
+summary(GORIV(edyears ~ 1,
+    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
+    IV.list = c(
+        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
+    control.list =
+        c("edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
+    data = analysis.data, IID = "eid"))
+
+# For higher ed attendance
+summary(lm(I(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental,
+    data = analysis.data))
+summary(GORIV(I(edyears >= 18) ~ 1,
+    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
+    IV.list = c(
+        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
+    control.list =
+        c("edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
+    data = analysis.data, IID = "eid"))
+
+
+
+
 # Causal, with + with/out ORIV measurement error adjustment.
 summary(lm(edyears ~ 1 + edpgi_all_imputed_random, data = analysis.data))
 summary(ivreg(edyears ~ 1 + edpgi_all_imputed_self | edpgi_all_imputed_random , data = analysis.data))

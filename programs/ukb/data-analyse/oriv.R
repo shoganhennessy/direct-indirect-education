@@ -25,47 +25,14 @@ library(fixest)
 # fixest object from "fixest" package
 # see https://www.rdocumentation.org/packages/fixest/versions/0.8.4/topics/feols
 
-GORIV <- function(fm, PGI1, PGI2, data, IID,
-        FID = NULL, resid = FALSE, within = FALSE){
+GORIV <- function(fm, PGI1, PGI2, IID, data, FID = NULL,
+        IV.list = NULL,
+        control.list = NULL){
     # Put data into data.table format.
     data <- data.table(data)
-    # data <- na.omit(data[, .SD, .SDcols=unique(c(all.vars(fm), IID, FID, PGI1, PGI2))])
-    if (within) {
-        data <- data[get(FID) %in% data[, .N, by=get(FID)][N>=2][[1]] ]
-    }
 
-    # Residualise / Set up model
-    if (resid==TRUE){
-        data[, Y := lm(fm, data)$residuals]
-        data[, Y := scale(Y)]
-        if (within==TRUE){
-            FM = paste0("Y ~ 1 | ", FID, "^rep | PGI_MAIN ~ PGI_IV")
-        } else {
-            FM = "Y ~ 1 | rep | PGI_MAIN ~ PGI_IV"
-        }
-
-    }
-    else if (resid==FALSE){
-        fm = as.character(fm)
-        if (within==TRUE){
-            FM = paste0(fm[2], "~", fm[3], "| ", FID, "^rep | PGI_MAIN ~ PGI_IV")
-        } else {
-            FM = paste0(fm[2], "~", fm[3], "| rep | PGI_MAIN ~ PGI_IV")
-        }
-    }
-    # standardise observed PGI
-    #data[, c(PGI1, PGI2) := lapply(.SD, scale), .SDcols=c(PGI1, PGI2)]
-    
     # compute scaling factor
-    if (within){
-        data[, fam_n := .N, by=FID]
-        data <- data[fam_n >= 2]
-        data[, PGI1_dm := get(PGI1) - mean(get(PGI1)), by=FID]
-        data[, PGI2_dm := get(PGI2) - mean(get(PGI2)), by=FID]
-        R <- sqrt(data[, cor(PGI1_dm, PGI2_dm)])
-    } else {
-        R <- sqrt(data[, cor(get(PGI1), get(PGI2))])
-    }
+    R <- sqrt(data[, cor(get(PGI1), get(PGI2))])
 
     # scale PGI
     data[, (PGI1) := get(PGI1) / R]
@@ -79,15 +46,46 @@ GORIV <- function(fm, PGI1, PGI2, data, IID,
     
     data[, PGI_MAIN := ifelse(rep==0, get(PGI1), get(PGI2))]
     data[, PGI_IV := ifelse(rep==0, get(PGI2), get(PGI1))]
-    cat("Actual number of observations =", N, "\n")
     
+    # Set up the stacked PGI control variables (parental values).
+    if ((!is.null(control.list))) {
+        control1 <- control.list[1]
+        control2 <- control.list[2]
+        data[, PGIcontrol1 := ifelse(rep==0, get(control1), get(control2))]
+    }
+    # Set up the stacked IVs (random PGI components).
+    if ((!is.null(IV.list))) {
+        IV1 <- IV.list[1]
+        IV2 <- IV.list[2]
+        data[, IV1 := ifelse(rep==0, get(IV1), get(IV2))]
+    }
+    #TODO: Make this consistent with the IVs + control variables.
+    # Define the formulae to estimate.
+    formula.long <- paste0(fm[2], "~", fm[3])
+    # Add stacked controls, if specified.
+    if ((!is.null(control.list))) {
+        formula.long <- paste0(formula.long, " + PGIcontrol1 ")
+    }
+    # Add fam fixed effects, if specified
+    if (!is.null(FID)){
+        formula.long <- paste0(formula.long, " | ", FID, "^")
+    }
+    else {
+        formula.long <- paste0(formula.long, " | ")
+    }
+    # Stack the random components as instruments (if specified)
+    if (!is.null(IV.list)){
+        formula.long <- paste0(formula.long, "rep | PGI_MAIN ~ IV1")
+    }
+    else {
+        formula.long <- paste0(formula.long, "rep | PGI_MAIN ~ PGI_IV")
+    }
+    cat("Actual number of observations =", N, "\n")
     # Run estimation
-    if (within){
-        return(feols(as.formula(FM), data=data, se="twoway", cluster=c(FID, IID)))
-    } else if (!is.null(FID)){
-        return(feols(as.formula(FM), data=data, se="twoway", cluster=c(FID, IID)))
+    if (!is.null(FID)){
+        return(feols(as.formula(formula.long), data=data, se="twoway", cluster=c(FID, IID)))
     } else {
-        return(feols(as.formula(FM), data=data, se="cluster", cluster=IID))
+        return(feols(as.formula(formula.long), data=data, se="cluster", cluster=IID))
     }
 }
 

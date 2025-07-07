@@ -196,12 +196,13 @@ employmentLists_i3 = [literal_eval(row)
 # Put these lists to one.
 employmentLists = [employmentLists_i0[i] + employmentLists_i1[i] +
     employmentLists_i2[i] + employmentLists_i3[i]
-    for i in range(0, len(employmentLists))]
+    for i in range(0, len(employmentLists_i0))]
 # Remove duplicates within each list 
 employmentLists = [list(dict.fromkeys(edQualsLists[i]))
     for i in range(0, len(employmentLists))]
 # Values for employed.
-phenoData["participant.employed"] = [int(1 in employmentList) for employmentList in employmentLists]
+phenoData["participant.employed"] = [
+    int(1 in employmentList) for employmentList in employmentLists]
 
 # Save (with the adjusted columns).
 phenoData.to_csv("phenotype-extract.csv")
@@ -317,6 +318,9 @@ relatedKinData["InfType"] = np.select(
 # Show the number of different kind of relatives
 from collections import Counter
 print(Counter(relatedKinData["InfType"]))
+
+#TODO: Take out the samll number of parents
+# relatedKinData = relatedKinData[relatedKinData["InfType"] != "PO"]
 
 # Export usable format, for PRS impute.
 relatedKinData[["FID", "ID1", "ID2", "InfType"]].to_csv(

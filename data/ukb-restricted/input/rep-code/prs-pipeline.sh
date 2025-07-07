@@ -12,9 +12,9 @@
 
 # Input: GWAS summary stats, from SSGAC (made into a csv).
 #gwasResultsCsv=$1
-#gwasResultsCsv="EA4_additive_p1e-5_clumped.csv"
+gwasResultsCsv="EA4_additive_p1e-5_clumped.csv"
 #gwasResultsCsv="tan_2024_educational_attainment.csv"
-gwasResultsCsv="EA4_additive_excl_23andMe.csv"
+#gwasResultsCsv="EA4_additive_excl_23andMe.csv"
 #gwasResultsCsv="ADHD1_multi_p5e-8_sumstats.csv"
 
 dx download data-input/$gwasResultsCsv
@@ -22,15 +22,16 @@ head $gwasResultsCsv
 
 # Name of the output file.
 #gwasResultsOutput=$2
-#gwasResultsOutput="raw-ed-pgi-okbay-2022"
-gwasResultsOutput="raw-ed-pgi-okbay-exclude-2022"
+gwasResultsOutput="raw-ed-pgi-okbay-2022"
+#gwasResultsOutput="raw-ed-pgi-okbay-exclude-2022"
 #gwasResultsOutput="raw-ed-pgi-tan-2024"
 #gwasResultsOutput="raw-adhd-pgi"
 
 
 # Adjust GWAS files to format needed.
 awk -F, '{ if (NR>1) { print $1 }}' $gwasResultsCsv > rsidlist.txt
-awk -F, '{ if (NR>1) { print sprintf("%02d", $2)":"$3"-"$3 }}' $gwasResultsCsv > chrposlist.txt
+awk -F, '{ if (NR>1) { print sprintf("%02d", $2)":"$3"-"$3 }}' \
+    $gwasResultsCsv > chrposlist.txt
 
 ## Get the BGEN software working on a UKB RAP terminal.
 # Install Bgenix.
