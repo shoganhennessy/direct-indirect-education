@@ -62,33 +62,6 @@ print(analysis.data)
 print(names(analysis.data))
 
 
-#! Test: make the random component recentred.
-# First the 23+me weights for the Ed PGI.
-# (1) Calculate E[ Ed PGI | parents]
-expected_edpgi_all.reg <- analysis.data %>%
-    lm(edpgi_all_imputed_self ~ 1 + (
-        poly(edpgi_all_imputed_paternal, 3) * poly(edpgi_all_imputed_maternal, 3)
-        ) * sex_male * father_present * mother_present * sibling_count,
-        na.action = na.exclude,
-        data = .)
-# (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
-analysis.data$edpgi_all_imputed_random <- (analysis.data$edpgi_all_imputed_self
-    - predict(expected_edpgi_all.reg, analysis.data))
-
-# Second the UKB weights for the Ed PGI.
-# (1) Calculate E[ Ed PGI | parents]
-expected_edpgi_exclude.reg <- analysis.data %>%
-    lm(edpgi_exclude_imputed_self ~ 1 + (
-        poly(edpgi_exclude_imputed_paternal, 3) * poly(edpgi_exclude_imputed_maternal, 3)
-        ) * sex_male * father_present * mother_present,
-        na.action = na.exclude,
-        data = .)
-# (2) Calculate random component = Ed PGI - \hat E[ Ed PGI | parents]
-analysis.data$edpgi_exclude_imputed_random <- (
-    analysis.data$edpgi_exclude_imputed_self
-        - predict(expected_edpgi_exclude.reg, analysis.data))
-
-
 ################################################################################
 ## Plot: correlates with the Ed PGI, and whether they are for random component.
 
@@ -267,7 +240,7 @@ point_est.data <- data.frame(
         coef(summary(Z_Ztilde_random.reg))["edpgi_all_imputed_random", "Estimate"],
         coef(summary(Z_Ztilde_random.reg))["edpgi_all_imputed_random", "Std. Error"],
         NA, NA, NA, NA,
-        round(as.numeric(summary(Z_Ztilde_random.reg)$fstatistic["value"])),
+        fstat.get(Z_Ztilde_random.reg, "edpgi_all_imputed_random"),
         summary(Z_Ztilde_random.reg)$r.squared,
         NROW(analysis.data)),
     # column 5: Ztilde -> Ztilde

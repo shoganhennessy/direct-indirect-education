@@ -30,23 +30,19 @@ GORIV <- function(fm, PGI1, PGI2, IID, data, FID = NULL,
         control.list = NULL){
     # Put data into data.table format.
     data <- data.table(data)
-
+    # scale PGI (only do if not using random component IVs).
     # compute scaling factor
     R <- sqrt(data[, cor(get(PGI1), get(PGI2))])
-
-    # scale PGI
+    # scale PGIs.
     data[, (PGI1) := get(PGI1) / R]
     data[, (PGI2) := get(PGI2) / R]
     cat("Scaling factor =", R, "\n")
-    
     # stack the data
     N = nrow(data)
     data = rbind(data, data)
     data$rep = c(rep(0,N), rep(1,N))
-    
     data[, PGI_MAIN := ifelse(rep==0, get(PGI1), get(PGI2))]
     data[, PGI_IV := ifelse(rep==0, get(PGI2), get(PGI1))]
-    
     # Set up the stacked PGI control variables (parental values).
     if ((!is.null(control.list))) {
         control1 <- control.list[1]
@@ -57,9 +53,8 @@ GORIV <- function(fm, PGI1, PGI2, IID, data, FID = NULL,
     if ((!is.null(IV.list))) {
         IV1 <- IV.list[1]
         IV2 <- IV.list[2]
-        data[, IV1 := ifelse(rep==0, get(IV1), get(IV2))]
+        data[, IV1 := ifelse(rep==0, get(IV2), get(IV1))]
     }
-    #TODO: Make this consistent with the IVs + control variables.
     # Define the formulae to estimate.
     formula.long <- paste0(fm[2], "~", fm[3])
     # Add stacked controls, if specified.

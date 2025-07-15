@@ -55,7 +55,7 @@ Following \cite{kweon2025associations}, I construct an individual-level income m
 Specifically, I impute occupation-based wages by estimating hourly earnings for each SOC category using data from the British Annual Survey of Hours and Earnings, conditional on age, gender, and year.
 This approach provides a more granular and continuous measure of economic status than the categorical household income variable (see \appendixref{appendix:wage-impute} for details on the imputation procedure).
 I create the annual occupation income by multiplying this by the number of hours they reported working, times 52 weeks in the year.
-For an example, this procedure gives a female participant, age 58 in 2010 with SOC 2314 (i.e., a secondary education teacher by profession), an occupation hourly wage of $\pounds 29.20$ and an annual income of $\pounds 68,476$ for her 45 hours worked each week (adjusted to 2024 \pounds GBP by CPI-H).
+For example, this procedure gives a female participant, age 58 in 2010 with SOC 2314 (i.e., a secondary education teacher by profession), an occupation hourly wage of $\pounds 29.20$ and an annual income of $\pounds 68,476$ for her 45 hours worked each week (adjusted to 2024 \pounds GBP by CPI-H).
 
 \begin{figure}[h!]
     \centering
@@ -125,7 +125,7 @@ The Ed PGI is defined as the weighted sum of whether individual $i$ has the rele
 \[ Z_i = \sum_{j = 1}^{J} w_j x_{i,j} \]
 where $w_j$ are the Ed PGI weights (provided in the supplementary data to \citealt{okbay2022polygenic}), and $x_{i,j}$ is an indicator of whether individual $i$ has the relevant SNP at DNA location $j$.\footnote{
     Every person has two copies of each chromosome, so that $x_{i,j}$ takes values 0, 1, 2 corresponding to how many copies of the SNP $i$ has.
-    The genetics literature has generally accepted that complex social behaviours are explained by additive effects (see \citealt{hill2008data}), and \cite{okbay2022polygenic} found little evidence for dominance in the Ed PGI SNPs.
+    The genetics literature has generally accepted that complex social behaviours are explained by additive effects (see \citealt{hill2008data}), and \cite{okbay2022polygenic} found little evidence for dominance in the Ed PGI SNPs, so that the Ed PGI makes sense as a weighted sum.
 }
 The \cite{okbay2022polygenic} GWAS found that over 8,000 individual SNPs were significant in predicting education years, after passing a battery of biostatistical tests and finding no evidence for significant interactions.
 The resulting Ed PGI is standardised to have mean zero and standard deviation one within the entire sample, making it interpretable as the number of standard deviations from the population mean.

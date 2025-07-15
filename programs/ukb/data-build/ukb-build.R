@@ -257,10 +257,28 @@ ukb_imputed_edpgi_all.data <- ukb_imputed_edpgi_all.data  %>%
         eid                        = IID,
         famid                      = FID,
         edpgi_all_imputed_self     = proband,
-        #edpgi_all_imputed_sibling  = sibling,
+        edpgi_all_imputed_sibling  = sibling,
         edpgi_all_imputed_paternal = paternal,
         edpgi_all_imputed_maternal = maternal)
 
+
+#! Test: Does 0.5 (child + sibling) = parental mean hold true, on average?
+ukb_imputed_edpgi_all.data %>% head(100) %>% View()
+
+ukb_imputed_edpgi_all.data %>%
+    transmute(
+        mean_children = 
+            0.5 * (edpgi_all_imputed_self + edpgi_all_imputed_sibling),
+        mean_parental =
+        0.5 * (edpgi_all_imputed_paternal + edpgi_all_imputed_maternal)) %>%
+    mutate(parental_diff = mean_children - mean_parental) %>%
+    pull(parental_diff) %>%
+    mean()
+#! Answer -> yes.
+ukb_imputed_edpgi_all.data <- ukb_imputed_edpgi_all.data %>%
+    select(- edpgi_all_imputed_sibling)
+
+# Get the columns referring to own PGI, and family members --- separate weights.
 ukb_imputed_edpgi_exclude.data <- ukb_imputed_edpgi_exclude.data %>%
     transmute(
         eid                            = IID,
