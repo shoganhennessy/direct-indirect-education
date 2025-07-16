@@ -203,11 +203,11 @@ The Ed PGI imputed random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$
 I estimate the genetic first-stage as follows, 
 \begin{equation}
     \label{eqn:genetic-firststage}
-    \tilde Z_i^\text{\textcolor{ForestGreen}{Child}}
-        = \gamma + \theta Z_i^\text{\textcolor{red}{Random}}
+    Z_i^\text{\textcolor{ForestGreen}{Child}}
+        = \gamma + \theta \tilde Z_i^\text{\textcolor{red}{Random}}
             + \vec\zeta' \vec X_i + \eta_i,
 \end{equation}
-where $\theta$ is the first-stage average parameter, and $\vec X_i$ is a vector of controls including parental imputed PGI levels, gender, age, sibling count, in city indicator, and the other PGIs (i.e., all demographic variables in \autoref{fig:demographic-correlates}).
+where $\theta$ is the first-stage average contribution of the random component (with measurement error), and $\vec X_i$ is a vector of controls including parental imputed PGI levels, gender, age, sibling count, in city indicator, and the other PGIs (i.e., all demographic variables in \autoref{fig:demographic-correlates}).
 Since $\tilde Z_i^\text{\textcolor{red}{Random}}$ serves as a formula instrument, it must be re-centred with respect to the control variables to produce valid causal effects \citep{borusyak2023nonrandom}.
 I do this by calculating
 $\Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
@@ -246,6 +246,7 @@ with interactions for the imputed parental PGI values and demographic variables.
     The row marked ORIV uses the combined estimates of the primary and secondary Ed PGI random component on the Ed PGI, estimated using ORIV.
 \end{table}
 
+\textbf{Points raised by Prof Miller:}
 \begin{enumerate}
     \item Also show $Z_i^\text{\textcolor{ForestGreen}{Child}} \to Z_i^\text{\textcolor{ForestGreen}{Child}}$, or random $\to$ random in appendix table, to get a better sense about what this implies.
     \item What does the first-stage attenuation bias say about the reliability ratio of commonly used Ed PGI values?  It says the reliability is fairly low....

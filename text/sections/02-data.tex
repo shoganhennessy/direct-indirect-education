@@ -191,18 +191,24 @@ By comparing siblings' genetics across thousands of genetic variants, we can rec
     \caption{Imputing One SNP for Parents from Sibling Data.}
     \label{fig:pgi-imputing}
     \input{sections/figures/imputing-pgi-tikz.tex}
+    \input{sections/figures/imputing-pgi-tikz-simple.tex}
     \justify
     \footnotesize
     \textbf{Note}:
     This figure illustrates the logic of imputing parental genotypes from sibling data at a single SNP.
-    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a particular allele inherited from their parents.
+    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a particular variant inherited from their parents.
+    A child, and their sibling, jointly imply the possible options for the parents.
+    The first option comes from the fact that child and sibling configuration of $\{1,0\}$ is only possible with the configuration of parents of $\{0,1\}, \{1,0\}$ or $\{1,1\}$.
+    With a parent configuration of $\{0,1\}$ or $\{1,0\}$, there are 4 possible realisations with a child and a sibling taking $\{1,0\}$, and 3 for parental configuration of $\{1,1\}$.
+    The second option is only possible with one parent configuration, so their is no uncertainty in what the parent values were.
+    This gives the relevant probabilities as a result of this combinatorial mixing, which is also shown in \autoref{fig:mendelian-indep}.
 \end{figure}
 
 \autoref{fig:pgi-imputing} visualises the logic behind imputing parental SNP values based on an individual's, and their sibling(s)'s, genetic data.
 In the middle panel, the individual has genotype 1 and their sibling has genotype 0.
-Since the individual must have inherited their 1 allele from one parent and their "0" allele from the other, while the sibling inherited two 0 alleles, we can infer that one parent has genotype 0 (contributing 0 to both children) and the other has genotype 1 (contributing 1 to the individual and 0 to the sibling).
+Since the individual must have inherited their 1 variant from one parent and their "0" variant from the other, while the sibling inherited two 0 variants, we can infer that one parent has genotype 0 (contributing 0 to both children) and the other has genotype 1 (contributing 1 to the individual and 0 to the sibling).
 The right panel shows an alternative configuration yielding the same sibling genotypes.
-When parental genotypes cannot be uniquely determined, the imputation uses the expected values based on observed alleles and population frequencies.
+When parental genotypes cannot be uniquely determined, the imputation uses the expected values based on observed variants and population frequencies.
 By applying this logic across hundreds of thousands of SNPs and accounting for segments of DNA shared identically by descent between siblings, we can accurately reconstruct parental PGIs despite never observing the parents directly.
 
 The imputation procedure performs well in the UKB analysis sample.
