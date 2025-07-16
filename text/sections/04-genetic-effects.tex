@@ -1,8 +1,8 @@
 \section{Genetic Effects}
 \label{sec:genetic-effects}
-The Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$, is not randomly assigned—individuals inherit genetic variants from their parents, creating systematic correlations with family background.
+The Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$, is not randomly assigned --- individuals inherit genetic variants from their parents, creating systematic correlations with family background.
 However, by isolating the random variation in genetic inheritance I construct a formula instrument that recovers credible estimates of the average causal effects of the Ed PGI on education and labour market outcomes.
-This section explicitly defines the target causal parameters, clearly states the identifying assumptions, and provides the corresponding estimating equations.
+This section explicitly defines the target causal parameters and estimation strategy, before showing the empirical estimates of genetic effects.
 
 \subsection{Identification Strategy}
 Formally, let $D_i(z')$ denote the potential education outcome (either measured by education years or higher education attendance) for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
@@ -68,12 +68,15 @@ This linear specification might not fully reflect heterogeneity in causal effect
 
 \subsection{Genetic Effects Results}
 
-\begin{table}[!htbp]
+The following results section begins by presenting ordinary least squares (OLS) estimates to document the correlational relationships between the Education PolyGenic Index (Ed PGI) and various education and labour market outcomes.
+Table 4 first displays raw correlations without any controls (Column 1).
+Column 2 adds an extensive set of demographic controls to these specifications, and Column 3 further corrects for attenuation bias arising from measurement error by implementing a stacked OLS specification that uses a secondary set of GWAS weights.
+
+\begin{table}[h!]
     \singlespacing
     \centering
     \small
-    \caption{Genetic Effect Estimates,
-        $Z_i^\text{\textcolor{ForestGreen}{Child}} \to D_i$ and $Y_i$, OLS and IV.}
+    \caption{OLS and IV Estimates, Effect of Ed PGI on Education, Occupation Wages and Income.}
     \begin{tabular}{l c c c c c c r}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
         & \multicolumn{6}{c}{Model:} & \\
@@ -90,34 +93,36 @@ This linear specification might not fully reflect heterogeneity in causal effect
     \justify
     \footnotesize
     \textbf{Note:}
-    Shows estimates of the genetic effects, \autoref{eqn:parametric-firststage} and \eqref{eqn:genetic-firststage}.
+    Shows estimates of the genetic effects, \autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}.
     The first 3 columns show the OLS correlation between Ed PGI and various outcomes; columns (3) through (6) show point estimates from the IV model, using the random component as an instrument for the ED PGI.
     OLS stacked refers to using the obviously related method to estimate the correlation between Ed PGI and outcome, purging bias from measurement error; similarly for the column named ORIV, with the IV approach for causal effects.
-    For example, 0.74 in row 1 column (6) means a 1 standard deviation increase in the Ed PGI (motivated by Mendelian independent assortment) leads to 0.74 extra years.
-    The regressions for income variables are logged, so the point estimate means a percent increase in income for every 1 standard deviation in the Ed PGI.
+    For example, 0.74 in row 1 column (6) means a 1 Standard Deviation (SD) increase in the Ed PGI (motivated by Mendelian independent assortment) leads to 0.74 extra years.
+    The regressions for income variables are logged, so the point estimate means a percent increase in income for every 1 SD increase in the Ed PGI.
 \end{table}
 
-\begin{enumerate}
-    \item Is there a summary exercise of the relation between point estimates, as in Gordon Dahl
-    \item Compare this to previous estimates of the Ed PGI correlation (Barth, Papageorge) and causal effects (Carvalho 2024).
-\end{enumerate}
+The addition of demographic controls makes negligible differences to the correlation estimates across outcomes, indicating minimal confounding by the observed demographic factors.
+However, adjusting for measurement error significantly increases the correlation estimates.
+Specifically, correlations between the Ed PGI and education outcomes (education years and having a university degree) increase by approximately 30-40\%, while those for labour market outcomes (hourly wage and annual income) increase by roughly 20-40\%.
+These adjusted estimates substantially exceed previously reported correlations for similar variables in earlier studies, such as \cite{papageorge2020genes}.
 
-These effects are higher, especially the stacked/ORIV estimates.
+The IV estimates isolate causal effects by using the inferred Mendelian random component as an instrument for the Ed PGI.
+Notably, these IV estimates are systematically lower than their corresponding OLS correlations.
+This discrepancy implies that growing up in a family environment shaped by parents with higher Ed PGI values independently and positively influences children's educational attainment and labour market outcomes, beyond the direct genetic influences captured by the Ed PGI.
 
-\begin{figure}[!htbp]
+\begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{TODO: Make this show the binscatter of Ed PGI $\to$ Ed years, and income.  Regular colour line for the raw correlation, and yellow line for the random component.}
+    \caption{OLS and IV Estimates, Effect of Ed PGI on Education and Wages.}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Ed PGI $\to$ Education Years.}
-        %\includegraphics[width=\textwidth]{sections/figures/edpgi-edyears.png}
+        \includegraphics[width=\textwidth]{sections/figures/edpgi-edyears-causal.png}
         \label{fig:causal-edpgi-edyears}
     \end{subfigure}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Ed PGI $\to$ Hourly Wages.}
-        %\includegraphics[width=\textwidth]{sections/figures/edpgi-earnings.png}
+        \includegraphics[width=\textwidth]{sections/figures/edpgi-earnings-causal.png}
         \label{fig:causal-edpgi-earnings}
     \end{subfigure}
     \label{fig:causal-edpgi-effects}
@@ -128,3 +133,17 @@ These effects are higher, especially the stacked/ORIV estimates.
     This figure shows the correlation between Ed PGI and Education Years, as well as occupation coded Hourly Wages.
     The green (or red) coloured lines are the obviously related estimated correlation between the Ed PGI and the respective outcomes, and the yellow lines with a slope matching the ORIV causal effect estimates.
 \end{figure}
+
+The IV estimates confirm meaningful average causal effects of the Ed PGI. For example, a one-standard-deviation increase in the Ed PGI causally leads to an additional 0.74 years of education and about a 6.1\% increase in occupation coded hourly wages, according to the ORIV estimates.
+Adjusting for measurement error notably affects these causal estimates, increasing them by roughly 30-40\% when moving from standard IV (Column 4) to ORIV specifications (Column 6), validating the importance of addressing measurement error.
+These causal estimates are meaningfully larger than those recently presented by \cite{carvalho2024genetics}, who analysed the same data but did not account for measurement error.
+
+Correcting for measurement error comes at a cost: the standard errors in ORIV specifications are noticeably larger than those in the unadjusted IV columns. 
+This increase reflects proper acknowledgment of statistical uncertainty in the GWAS weights used to construct the Ed PGI.
+Prior studies reporting smaller standard errors do not account for this additional uncertainty, and thus substantially overstate the precision and reliability of their correlation or causal effect estimates.
+
+\textbf{Points raised by Prof Miller:}
+\begin{enumerate}
+    \item Is there a summary exercise of the relation between point estimates, as in Gordon Dahl
+    \item Compare this to previous estimates of the Ed PGI correlation (Barth, Papageorge) and causal effects (Carvalho 2024).
+\end{enumerate}

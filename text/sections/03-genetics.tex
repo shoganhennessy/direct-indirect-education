@@ -123,7 +123,7 @@ The observed random component, using sibling PGI values (instead of parents') is
         - Z_{s(i)}^\text{\textcolor{purple}{Sibling}} \right). \]
 
         The imputed random component is equivalent to using the variation between an individual and their observed sibling.
-This random component, therefore, is using the same within-family variation that early genetic studies did by examining within family (or twins) differences.
+This random component, therefore, is using the same within-family variation that early genetic studies did by examining within family differences.
 An individual's Ed PGI is drawn from the same distribution as their sibling, because they had the same parents; in absence of observing both parents directly, this approach uses the sibling to infer this distribution.
 
 This approach is equivalent, in expectation, to using observed parents because of the simple fact that children and parents are two independent draws from the parental genetic distribution.
@@ -157,14 +157,14 @@ For estimation, an Ordinary Least Squares (OLS) regression will implicitly weigh
 Thus, while the sibling-based imputation approach preserves unbiasedness in estimating genetic effects, it comes at the cost of increased standard errors and potentially reduced generalisability if sibling genetic divergence is not representative for the entire population.
 
 \subsection{Measurement Error in the Ed PGI}
-Previous studies have treated observed Ed PGI values as if they were perfect genetic measures, not accounting for the fact that $Z^\text{\textcolor{ForestGreen}{Child}}_i = \sum_{j'=1}^J w_{j'} z_{i,j'}$ is calculated from many statistical estimates, which are themselves subject to measurement error.
-Although the \cite{okbay2022polygenic} weights are estimates from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error; the sample size if large, but the number of estimated parameters is similarly large ($w_{j'}$ for around 8,000 different values), making estimation error a sufficient concern.
+Previous studies have treated observed Ed PGI values as if they were perfect genetic measures, not accounting for the fact that $Z^\text{\textcolor{ForestGreen}{Child}}_i = \sum_{j'=1}^J w_{j'} z_{i,j'}$ is calculated from many statistical estimates of $w_{j'}$, which are themselves subject to measurement error.
+Although the \cite{okbay2022polygenic} weights are estimates from an exceptionally large sample of over 3 million individuals, they remain subject to finite sample sampling variation and estimation error; the sample size is large, but the number of estimated parameters is similarly large ($w_{j'}$ for around 8,000 different values), making estimation error a sufficient concern.
 
-Correspondingly, any statistical analysis using observed values of $Z^\text{\textcolor{ForestGreen}{Child}}_i$, or $\tilde Z_i^\text{\textcolor{red}{Random}}$ will suffer from attenuation bias and overconfident standard errors, which do not account for the statistical uncertainty in the GWAS weights $w_{j'}$.
+Correspondingly, any statistical analysis using observed values of $Z^\text{\textcolor{ForestGreen}{Child}}_i$, or $\tilde Z_i^\text{\textcolor{red}{Random}}$, will suffer from attenuation bias and overconfident standard errors, which do not account for the statistical uncertainty in the GWAS weights $w_{j'}$.
 This even holds true in an IV specification, because $Z^\text{\textcolor{ForestGreen}{Child}}_i$ and $\tilde Z_i^\text{\textcolor{red}{Random}}$ are measured with the same measurement error, because they are both functions of the GWAS weights $w_{j'}$.
 In this case, the IV and endogenous variable have correlated measurement error, leading to attenuation bias in IV estimates.
 
-To avoid this form of bias, I calculate $\tilde Z_i^\text{\textcolor{red}{Random}}$ using a set of GWAS weights calculate from a different population to that for $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+To avoid this form of bias, I calculate $\tilde Z_i^\text{\textcolor{red}{Random}}$ using a set of GWAS weights estimated in a different population to that for $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
 Specifically, I take a secondary set of weights also provided in the supplementary data for \cite{okbay2022polygenic}, that were estimated exclusively from the UK Biobank subsample (and not the 23\&Me sample).\footnote{
     Note that this analysis also uses the UKB data, so that this secondary Ed PGI is calculated on a sample that overlaps the analysis sample.
     This will lead to over-fitting, although is ameliorated by the fact that the analysis sample is the sibling sample, about 10\% of the entire UKB, limiting the overlap to the extent possible.
@@ -172,8 +172,8 @@ Specifically, I take a secondary set of weights also provided in the supplementa
 This means uses an imputed random component which has measurement error coming from a different population than that for the Ed PGI, thus purging the attenuation bias in IV estimates.
 
 This approach was developed in the genetics literature, to purge bias from PGI correlations \citep{van2023overcoming} and is applied here for the first time for causal estimates.
-This raises the question: which set of GWAS weights should be used for the instrumental variable, and which for the endogenous Ed PGI?
-The obviously related IV (ORIV, \citet{gillen2019experimenting}) approach removes this subjective choice by estimating the IV specification twice, once with each set of weights serving as the instrument for the other set, and then combining the estimates optimally.
+Using one set of weights to instrument for another raises a question: which set of GWAS weights should be used for the IV random component, and which for the endogenous Ed PGI?
+The Obviously Related IV (ORIV, \citealt{gillen2019experimenting}) approach removes this subjective choice by estimating the IV specification twice, once with each set of weights serving as the instrument for the other set, and then combining the estimates optimally.
 This yields unbiased estimates while efficiently accounting for estimation uncertainty from both sets of GWAS weights --- see \citealt{van2023overcoming} for full details.
 % Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
 
@@ -188,7 +188,7 @@ This yields unbiased estimates while efficiently accounting for estimation uncer
     \justify
     \footnotesize
     \textbf{Note}:
-    Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
+    Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $\tilde Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
 \end{figure}
 
 \textbf{Describe the random component.
