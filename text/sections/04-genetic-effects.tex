@@ -1,72 +1,93 @@
 \section{Genetic Effects}
 \label{sec:genetic-effects}
 The Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$, is not randomly assigned --- individuals inherit genetic variants from their parents, creating systematic correlations with family background.
-However, by isolating the random variation in genetic inheritance I construct a formula instrument that recovers credible estimates of the average causal effects of the Ed PGI on education and labour market outcomes.
-This section explicitly defines the target causal parameters and estimation strategy, before showing the empirical estimates of genetic effects.
+However, by isolating the random variation in genetic inheritance I recovers credible estimates of the average causal effects of the Ed PGI on education and labour market outcomes.
+This section shows the empirical estimates of genetic effects.
 
-\subsection{Identification Strategy}
-Formally, let $D_i(z')$ denote the potential education outcome (either measured by education years or higher education attendance) for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
-Similarly, define $Y_i(z', D_i(z'))$ as the potential labour market outcome (occupation-coded hourly wages or annual income) in the same hypothetical case of $i$ having $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
-Note that notation includes $D_i(z')$ entering labour market outcome, because $z'$ affects education, which may go on to affect labour market outcomes --- this issue is further explored in \autoref{sec:direct}.
+\subsection{Genetic First-Stage Results}
+The Ed PGI imputed random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, serves as a formula instrument for an individuals' Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
 
-Observed education and wages/income data are a sum of their respective potential outcomes.
-\[ D_i = \sum_{z'}
-    \indicator{Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} D_i(z'),
-    \quad Y_i = \sum_{z'} 
-    \indicator{Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} Y_i(z', D_i(z')).
-\]
+\textbf{Describe the random component.
+What is its distribution.
+It is not correlated with other demographic variables, and less so with the other PGIs.}
+\autoref{fig:edpgi-dist} shows the distribution, and \autoref{fig:demographic-correlates} shows what it is correlated with.
 
-\noindent
-\textbf{Target Parameters.}
-This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following average partial effects:
-\[ \partialdiff{z'} \E{D_i(z')}, \quad \partialdiff{z'} \E{Y_i(z', D_i(z'))}. \]
-The first average partial effect represents the average effect of a one standard deviation change in the Ed PGI on education, and the second on labour market wages or income.
 
-The Ed PGI, however, is neither randomly assigned nor directly manipulatable, so that we may not observe $D_i(z')$ nor $Y_i(z', D_i(z'))$ for different values of $z'$ for the same individual, and causal effects are not identifiable without further assumptions (i.e., the fundamental problem of causal inference).
-Thus, I rely on random variation coming from the random component of the Ed PGI to infer causal effects.
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Distribution of the Ed PGI and the Random Component, Relative to Imputed Parental Decile.}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        \caption{Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.}
+        \includegraphics[width=\textwidth]{sections/figures/edpgi-self-dist.png}
+        \label{fig:edpgi-self-dist}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        \caption{Ed PGI random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$.}
+        \includegraphics[width=\textwidth]{sections/figures/edpgi-random-dist.png}
+        \label{fig:edpgi-random-dist}
+    \end{subfigure}
+    \label{fig:edpgi-dist}
+    \vspace{-1cm}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    This figure shows the distribution of Ed PGI and the random component, $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $\tilde Z_i^\text{\textcolor{red}{Random}}$, conditional on the decile of the parental imputed Ed PGI.
+    Parental imputed Ed PGI decile 1 shows the distributions for the bottom 10\% of parental imputed values, decile 2 shows distribution among 10--20\%, and so on.
+\end{figure}
 
-\noindent
-\textbf{Identifying Assumptions.}
-I use the random component of the Ed PGI, $Z_i^\text{\textcolor{red}{Random}}$, as an instrument for the Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
-This requires a number of assumptions to recover valid average causal effects.
-\begin{enumerate}[label=(\arabic*)]
-    \item Instrument Relevance and Independence: The random component of the Ed PGI strongly predicts the individual's Ed PGI, and is unrelated to potential outcomes.
-    \item Instrument Monotonicity: 
-    A higher value of the random component (weakly) increases the Ed PGI, with probability 1.
-    \item Exclusion Restriction:
-    The random genetic component, $Z_i^\text{\textcolor{red}{Random}}$, affects the potential outcomes only via the Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+
+The Ed PGI random component is a strong instrument for the Ed PGI, even when using the primary as an instrument for the secondary ($1 \to 2$, and visa versa).
+\autoref{tab:genetic-firststage} summarises estimates of the genetic first-stage defined in equation \eqref{eqn:genetic-firststage}.
+Columns (1) and (5) show mechanical results, equal to one by construction, as the random component is calculated from the primary and secondary Ed PGIs respectively.
+Columns (2) and (4) show that the random component is a strong instrument for the Ed PGI, calculated using weights from the other sample (primary or secondary), confirming that the random component from one PGI retains predictive power for the other, independently calculated PGIs.
+The fact that these cross-PGI coefficients are not equal to one indicates substantial measurement error in both PGIs, which would lead to attenuation bias in standard IV estimation.
+The ORIV estimates, columns (3) and (6) explicitly addresses this measurement error by combining information from both primary and secondary first-stages.
+Although ORIV estimates recover unbiased coefficients, this approach necessarily comes at the expense of greater variance.
+
+\begin{table}[!htbp]
+    \singlespacing
+    \centering
+    \small
+    \caption{First-stage Genetic Estimates, Random Component on Ed PGI
+        ($\tilde Z_i^\text{\textcolor{red}{Random}} \to Z_i^\text{\textcolor{ForestGreen}{Child}}$).}
+    \centerline{
+    \begin{tabular}{l c c c c c c}
+        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+        & \multicolumn{6}{c}{Outcome:} \\
+        & \multicolumn{3}{c}{Primary Ed PGI,
+            $Z_i^\text{\textcolor{ForestGreen}{Child}}$}
+            & \multicolumn{3}{c}{Secondary Ed PGI,
+                $Z_i^\text{\textcolor{ForestGreen}{Child}}$} \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        & (1) & (2) & (3) & (4) & (5) & (6) \\
+        \midrule
+        %\\[-1.8ex]\hline \\[-1.8ex]
+        \input{sections/tables/genetic-firststage.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+    \end{tabular}}
+    \vspace{-0.25cm}
+    \label{tab:genetic-firststage}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    Shows estimates of the genetic first-stage, \eqref{eqn:genetic-firststage},
+    using the random component as an instrument for the Ed PGI.
+    The first three columns using the primary Ed PGI as the outcome, while the next use the secondary Ed PGI.
+    The row marked ORIV uses the combined estimates of the primary and secondary Ed PGI random component on the Ed PGI, estimated using ORIV.
+\end{table}
+
+\autoref{tab:genetic-firststage} shows how much 
+
+\textbf{Points raised by Prof Miller:}
+\begin{enumerate}
+    \item Also show $Z_i^\text{\textcolor{ForestGreen}{Child}} \to Z_i^\text{\textcolor{ForestGreen}{Child}}$, or random $\to$ random in appendix table, to get a better sense about what this implies.
+    \item What does the first-stage attenuation bias say about the reliability ratio of commonly used Ed PGI values?  It says the reliability is fairly low....
 \end{enumerate}
 
-The three identifying assumptions are justified by the biology of genetic inheritance and the design of the empirical strategy.
-The relevance and independence assumption (1) holds because the random genetic component arises solely from Mendelian inheritance, ensuring both predictive strength (see \autoref{tab:genetic-firststage}) and independence from unobserved confounding conditional on parental genetics and observed covariates.
-The monotonicity assumption (2) is satisfied because inheriting a higher random genetic component can only additively increase the Ed PGI, never reducing it.
-Indeed, the random component mechanically changes the Ed PGI for anyone who receives a higher random component, so that everyone is a complier, too.
-Finally, the exclusion restriction (3) is credible given that genetic variants used in the random component influence socioeconomic outcomes only through their aggregation into the Ed PGI, by construction.
-
-\noindent
-\textbf{Estimation Strategy.}
-I estimate the average partial effects with a regression specification as follows, where $\vec X_i$ is a vector of control variables described previously.
-\begin{align}
-    \label{eqn:parametric-firststage}
-    D_i &= \phi + \pi Z_i^\text{\textcolor{ForestGreen}{Child}}
-        + \vec \zeta' \vec X_i + \eta_i,  \\
-    \label{eqn:parametric-secondstage}
-    Y_i &= \alpha + \beta Z_i^\text{\textcolor{ForestGreen}{Child}}
-        + \vec \varphi' \vec X_i + \varepsilon_i.
-\end{align}
-$\pi$ represents the average effect of the Ed PGI on the education variables, and $\beta$ similarly on wages and annual income (measured in $\log$ values).
-I use the Ed PGI random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, to instrument for the Ed PGI in the IV specifications, using the ORIV method (with Ed PGI calculated using two independent weights) where mentioned.
-The IV first-stage is shown in \autoref{eqn:genetic-firststage}, with the same set of control variables as both estimating equations above.
-
-\noindent
-\textbf{Limitations.}
-The OLS and IV estimates place greater weight on individuals with larger deviations in the random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, which might not represent effects for the entire population --- potentially limiting external validity.
-Additionally, despite independent Mendelian inheritance, the random genetic component remains modestly correlated with other PGIs.
-While I control for these other PGI values, these correlations further constrain generalisability beyond the analysis sample, by implying overlap with the Ed PGI and these other PGIs.
-Finally, the linear specifications employed (OLS and ORIV) yield weighted averages of individual-level causal effects.
-This linear specification might not fully reflect heterogeneity in causal effects across the PGI distribution, or provide weights for the average causal effects representative for the entire UKB population --- see \cite{blandhol2022tsls} for further details.
-
-\subsection{Genetic Effects Results}
+\subsection{Genetic Effect Results}
 
 The following results section begins by presenting ordinary least squares (OLS) estimates to document the correlational relationships between the Education PolyGenic Index (Ed PGI) and various education and labour market outcomes.
 Table 4 first displays raw correlations without any controls (Column 1).
@@ -77,6 +98,7 @@ Column 2 adds an extensive set of demographic controls to these specifications, 
     \centering
     \small
     \caption{OLS and IV Estimates, Effect of Ed PGI on Education, Occupation Wages and Income.}
+    \centerline{
     \begin{tabular}{l c c c c c c r}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
         & \multicolumn{6}{c}{Model:} & \\
@@ -87,13 +109,13 @@ Column 2 adds an extensive set of demographic controls to these specifications, 
         \midrule
         \input{sections/tables/genetic-effects.tex}
         \\[-1.8ex]\hline \\[-1.8ex]
-    \end{tabular}
+    \end{tabular}}
     \vspace{-0.25cm}
     \label{tab:genetic-effects}
     \justify
     \footnotesize
     \textbf{Note:}
-    Shows estimates of the genetic effects, \autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}.
+    Shows estimates of the genetic effects, of \eqref{eqn:parametric-secondstage}.
     The first 3 columns show the OLS correlation between Ed PGI and various outcomes; columns (3) through (6) show point estimates from the IV model, using the random component as an instrument for the ED PGI.
     OLS stacked refers to using the obviously related method to estimate the correlation between Ed PGI and outcome, purging bias from measurement error; similarly for the column named ORIV, with the IV approach for causal effects.
     For example, 0.74 in row 1 column (6) means a 1 Standard Deviation (SD) increase in the Ed PGI (motivated by Mendelian independent assortment) leads to 0.74 extra years.
@@ -142,8 +164,49 @@ Correcting for measurement error comes at a cost: the standard errors in ORIV sp
 This increase reflects proper acknowledgment of statistical uncertainty in the GWAS weights used to construct the Ed PGI.
 Prior studies reporting smaller standard errors do not account for this additional uncertainty, and thus substantially overstate the precision and reliability of their correlation or causal effect estimates.
 
-\textbf{Points raised by Prof Miller:}
-\begin{enumerate}
-    \item Is there a summary exercise of the relation between point estimates, as in Gordon Dahl
-    \item Compare this to previous estimates of the Ed PGI correlation (Barth, Papageorge) and causal effects (Carvalho 2024).
-\end{enumerate}
+\subsection{Other PGIs as Controls}
+Compare estimates with and with PGI controls, after noting that Ed PGI correlated with other PGIs.  Raises possibility that Ed PGI is picking up institutional disadvantage, if effect is smaller.
+
+Is Ed PGI random component a good IV for ADHD PGI?  If it is, this implies significant overlap in the Ed and ADHD PGI, for example.
+Using the random component as an IV for other PGIs implies significant overlap in the PGIs.
+
+Genes for education?  More like genes associated with Ed through multiple pathways.
+
+\subsection{Within Family Variation}
+Compare results with and without family FEs.  Gives an idea that with families there is still a lot of genetic variation.
+
+
+\begin{table}[h!]
+    \singlespacing
+    \centering
+    \small
+    \caption{OLS and IV Estimates, Effect of Ed PGI on Education, Occupation Wages and Income, with Family Fixed Effects.}
+    \centerline{
+    \begin{tabular}{l c c c c c c r}
+        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+        & \multicolumn{6}{c}{Model:} & \\
+        & OLS & OLS          & OLS     & Reduced & Regular & ORIV & Observation \\
+        &     & $+$ controls & Stacked & Form    & IV      &      & Count \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        Outcome & (1) & (2) & (3) & (4) & (5) & (6) & \\
+        \midrule
+        \input{sections/tables/genetic-effects-FEs.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+        Family Fixed Effects? & Yes & Yes & Yes & Yes & Yes & Yes \\
+        \\[-1.8ex]\hline \\[-1.8ex]
+    \end{tabular}}
+    \vspace{-0.25cm}
+    \label{tab:genetic-effects-fes}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    This table shows estimates of the genetic effects, \autoref{eqn:parametric-secondstage} with various different specifications --- now, all including family fixed effects in the estimates.
+    All columns are as in \autoref{tab:genetic-effects}, and income variables are logged.
+\end{table}
+
+Compare results for families with at least one parent.  Measurement error from the sibling imputation is lower among these people (though not zero), so might imply that
+
+\subsection{Implications of Empirical Results}
+
+Empirical genetics in social science research is at a very young stage.
+The case for causality is very new, despite relying on ideas that have been known for centuries.

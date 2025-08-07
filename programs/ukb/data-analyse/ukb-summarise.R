@@ -17,8 +17,8 @@ library(binsreg)
 # Define number of digits in tables and graphs
 digits.no <- 3
 # Size for figures
-fig.width <- 7.5
-fig.height <- fig.width
+fig.width <- 8.5
+fig.height <- 0.75 * fig.width
 presentation.width <- (5 / 3) * fig.width
 presentation.height <- (2 / 3) * presentation.width
 # List of 3 default colours.
@@ -92,7 +92,7 @@ analysis.data %>% names() %>% print()
 analysis.data %>%
     head(1) %>%
     select(visityear, sex_male, recruitedage, jobcode_soc,
-        soc_mean_hourly, soc_mean_annual, hours_workweek) %>%
+        soc_median_hourly, soc_median_annual, hours_workweek) %>%
     print()
 
 
@@ -136,6 +136,7 @@ summary.table <- function(given.data){
             # Education variables
             "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{Education:}" = NA,
             "Education years" = edyears,
+            "Age left education" = agefinishededuc,
             "Qualification, University degree" = edqual_highered,
             "Qualification, A-Levels" = edqual_alevels,
             "Qualification, GCSEs" = edqual_gcses,
@@ -144,8 +145,8 @@ summary.table <- function(given.data){
             "Qualification, No official qualifications" = edqual_minimum,
             # Income variables
             "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{Labour Market Outcomes:}" = NA,
-            "Occupation hourly wage, \\pounds"             = soc_mean_hourly,
-            "Occupation annual income, thousands \\pounds" = soc_mean_annual,
+            "Occupation hourly wage, \\pounds"             = soc_median_hourly,
+            "Occupation annual income, thousands \\pounds" = soc_median_annual,
             "Average hours worked, per week"               = hours_workweek,
             "Household income, $< \\pounds 18k$"           = householdincome_less18k,
             "Household income, $\\pounds 18-31k$"          = householdincome_18to31k,
@@ -229,7 +230,7 @@ edpgi.plot <- analysis.data %>%
     scale_y_continuous(expand = c(0, 0),
         name = "",
         limits = c(0, 10010)) +
-    ggtitle(TeX(r"(Observations, \textit{N})")) +
+    ggtitle(TeX(r"(Observations)")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
@@ -273,9 +274,9 @@ ggsave(file.path(figures.folder, "edyears-hist.png"),
     units = "cm", width = fig.width, height = fig.height)
 
 # Show the histogram of annual income.
-mean.earnings <- analysis.data %>% pull(soc_mean_annual) %>% mean(na.rm = TRUE)
+mean.earnings <- analysis.data %>% pull(soc_median_annual) %>% mean(na.rm = TRUE)
 earnings.plot <- analysis.data %>%
-    ggplot(aes(x = soc_mean_annual)) +
+    ggplot(aes(x = soc_median_annual)) +
     geom_density(aes(y = after_stat(count)), fill = colour.list[3]) +
     geom_vline(xintercept = mean.earnings, linetype = "dashed") +
     #annotate("text", colour = colour.list[3], x = 100, y = 50,
@@ -283,7 +284,7 @@ earnings.plot <- analysis.data %>%
     #    size = 4.25,  hjust = 0, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0.5),
-        name = "Annual Earnings, $ thousands",
+        name = "Annual Income, $ thousands",
         #limits = c(0, 300),
         breaks = seq(0, 300, by = 50)) +
     scale_y_continuous(expand = c(0, 0),
@@ -300,14 +301,14 @@ ggsave(file.path(figures.folder, "earnings-hist.png"),
     units = "cm", width = fig.width, height = fig.height)
 
 # Show correlation between edyears and income
-edyears.reg <- lm(log(soc_mean_annual) ~ 1 + edyears, data = analysis.data)
+edyears.reg <- lm(log(soc_median_annual) ~ 1 + edyears, data = analysis.data)
 edyears.point <- coef(summary(edyears.reg))["edyears", "Estimate"]
 edyears.se <- coef(summary(edyears.reg))["edyears", "Std. Error"]
 # Scatter plot of edyears + earnings.
 edyears_earnings.plot <- analysis.data %>%
     group_by(edyears) %>%
-    summarise(soc_mean_annual = mean(soc_mean_annual, na.rm = TRUE)) %>%
-    ggplot(aes(x = edyears, y = soc_mean_annual)) +
+    summarise(soc_median_annual = mean(soc_median_annual, na.rm = TRUE)) %>%
+    ggplot(aes(x = edyears, y = soc_median_annual)) +
     geom_smooth(method = "loess",
         colour = colour.list[2], fill = colour.list[2], size = 2) +
     geom_point(colour = "black", size = 2) +
@@ -327,7 +328,7 @@ edyears_earnings.plot <- analysis.data %>%
         name = "",
         limits = c(0, 50),
         breaks = seq(0, 100, by = 10)) +
-    ggtitle("Annual Earnings, £ thousands") +
+    ggtitle("Annual Income, £ thousands") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
@@ -345,17 +346,17 @@ ggsave(file.path(presentation.folder, "edyears-earnings.png"),
 analysis.data %>%
     filter(edyears >= 12) %>%
     mutate(college_degree = as.integer(degree_reported >= 5)) %>%
-    lm(log(soc_mean_annual) ~ 1 + college_degree, data = .) %>%
+    lm(log(soc_median_annual) ~ 1 + college_degree, data = .) %>%
     summary() %>%
     print()
 # SHow this in a plot.
 college_earnings.plot <- analysis.data %>%
     filter(edyears >= 12) %>%
-    mutate(college_degree = as.character(degree_reported >= 5)) %>%
+    mutate(college_degree = as.character(edyears > 14)) %>%
     group_by(college_degree) %>%
-    summarise(soc_mean_annual = mean(soc_mean_annual, na.rm = TRUE)) %>%
+    summarise(soc_median_annual = mean(soc_median_annual, na.rm = TRUE)) %>%
     ungroup() %>%
-    ggplot(aes(x = college_degree, y = soc_mean_annual)) +
+    ggplot(aes(x = college_degree, y = soc_median_annual)) +
     geom_bar(stat = "identity", colour = 1, fill = colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 0.5, y = 100,
@@ -370,7 +371,7 @@ college_earnings.plot <- analysis.data %>%
         name = "",
         limits = c(0, 150),
         breaks = seq(0, 150, by = 25)) +
-    ggtitle("Annual Earnings, $ thousands") +
+    ggtitle("Annual Income, £ thousands") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
@@ -458,17 +459,18 @@ ggsave(file.path(presentation.folder, "edpgi-edyears-causal.png"),
 # Reduced-form OLS no controls 0.100560
 # First-stage OLS no controls 0.66519
 analysis.data %>%
-    lm(log(soc_mean_annual) ~ 1 + edpgi_all_imputed_self, data = .) %>%
+    lm(log(soc_median_annual) ~ 1 + edpgi_all_imputed_self, data = .) %>%
     summary() %>%
     print()
 # Reduced-form OLS with controls 0.056507
 edpgi_earnings.plot <- analysis.data %>%
-    binscatter.plot(data = ., "edpgi_all_imputed_self", "soc_mean_annual",
+    mutate(log_soc_median_annual = log(soc_median_annual)) %>%
+    binscatter.plot(data = ., "edpgi_all_imputed_self", "log_soc_median_annual",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 1.5, y = 15,
         fontface = "bold",
-        label = ("Slope = +8.8% (0.008)"),
+        label = ("Slope = +8.1% (0.004)"),
         size = 4.25, hjust = 0.5, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0, 0),
@@ -479,7 +481,7 @@ edpgi_earnings.plot <- analysis.data %>%
         name = "",
         limits = c(0, 150),
         breaks = seq(0, 300, by = 25)) +
-    ggtitle("Annual Earnings, $ thousands") +
+    ggtitle("Annual Income, £ thousands") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
@@ -494,13 +496,13 @@ ggsave(file.path(presentation.folder, "edpgi-earnings.png"),
 
 # Generate a version with the (implied) causal design.
 edpgi_earnings_causal.plot <- analysis.data %>%
-    mutate(soc_mean_annual = soc_mean_annual) %>%
-    binscatter.plot(data = ., "edpgi_all_imputed_self", "soc_mean_annual",
+    mutate(soc_median_annual = soc_median_annual) %>%
+    binscatter.plot(data = ., "edpgi_all_imputed_self", "soc_median_annual",
         colour.list[3]) +
     annotate("text", colour = colour.list[3],
         x = 1.5, y = 15,
         fontface = "bold",
-        label = ("Slope = +8.8% (0.008)"),
+        label = ("Slope = +8.8% (0.008)"),  
         size = 4.25, hjust = 0.5, vjust = 0) +
     # Add on the part with a lower slope.
     annotate("text", colour = "orange",
@@ -523,7 +525,7 @@ edpgi_earnings_causal.plot <- analysis.data %>%
         name = "",
         limits = c(0, 150),
         breaks = seq(0, 300, by = 25)) +
-    ggtitle("Annual Earnings, $ thousands") +
+    ggtitle("Annual Income, £ thousands") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
         plot.margin = unit(c(0.5, 3, 0, 0), "mm"))

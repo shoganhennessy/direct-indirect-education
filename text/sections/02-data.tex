@@ -206,7 +206,7 @@ By comparing siblings' genetics across thousands of genetic variants, we can rec
 
 \autoref{fig:pgi-imputing} visualises the logic behind imputing parental SNP values based on an individual's, and their sibling(s)'s, genetic data.
 In the middle panel, the individual has genotype 1 and their sibling has genotype 0.
-Since the individual must have inherited their 1 variant from one parent and their "0" variant from the other, while the sibling inherited two 0 variants, we can infer that one parent has genotype 0 (contributing 0 to both children) and the other has genotype 1 (contributing 1 to the individual and 0 to the sibling).
+Since the individual must have inherited their 1 variant from one parent and their 0 variant from the other, while the sibling inherited two 0 variants, we can infer that one parent has genotype 0 (contributing 0 to both children) and the other has genotype 1 (contributing 1 to the individual and 0 to the sibling).
 The right panel shows an alternative configuration yielding the same sibling genotypes.
 When parental genotypes cannot be uniquely determined, the imputation uses the expected values based on observed variants and population frequencies.
 By applying this logic across hundreds of thousands of SNPs and accounting for segments of DNA shared identically by descent between siblings, we can accurately reconstruct parental PGIs despite never observing the parents directly.

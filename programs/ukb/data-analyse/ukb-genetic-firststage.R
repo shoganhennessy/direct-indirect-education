@@ -13,12 +13,12 @@ library(latex2exp)
 # Library to sumamrise models in plots
 library(modelsummary)
 # The standard, linear, IV estimator package.
-library(ivreg)
+library(fiexest)
 # Define number of digits in tables and graphs
 digits.no <- 3
 # Size for figures
 fig.height <- 10
-fig.width <- 1.5 * fig.height
+fig.width <- 1.25 * fig.height
 presentation.width <- (3 / 2) * fig.width
 presentation.height <- presentation.width
 # List of 3 default colours.
@@ -65,6 +65,11 @@ print(names(analysis.data))
 ################################################################################
 ## Plot: correlates with the Ed PGI, and whether they are for random component.
 
+analysis.data %>% pull(edpgi_all_imputed_self) %>% summary() %>% print()
+analysis.data %>% pull(edpgi_all_imputed_self) %>% sd() %>% print()
+analysis.data %>% pull(edpgi_all_imputed_random) %>% summary() %>% print()
+analysis.data %>% pull(edpgi_all_imputed_random) %>% var() %>% print()
+
 # Get the demographic possible confounders.
 demographic.data <- analysis.data %>%
     select(
@@ -91,7 +96,7 @@ demographic.labels <- c(
     "asthma_pgi"        = "Other PGI: Asthma",
     "bipolar_pgi"       = "Other PGI: Bipolar",
     "bmi_pgi"           = "Other PGI: BMI",
-    "t2diabetes_pgi"    = "Other PGI: Diabetes (T2)",
+    "t2diabetes_pgi"    = "Other PGI: Diabetes, Type-2",
     "height_pgi"        = "Other PGI: Height",
     "schizophrenia_pgi" = "Other PGI: Schizophrenia")
 
@@ -321,14 +326,14 @@ point_est.data %>%
 ## OLS versus random component.
 lm(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data) %>% summary()
 lm(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
-ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
+ivreg::ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
     edpgi_all_imputed_random  + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
 
-ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
-    edpgi_exclude_imputed_random  + edpgi_exclude_imputed_parental, data = analysis.data) %>% summary()
+ivreg::ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
+    edpgi_exclude_imputed_random  + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
 
 
-ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
+ivreg::ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
     edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
 #! About twice as large as literature estimates, when using diferent weights for imputed random/parental component.
 
@@ -360,9 +365,8 @@ lm(edpgi_all_imputed_self ~ 1 + edpgi_exclude_imputed_random, data = analysis.da
 
 
 
-ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental | edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
-
-ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self | edpgi_all_imputed_random , data = analysis.data) %>% summary()
+ivreg::ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental | edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
+ivreg::ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self | edpgi_all_imputed_random , data = analysis.data) %>% summary()
 
 
 # The gain from ORIV (correlation)
@@ -412,66 +416,105 @@ summary(GORIV(log(soc_mean_hourly) ~ 1,
 
 
 ################################################################################
-## Quasi second-stage, Ed PGI -> Ed Years
-
-# OLS (not causal)
-analysis.data %>%
-    lm(edyears ~ 1 + edpgi_self, data = .) %>%
-    summary() %>%
-    print()
-
-# Show the correlation between the random value, and Ed years
-analysis.data %>%
-    lm(edyears ~ 1 + edpgi_random, data = .) %>%
-    summary() %>%
-    print()
-
-# Show the correlation between the self + parents value, and Ed years
-analysis.data %>%
-    lm(edyears ~ 1 + edpgi_self + edpgi_parents, data = .) %>%
-    summary() %>%
-    print()
-
-# Try it with the random part as an instrument.
-analysis.data %>%
-    ivreg::ivreg(edyears ~ 1 + edpgi_self | 1 + edpgi_random,
-        data = .) %>%
-    summary() %>%
-    print()
+## Validation of assumptions.
 
 # Show the mean Ed PGI random component across the parent dist
 analysis.data$parental_quantile <-
-    ecdf(analysis.data$edpgi_parents)(analysis.data$edpgi_parents)
+    ecdf(analysis.data$edpgi_all_imputed_parental)(
+        analysis.data$edpgi_all_imputed_parental)
 analysis.data$parental_quantile <- factor(
-    round(10 * analysis.data$parental_quantile))
+    round(9 * analysis.data$parental_quantile) + 1)
 # Compare this to Houmark+ (2024) Figure 1.
 analysis.data %>%
     group_by(parental_quantile) %>%
     summarise(
-        edpgi_random_mean   = mean(edpgi_random),
-        edpgi_random_sd     = sd(edpgi_random),
-        edpgi_self_mean     = mean(edpgi_self),
-        edpgi_self_sd       = sd(edpgi_self),
-        edpgi_parental_mean = mean(edpgi_parents),
-        edpgi_parental_sd   = sd(edpgi_parents)) %>%
+        edpgi_random_mean   = mean(edpgi_exclude_imputed_random),
+        edpgi_random_sd     = sd(edpgi_exclude_imputed_random),
+        edpgi_self_mean     = mean(edpgi_all_imputed_self),
+        edpgi_self_sd       = sd(edpgi_all_imputed_self),
+        edpgi_parental_mean = mean(edpgi_all_imputed_parental),
+        edpgi_parental_sd   = sd(edpgi_all_imputed_parental)) %>%
     View()
-mean(analysis.data$edpgi_self > analysis.data$edpgi_parents)
+mean(analysis.data$edpgi_exclude_imputed_random
+    > analysis.data$edpgi_all_imputed_parental)
+
+# Plot the distribution of self andrandom component.
+library(ggridges)
+# Ed PGI
+parental_self.plot <- analysis.data %>%
+    ggplot(aes(x = edpgi_all_imputed_self,
+        y = parental_quantile)) +
+    geom_density_ridges_gradient(
+        scale = 3, rel_min_height = 0.01,
+        colour = "black", fill = colour.list[2]) +
+    theme_bw() +
+    scale_x_continuous(expand = c(0, 0),
+        name = "Ed PGI",
+        breaks = seq(-10, 10, by = 1),
+        limits = c(-4, 4)) +
+    scale_y_discrete(expand = c(0, 0),
+        name = "") +
+    ggtitle("Parental Quantile, 1st through 10th") +
+    theme(plot.title = element_text(size = rel(1), hjust = 0),
+        plot.title.position = "plot",
+        plot.margin = unit(c(0.5, 3, 0, 0), "mm"),
+        panel.spacing = unit(0.1, "lines"),
+        legend.position = "none")
+# Save the plot.
+ggsave(file.path(figures.folder, "edpgi-self-dist.png"),
+    plot = parental_self.plot,
+    units = "cm", width = fig.width, height = fig.height)
+
+# Random component.
+parental_random.plot <- analysis.data %>%
+    ggplot(aes(x = edpgi_all_imputed_random,
+        y = parental_quantile)) +
+    geom_density_ridges_gradient(
+        scale = 3, rel_min_height = 0.01,
+        colour = "black", fill = colour.list[3]) +
+    geom_vline(xintercept = 0, linetype = "dashed") +
+    theme_bw() +
+    scale_x_continuous(expand = c(0, 0),
+        name = "Ed PGI, random component",
+        breaks = seq(-10, 10, by = 1),
+        limits = c(-4, 4)) +
+    scale_y_discrete(expand = c(0, 0),
+        name = "") +
+    ggtitle("Parental Quantile, 1st through 10th") +
+    theme(plot.title = element_text(size = rel(1), hjust = 0),
+        plot.title.position = "plot",
+        plot.margin = unit(c(0.5, 3, 0, 0), "mm"),
+        panel.spacing = unit(0.1, "lines"),
+        legend.position = "none")
+# Save the plot.
+ggsave(file.path(figures.folder, "edpgi-random-dist.png"),
+    plot = parental_random.plot,
+    units = "cm", width = fig.width, height = fig.height)
+
+
+
+
+
+
+
 # Ensure this does not vary across the parental distribution.
 analysis.data %>%
-    lm(edpgi_self ~ 1 + edpgi_random * parental_quantile, data = .) %>%
+    lm(edpgi_all_imputed_self ~ 1 + edpgi_exclude_imputed_random * parental_quantile, data = .) %>%
     summary() %>%
     print()
 #  TEST: does this association hold true among people for whom we observe one or both parents? -> Yes.
 analysis.data %>%
     filter(father_present + mother_present > 0) %>%
-    lm(edpgi_random ~ 1 + 
-        sex_male * (edpgi_father + edpgi_mother), data = .) %>%
+    lm(edpgi_exclude_imputed_random ~ 1 + 
+        + father_present : edpgi_all_imputed_paternal
+        + mother_present : edpgi_all_imputed_maternal, data = .) %>%
     summary() %>%
     print()
 # Compare to the Ed PGI in raw form.
 analysis.data %>%
     filter(father_present + mother_present > 0) %>%
-    lm(edpgi_self ~ 1 +
-        sex_male * (edpgi_father + edpgi_mother), data = .) %>%
+    lm(edpgi_all_imputed_self ~ 1 +
+        + father_present : edpgi_all_imputed_paternal
+        + mother_present : edpgi_all_imputed_maternal, data = .) %>%
     summary() %>%
     print()

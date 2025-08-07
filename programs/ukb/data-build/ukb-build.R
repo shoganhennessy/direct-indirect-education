@@ -91,14 +91,20 @@ ukb_pheno.data <- ukb_pheno.data %>%
             ifelse(!is.na(participant.p20277_i3), participant.p20277_i3, NA)))),
         # birth_n_coord
         birth_n_coord =
-            ifelse(!is.na(participant.p129_i0) & participant.p129_i0 != -1, participant.p129_i0,
-            ifelse(!is.na(participant.p129_i1) & participant.p129_i1 != -1, participant.p129_i1,
-            ifelse(!is.na(participant.p129_i2) & participant.p129_i2 != -1, participant.p129_i2, NA))),
+            ifelse(!is.na(participant.p129_i0) & participant.p129_i0 != -1,
+                participant.p129_i0,
+            ifelse(!is.na(participant.p129_i1) & participant.p129_i1 != -1,
+                participant.p129_i1,
+            ifelse(!is.na(participant.p129_i2) & participant.p129_i2 != -1,    
+                participant.p129_i2, NA))),
         # birth_e_coord
         birth_e_coord =
-            ifelse(!is.na(participant.p130_i0), participant.p130_i0,
-            ifelse(!is.na(participant.p130_i1), participant.p130_i1,
-            ifelse(!is.na(participant.p130_i2), participant.p130_i2, NA))),
+            ifelse(!is.na(participant.p130_i0) & participant.p130_i0 != -1,
+                participant.p130_i0,
+            ifelse(!is.na(participant.p130_i1) & participant.p130_i1 != -1,
+                participant.p130_i1,
+            ifelse(!is.na(participant.p130_i2) & participant.p130_i2 != -1,
+                participant.p130_i2, NA))),
         # birth_country
         birth_country =
             ifelse(!is.na(participant.p1647_i0), participant.p1647_i0,
@@ -153,8 +159,8 @@ ukb_pheno.data <- ukb_pheno.data %>%
     filter(!is.na(edyears)) # Missing values are those who cannot be assigned at all, after all this.
 
 # Ensure reasonable distribution for everyone (and NA end condition not met.)
-ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
-ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
+# ukb_pheno.data %>% pull(edyears) %>% table(exclude = NULL) %>% print()
+# ukb_pheno.data %>% pull(jobcode_soc) %>% table(exclude = NULL) %>% print()
 
 
 ################################################################################
@@ -191,6 +197,7 @@ cleaned_pheno.data <- ukb_pheno.data %>%
         edqual_minimum         = as.integer(participant.edqual_minimum),
         edqual_missing         = as.integer(participant.edqual_missing),
         edyears                = as.integer(edyears),
+        agefinishededuc        = as.integer(agefinishededuc),
         # Genetic variables.
         genetic_race           = as.numeric(participant.p22006),
         PCA                    = as.numeric(participant.p22020),
@@ -263,7 +270,7 @@ ukb_imputed_edpgi_all.data <- ukb_imputed_edpgi_all.data  %>%
 
 
 #! Test: Does 0.5 (child + sibling) = parental mean hold true, on average?
-ukb_imputed_edpgi_all.data %>% head(100) %>% View()
+ukb_imputed_edpgi_all.data %>% head(100) %>% print()
 
 ukb_imputed_edpgi_all.data %>%
     transmute(
@@ -354,11 +361,11 @@ cpi.factor <- cpi.update / cpi.base
 ukb_soc.data <- ukb_soc.data %>%
     transmute(
         eid = eid,
-        soc_mean_hourly       = cpi.factor * soc_mean_hourly)
-        # soc_median_hourly     = cpi.factor * soc_median_hourly,
-        # soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
-        # soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
-        # soc_2d_hourly         = exp(log_y_hourly))
+        soc_mean_hourly       = cpi.factor * soc_mean_hourly,
+        soc_median_hourly     = cpi.factor * soc_median_hourly,
+        soc_mean_hourly_all   = cpi.factor * soc_mean_hourly_all,
+        soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
+        soc_2d_hourly         = cpi.factor * exp(log_y_hourly))
 
 
 ################################################################################
@@ -512,7 +519,7 @@ final_pheno.data <- cleaned_pheno.data %>%
         edpgi_exclude_imputed_maternal = edpgi_exclude_imputed_maternal,
         # Annual wage by hours worked, in thousands
         #TODO: make this vary by full/part-time
-        soc_mean_annual = (soc_mean_hourly * hours_workweek * 40) / 1000) %>%
+        soc_median_annual = (soc_median_hourly * hours_workweek * 40) / 1000) %>%
     # Mean parental Ed PGI, scaled by 
     rowwise() %>%
     mutate(edpgi_all_imputed_parental = mean(c(
@@ -567,6 +574,7 @@ final_pheno.data <- cleaned_pheno.data %>%
         edqual_minimum,
         edqual_missing,
         edyears,
+        agefinishededuc,
         # Income variables
         householdincome_cat,
         recruitedage,
@@ -574,7 +582,11 @@ final_pheno.data <- cleaned_pheno.data %>%
         #TODO employment -> fix in the python extract because lists.
         hours_workweek,
         soc_mean_hourly,
-        soc_mean_annual,
+        soc_median_annual,
+        soc_median_hourly,
+        soc_mean_hourly_all,
+        soc_median_hourly_all,
+        soc_2d_hourly,
         starts_with("householdincome"),
         # Health & Death variables
         deathyear,
@@ -591,10 +603,10 @@ final_pheno.data %>% NROW()
 final_pheno.data %>% filter(analysis_sample == 1) %>% NROW()
 
 # Similarly, for with SOC occ wage data.
-final_pheno.data %>% filter(!is.na(soc_mean_annual)) %>% NROW() %>% print()
+final_pheno.data %>% filter(!is.na(soc_median_annual)) %>% NROW() %>% print()
 final_pheno.data %>%
     filter(!is.na(edpgi_all_imputed_parental)
-        & !is.na(edyears), !is.na(soc_mean_annual)) %>%
+        & !is.na(edyears), !is.na(soc_median_annual)) %>%
     NROW() %>%
     print()
 
@@ -675,6 +687,13 @@ final_pheno.data <- analysis.data %>%
     right_join(final_pheno.data, by = "eid")
 
 
+#! Note: skipp the uni matching, until it useful again.
+# Save the file.
+final_pheno.data %>%
+    write_csv(file.path(output.folder, "ukb-cleaned-pheno.csv"))
+quit("no")
+
+
 ################################################################################
 ## Connect UKB data with collected distance to nearest uni data.
 
@@ -683,13 +702,13 @@ higher_loc.data <- read_csv(
     file.path(input.folder, "..", "..", "uk-highered", "highered-compiled.csv"))
 
 # Get the subsample with birth locations.
-uni.age <- 16
+uni.age <- 17
 birth.data <- final_pheno.data %>%
     filter(!is.na(birth_n_coord), !is.na(birth_e_coord),
         !is.na(birthyear), analysis_sample == 1) %>%
     mutate(year_ageuni = birthyear + uni.age) %>%
     select(eid, birth_n_coord, birth_e_coord, year_ageuni)
-# Empty columns for uni data
+# Empty columns, to fill in uni data
 # Uni if open at age when deciding uni.
 birth.data$open_closest_uni_name <- NA
 birth.data$open_closest_uni_county <- NA
@@ -709,9 +728,8 @@ for (i in 1:total.rows) {
     if (((100 * i / round(total.rows, -2)) %% 1) == 0) {
         print(paste0(i, " out of ", total.rows, ", ", 100 * (i / total.rows), "% done."))
     }
-    #print(paste0(i, " out of ", total.rows, ", ", 100 * (i / total.rows), "% done."))
     individual.data <- birth.data[i, ]
-    # Get universities that existed when this person was 18
+    # Get universities that existed when this person was right age.
     open_unis.data <- higher_loc.data[
         higher_loc.data$year_founded <= individual.data$year_ageuni, ]
     # Find which open uni is the closest to individual i 
@@ -740,22 +758,37 @@ for (i in 1:total.rows) {
     birth.data[i, ]$all_uni_e_coord <- closest_all_uni.data$uni_e_coord
 }
 
+# TODO: Add this back on to analysis.data here.
+
+final_pheno.data <- birth.data %>%
+    select(-birth_n_coord, -birth_e_coord) %>%
+    right_join(final_pheno.data, by = "eid")
+
 
 ################################################################################
-## Add counties to birth places.
+## Add counties to birth places (for everyone).
 
 # Read UK district (i.e., county) borders in 1971, from UK data service.
 # https://borders.ukdataservice.ac.uk/bds.html
-eng_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
-        "locations", "England_ct_1971", "england_ct_1971.shp") %>% 
+eng_shape.data <- file.path(
+        input.folder, "..", "..", "uk-highered", "locations",
+        "England_ct_1971", "england_ct_1971.shp") %>% 
+        #!TEST: Eng DISTRICTS.
+        #"England_dt_1971", "england_dt_1971.shp") %>%
     st_read() %>%
     mutate(country = "England")
-scot_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
-        "locations", "Scotland_ct_1971", "scotland_ct_1971.shp") %>% 
+scot_shape.data <- file.path(
+        input.folder, "..", "..", "uk-highered", "locations",
+        "Scotland_ct_1971", "scotland_ct_1971.shp") %>%
+        #!TEST: Scot DISTRICTS.
+        #"Scotland_dt_1971", "scotland_dt_1971.shp") %>%
     st_read()  %>%
     mutate(country = "Scotland")
-wales_shape.data <- file.path(input.folder, "..", "..", "uk-highered",
-        "locations", "Wales_ct_1971", "wales_ct_1971.shp") %>% 
+wales_shape.data <- file.path(
+        input.folder, "..", "..", "uk-highered", "locations",
+        "Wales_ct_1971", "wales_ct_1971.shp") %>%
+        #!TEST: Wales DISTRICTS.
+        #"Wales_dt_1971", "wales_dt_1971.shp") %>%
     st_read() %>%
     mutate(country = "Wales")
 # Combine, to get entire UK data.
@@ -765,24 +798,23 @@ uk_shape.data <- rbind(eng_shape.data, scot_shape.data, wales_shape.data)
 print(paste("UKB birth data CRS:", st_crs(birth.data)$input))
 print(paste("County data CRS:", st_crs(uk_shape.data)$input))
 
-# Put the birth county onto the birth data.
-birth.data <- birth.data %>%
-    st_as_sf(coords = c("birth_e_coord", "birth_n_coord"),
+# Put the birth county onto the analysis data.
+birth_county.data <- final_pheno.data %>%
+    select(eid, birth_e_coord, birth_n_coord) %>%
+    drop_na(birth_e_coord, birth_n_coord) %>%
+    st_as_sf(
+        coords = c("birth_e_coord", "birth_n_coord"),
         crs = st_crs(uk_shape.data)) %>%
     st_join(uk_shape.data, join = st_within)
-
-# Restrict to relevant columns
-birth.data <- birth.data %>%
-    rename(
-        #birth_county_label = label,
-        birth_county_name = name) %>%
+# calculate the area of their birth county.
+birth_county.data$birth_county_area <- st_area(birth_county.data)    
+birth_county.data <- birth_county.data %>%
     tibble() %>%
-    select(-country, -label, -geometry, -year_ageuni)
-
-# Put the ed location data back on to the dataframe.
+    select(-country, -label, -geometry) %>%
+    rename(birth_county_name = name)
+# Put onto the final data.
 final_pheno.data <- final_pheno.data %>%
-    left_join(birth.data, by = "eid")
-
+    left_join(birth_county.data, by = "eid")
 # How many have newly opened unis?
 final_pheno.data %>%
     filter(analysis_sample == 1) %>%
@@ -793,6 +825,10 @@ final_pheno.data %>%
     filter(open_closest_uni_name != all_closest_uni_name) %>%
     NROW() %>%
     print()
+
+
+final_pheno.data %>% filter(!is.na(birth_county_name)) %>% NROW()
+final_pheno.data %>% NROW()
 
 
 ################################################################################

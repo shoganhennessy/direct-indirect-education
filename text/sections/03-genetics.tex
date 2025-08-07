@@ -7,7 +7,7 @@ Consequently, correlations between an individual's Ed PGI and outcomes may refle
 
 However, while genetic inheritance generates systematic associations between genes and environments, it also includes a random component.
 Specifically, Mendelian inheritance ensures that, conditional upon parental genetics, there is random variation in the genetic variants a child inherits.
-This provides an instrumental variable to isolate causal effects of Ed PGI on outcomes.
+This provides an Instrumental Variable (IV) to isolate causal effects of Ed PGI on outcomes.
 I exploit such Mendelian random variation to instrument for changes in the Ed PGI, thereby identifying causal relationships independent of confounding environmental factors.
 
 \subsection{Mendelian Independent Inheritance}
@@ -93,6 +93,11 @@ This result came about purely from random chance, conditional on at least one of
 $x_{i,j}^\text{\textcolor{red}{Random}}$ is the random variation in presence of SNP at position $j$.
 From the possible values of the parents' variants, $x_{i,j}^\text{\textcolor{red}{Random}}$ equals zero if both parents have 0 or 2 copies, equals $\frac 12$ if the child actually inherited 1 copy when both parents had one copy each ($- \frac 12$ if they did not inherit), and 1 if they inherited 2 copies and the parents had one each ($-1$ if they inherited 0).
 
+\subsection{Imputed Parental PGI}
+\label{sec:mendel-imputed}
+
+Describe here how sibling imputed, from $x_{i,j}^\text{\textcolor{ForestGreen}{Child}}$ and $x_{s(i),j}^\text{\textcolor{purple}{Sibling}}$, lead to mean parental values.
+
 \subsection{Mendelian Independent Inheritance in the Ed PGI}
 \label{sec:mendel-pgi}
 Moving from a single variant to the PGI simply means summing across the same random-segregation for all the variants.
@@ -133,7 +138,7 @@ Thus, in expectation, they both proxy for the parental PGI values,
     = \frac12 \left(
         Z_{m(i)}^\text{\textcolor{orange}{Mother}}
             + Z_{f(i)}^\text{\textcolor{blue}{Father}} \right)
-    \implies
+    \Rightarrow
     \E{ \tilde Z_i^\text{\textcolor{red}{Random}} } = 
         Z_i^\text{\textcolor{red}{Random}}. \]
 
@@ -171,35 +176,49 @@ Specifically, I take a secondary set of weights also provided in the supplementa
 }
 This means uses an imputed random component which has measurement error coming from a different population than that for the Ed PGI, thus purging the attenuation bias in IV estimates.
 
-This approach was developed in the genetics literature, to purge bias from PGI correlations \citep{van2023overcoming} and is applied here for the first time for causal estimates.
-Using one set of weights to instrument for another raises a question: which set of GWAS weights should be used for the IV random component, and which for the endogenous Ed PGI?
-The Obviously Related IV (ORIV, \citealt{gillen2019experimenting}) approach removes this subjective choice by estimating the IV specification twice, once with each set of weights serving as the instrument for the other set, and then combining the estimates optimally.
+This approach was first proposed in the genetics literature, to purge bias from PGI correlations \citep{van2023overcoming} and is applied here for the first time for causal estimates.
+Using a PGI with one set of GWAS weights as an IV for another PGI constructed with different weights raises a key question: which set of weights should define the random (instrumental) component, and which should be used for the endogenous Ed PGI?
+The method of Obviously Related Instrumental Variables (ORIV) removes this subjective choice by estimating the IV specification twice, once with each set of weights serving as the instrument for the other set \citep{gillen2019experimenting}.
+ORIV then combines the estimates optimally and clustering the standard errors to account for the two-step estimation (i.e., clustering on individuals).
 This yields unbiased estimates while efficiently accounting for estimation uncertainty from both sets of GWAS weights --- see \citealt{van2023overcoming} for full details.
 % Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
 
-\subsection{Distribution of the Random Component}
+\subsection{Identification Strategy}
+Formally, let $Y_i(z')$ denote the potential education or labour market outcome for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
+Observed education and wages/income data are a sum of their respective potential outcomes.
+\[ \sum_{z'} \indicator{
+    Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} Y_i(z').
+\]
 
-\begin{figure}[h!]
-    \centering
-    \singlespacing
-    \caption{Correlation for Ed PGI, or Random Component, and Demographic Variables.}
-    \label{fig:demographic-correlates}
-    \includegraphics[width=0.85\textwidth]{sections/figures/demographic-correlates.png}
-    \justify
-    \footnotesize
-    \textbf{Note}:
-    Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $\tilde Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
-\end{figure}
+\noindent
+\textbf{Target Parameters.}
+This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following average partial effects:
+\[ \partialdiff{z'} \E{Y_i(z')}. \]
+The first average partial effect represents the average effect of a one standard deviation change in the Ed PGI on education and labour market wages or income.
 
-\textbf{Describe the random component.
-What is its distribution.
-It is not correlated with other demographic variables, and less so with the other PGIs.}
-\autoref{fig:demographic-correlates} shows what the Ed PGI, and the calculated random component is correlated with.
+The Ed PGI, however, is neither randomly assigned nor directly manipulatable, so that we may not observe $Y_i(z')$ for different values of $z'$ for the same individual, and causal effects are not identifiable without further assumptions (i.e., the fundamental problem of causal inference).
+Thus, I rely on random variation coming from the random component of the Ed PGI to infer causal effects.
 
+\noindent
+\textbf{Identifying Assumptions.}
+I use the random component of the Ed PGI, $\tilde Z_i^\text{\textcolor{red}{Random}}$, as an instrument for the Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+This requires a number of assumptions to recover valid average causal effects.
+\begin{enumerate}[label=(\arabic*)]
+    \item Instrument Relevance and Independence: The random component of the Ed PGI strongly predicts the individual's Ed PGI, and is unrelated to potential outcomes.
+    \item Instrument Monotonicity: 
+    A higher value of the random component (weakly) increases the Ed PGI, with probability 1.
+    \item Exclusion Restriction:
+    The random genetic component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, affects the potential outcomes only via the Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+\end{enumerate}
 
-\subsection{Genetic First-Stage Effects}
-The Ed PGI imputed random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, serves as a formula instrument for an individuals' Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+The three identifying assumptions are justified by the biology of genetic inheritance and the design of the empirical strategy.
+The relevance and independence assumption (1) holds because the random genetic component arises solely from Mendelian inheritance, ensuring both predictive strength (see \autoref{tab:genetic-firststage}) and independence from unobserved confounding conditional on parental genetics and observed covariates.
+The monotonicity assumption (2) is satisfied because inheriting a higher random genetic component can only additively increase the Ed PGI, never reducing it.
+Indeed, the random component mechanically changes the Ed PGI for anyone who receives a higher random component, so that everyone is a complier, too.
+Finally, the exclusion restriction (3) is credible given that genetic variants used in the random component influence socioeconomic outcomes only through their aggregation into the Ed PGI, by construction.
 
+\noindent
+\textbf{Estimation Strategy.}
 I estimate the genetic first-stage as follows, 
 \begin{equation}
     \label{eqn:genetic-firststage}
@@ -215,47 +234,20 @@ $\Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
         Z_{f(i)}^\text{\textcolor{blue}{Father}}}$
 with interactions for the imputed parental PGI values and demographic variables.
 
-\begin{table}[!htbp]
-    \singlespacing
-    \centering
-    \small
-    \caption{First-stage Genetic Estimates,
-        $Z_i^\text{\textcolor{red}{Random}} \to Z_i^\text{\textcolor{ForestGreen}{Child}}$ Independently and with ORIV.}
-    \begin{tabular}{l c c c c c c}
-        \\[-1.8ex]\hline \hline \\[-1.8ex] 
-        & \multicolumn{6}{c}{Outcome:} \\
-        & \multicolumn{3}{c}{Primary Ed PGI,
-            $Z_i^\text{\textcolor{ForestGreen}{Child}}$}
-            & \multicolumn{3}{c}{Secondary Ed PGI,
-                $Z_i^\text{\textcolor{ForestGreen}{Child}}$} \\
-        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
-        & (1) & (2) & (3) & (4) & (5) & (6) \\
-        \midrule
-        %\\[-1.8ex]\hline \\[-1.8ex]
-        \input{sections/tables/genetic-firststage.tex}
-        \\[-1.8ex]\hline \\[-1.8ex]
-    \end{tabular}
-    \vspace{-0.25cm}
-    \label{tab:genetic-firststage}
-    \justify
-    \footnotesize
-    \textbf{Note:}
-    Shows estimates of the genetic first-stage, \eqref{eqn:genetic-firststage},
-    using the random component as an instrument for the Ed PGI.
-    The first three columns using the primary Ed PGI as the outcome, while the next use the secondary Ed PGI.
-    The row marked ORIV uses the combined estimates of the primary and secondary Ed PGI random component on the Ed PGI, estimated using ORIV.
-\end{table}
+I estimate the second-stage with a regression specification as follows, where $\vec X_i$ is a vector of control variables described previously.
+\begin{align}
+    \label{eqn:parametric-secondstage}
+    Y_i &= \alpha + \beta Z_i^\text{\textcolor{ForestGreen}{Child}}
+        + \vec \varphi' \vec X_i + \varepsilon_i.
+\end{align}
+$\beta$ represents the average effect of the Ed PGI on the education variables, and on wages and annual income (measured in $\log$ values).
+I use the Ed PGI random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, to instrument for the Ed PGI in the IV specifications, using the ORIV method (with Ed PGI calculated using two independent weights) where mentioned.
+The IV first-stage is shown in \autoref{eqn:genetic-firststage}, with the same set of control variables as the second-stage.
 
-\textbf{Points raised by Prof Miller:}
-\begin{enumerate}
-    \item Also show $Z_i^\text{\textcolor{ForestGreen}{Child}} \to Z_i^\text{\textcolor{ForestGreen}{Child}}$, or random $\to$ random in appendix table, to get a better sense about what this implies.
-    \item What does the first-stage attenuation bias say about the reliability ratio of commonly used Ed PGI values?  It says the reliability is fairly low....
-\end{enumerate}
-
-The Ed PGI random component is a strong instrument for the Ed PGI, even when using the primary as an instrument for the secondary ($1 \to 2$, and visa versa).
-\autoref{tab:genetic-firststage} summarises estimates of the genetic first-stage defined in equation \eqref{eqn:genetic-firststage}.
-Columns (1) and (5) show mechanical results, equal to one by construction, as the random component is calculated from the primary and secondary Ed PGIs respectively.
-Columns (2) and (4) show that the random component is a strong instrument for the Ed PGI, calculated using weights from the other sample (primary or secondary), confirming that the random component from one PGI retains predictive power for the other, independently calculated PGIs.
-The fact that these cross-PGI coefficients are not equal to one indicates substantial measurement error in both PGIs, which would lead to attenuation bias in standard IV estimation.
-The ORIV estimates, columns (3) and (6) explicitly addresses this measurement error by combining information from both primary and secondary first-stages.
-Although ORIV estimates recover unbiased coefficients, this approach necessarily comes at the expense of greater variance.
+\noindent
+\textbf{Limitations.}
+The OLS and IV estimates place greater weight on individuals with larger deviations in the random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, which might not represent effects for the entire population --- potentially limiting external validity.
+Additionally, despite independent Mendelian inheritance, the random genetic component remains modestly correlated with other PGIs.
+While I control for these other PGI values, these correlations further constrain generalisability beyond the analysis sample, by implying overlap with the Ed PGI and these other PGIs.
+Finally, the linear specifications employed (OLS and ORIV) yield weighted averages of individual-level causal effects.
+This linear specification might not fully reflect heterogeneity in causal effects across the PGI distribution, or provide weights for the average causal effects representative for the entire UKB population --- see \cite{blandhol2022tsls} for further details.
