@@ -41,84 +41,39 @@ Further writing about how identifying
 \begin{table}[!h]
     \singlespacing
     \centering
-    \caption{Effects of the MSLA Change.}
+    \caption{First-stage of the MSLA Change, and Returns to Education Estimates.}
     \centerline{
     \begin{tabular}{l c c c c c c c c}
-        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+        \\[-1.8ex]\hline \hline \\[-1.8ex]
+        \textbf{Panel A: First-stage.} \\
         & \multicolumn{4}{c}{First-stage.}
             & \multicolumn{4}{c}{Reduced form.}\\
         \cmidrule(lr){2-5} \cmidrule(lr){6-9}
-        Outcome: & \multicolumn{2}{c}{GCSE}       & \multicolumn{2}{c}{Education} & \multicolumn{2}{c}{Hourly} & \multicolumn{2}{c}{Annual}  \\
+        %\multicolumn{1}{r}{Outcome:}
+        Outcome:
+        & \multicolumn{2}{c}{GCSE}       & \multicolumn{2}{c}{Education} & \multicolumn{2}{c}{Hourly} & \multicolumn{2}{c}{Annual}  \\
         & \multicolumn{2}{c}{Completion} & \multicolumn{2}{c}{Years}     & \multicolumn{2}{c}{Wage}   & \multicolumn{2}{c}{Income} \\
         \cmidrule(lr){2-5} \cmidrule(lr){6-9}
         & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
         \\[-1.8ex]\hline \\[-1.8ex]
         \input{sections/tables/mlsa-firststage.tex}
-        \\[-1.8ex]\hline \\[-1.8ex]
-    \end{tabular}
-    }
-    \vspace{-0.25cm}
-    \label{tab:msla-firststage}
-    \justify
-    \footnotesize
-    \textbf{Note:}
-    Talk about it.
-    Note this is among the entire sample, and not the sibling analysis subsample.
-\end{table}
-
-\subsection{Returns to Education}
-
-\begin{table}[!h]
-    \singlespacing
-    \centering
-    \caption{Returns to Education, Motivated by MSLA Change.}
-    \centerline{
-    \begin{tabular}{l c c c c c c c c}
-        \\[-1.8ex]\hline \hline \\[-1.8ex] 
-        & \multicolumn{4}{c}{OLS.}
-            & \multicolumn{4}{c}{MLSA IV.}\\
+        \\[-1.8ex]\hline \hline \\[-1.8ex]
+        \textbf{Panel B: Second-stage.} \\
+            & \multicolumn{4}{c}{OLS.}
+                & \multicolumn{4}{c}{MLSA IV.} \\
         \cmidrule(lr){2-5} \cmidrule(lr){6-9}
         & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
         \\[-1.8ex]\hline \\[-1.8ex]
-        \multicolumn{9}{l}{\textbf{Outcome:} Log Occupation Hourly Wage} \\
+        \multicolumn{8}{l}{Outcome: Log Occupation Hourly Wage} \\
         \input{sections/tables/mlsa-secondstage-wage.tex}
         \\[-1.8ex]\hline \\[-1.8ex]
-        \multicolumn{9}{l}{\textbf{Outcome:} Log Occupation Annual Income} \\
+        \multicolumn{8}{l}{Outcome: Log Occupation Annual Income} \\
         \input{sections/tables/mlsa-secondstage-income.tex}
-        \\[-1.8ex]\hline \\[-1.8ex]
+        \\[-1.8ex]\hline \hline \\[-1.8ex]
     \end{tabular}
     }
     \vspace{-0.25cm}
-    \label{tab:msla-secondstage}
-    \justify
-    \footnotesize
-    \textbf{Note:}
-    Talk about it.
-    Note this is among the entire sample, and not the sibling analysis subsample.
-\end{table}
-
-\begin{table}[!h]
-    \singlespacing
-    \centering
-    \caption{Returns to Higher Education.}
-    \centerline{
-    \begin{tabular}{l c c c c c c c c}
-        \\[-1.8ex]\hline \hline \\[-1.8ex] 
-        & \multicolumn{4}{c}{OLS.}
-            & \multicolumn{4}{c}{MLSA IV.}\\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
-        & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
-        \\[-1.8ex]\hline \\[-1.8ex]
-        \multicolumn{9}{l}{\textbf{Outcome:} Log Occupation Hourly Wage} \\
-        \input{sections/tables/mlsa-secondstage-wage.tex}
-        \\[-1.8ex]\hline \\[-1.8ex]
-        \multicolumn{9}{l}{\textbf{Outcome:} Log Occupation Annual Income} \\
-        \input{sections/tables/mlsa-secondstage-income.tex}
-        \\[-1.8ex]\hline \\[-1.8ex]
-    \end{tabular}
-    }
-    \vspace{-0.25cm}
-    \label{tab:msla-secondstage}
+    \label{tab:msla-iv}
     \justify
     \footnotesize
     \textbf{Note:}

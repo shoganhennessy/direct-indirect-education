@@ -18,7 +18,7 @@ library(binsreg)
 digits.no <- 3
 # Size for figures
 fig.width <- 8.5
-fig.height <- 0.75 * fig.width
+fig.height <- fig.width
 presentation.width <- (5 / 3) * fig.width
 presentation.height <- (2 / 3) * presentation.width
 # List of 3 default colours.
