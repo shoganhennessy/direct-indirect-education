@@ -184,19 +184,23 @@ This yields unbiased estimates while efficiently accounting for estimation uncer
 % Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
 
 \subsection{Identification Strategy}
-Formally, let $Y_i(z')$ denote the potential education or labour market outcome for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
+Formally, let $D_i(z')$ denote the potential education level and $Y_i(z', D_i(z'))$ labour market outcome for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
 Observed education and wages/income data are a sum of their respective potential outcomes.
-\[ \sum_{z'} \indicator{
-    Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} Y_i(z').
+\[ D_i = \sum_{z'} \indicator{
+    Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} D_i(z'), \;\;\;\;
+    Y_i = \sum_{z'} \indicator{
+    Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} Y_i(z', D_i(z')).
 \]
+Note that $Y_i(z', D_i(z'))$ is a function of both hypothetical Ed PGI value, and resulting education $D_i(z')$; \autoref{sec:direct} returns to this distinction.
 
 \noindent
 \textbf{Target Parameters.}
 This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following average partial effects:
-\[ \partialdiff{z'} \E{Y_i(z')}. \]
-The first average partial effect represents the average effect of a one standard deviation change in the Ed PGI on education and labour market wages or income.
+\[ \partialdiff{z'} \E{D_i(z')}, \;\;\;\; 
+    \partialdiff{z'} \E{Y_i(z', D_i(z'))}. \]
+The first average partial effect represents the average effect of a one standard deviation change in the Ed PGI on a measure of education, and the second on labour market wages or income.
 
-The Ed PGI, however, is neither randomly assigned nor directly manipulatable, so that we may not observe $Y_i(z')$ for different values of $z'$ for the same individual, and causal effects are not identifiable without further assumptions (i.e., the fundamental problem of causal inference).
+The Ed PGI, however, is neither randomly assigned nor directly manipulatable, so that we may not observe $Y_i(z', D_i(z'))$ for different values of $z'$ for the same individual, and causal effects are not identifiable without further assumptions (i.e., the fundamental problem of causal inference).
 Thus, I rely on random variation coming from the random component of the Ed PGI to infer causal effects.
 
 \noindent

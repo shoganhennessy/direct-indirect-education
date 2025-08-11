@@ -1,67 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Results section
-\section{Accounting for Multiple Levels of Education}
+\section{Mediation Estimates}
 \label{sec:direct-effects}
 
-Set up the empirical model, where the education mediator has 3 levels:
-$D_i^1, D_i^2, D_i^3$ which represent GCSEs, A-Levels, and a university degree respectively.
-Note that these are sequential education qualifications, where GCSEs must be attained to advance to A-Levels and similarly for A-Levels to university --- $D_i^{k'} =1$ implies $D_i^{k'-1} =1$.
+Long section describing the mediation estimates.
 
-This leads to a mediation model, where resulting occupation-based wages and income are a result of sequential choices,
-\begin{align}
-    D_i^{k'} &= \phi_{k'} +
-        \bar\pi_{k'} Z_i + \eta_{k',i}, \;\;\;\; \text{ for } k' = 1, 2, 3 \\
-    Y_i &= \alpha + \gamma Z_i +
-        \sum_{k'=1,2,3} \left(
-            \beta_{k'} D_i^{k'} + \delta_{k'} Z_i D_i^{k'} \right)
-        + \vec\varphi' \vec X_i
-        + \varepsilon_i.
-\end{align}
+Use estimate the mediation effects, using (1) OLS (2) sibling FEs (3) MSLA. 
 
-Describe how it is not identified, because education qualifications are not randomly assigned.
-
-\subsection{Returns to Education}
-Write a section how correlational estimates give an estimate for returns to education, which are often not so different from causally identified version.
-
-And then estimates which control for family variation by fixed effects (siblings FEs) give lower bounds for returns to education.
-
-
-\begin{table}[!h]
-    \small
-    \singlespacing
-    \centering
-    \caption{Returns to Multiple Levels of Education, OLS and Sibling FE Estimates.}
-    \centerline{
-    \begin{tabular}{l c c c c c c c c}
-        \\[-1.8ex]\hline \hline \\[-1.8ex] 
-        & \multicolumn{4}{c}{OLS}
-            & \multicolumn{4}{c}{OLS with Sibling FEs}\\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
-        Outcome: &
-        \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} & 
-        \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} \\
-        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
-        \cmidrule(lr){6-7} \cmidrule(lr){8-9}
-        & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
-        \\[-1.8ex]\hline \\[-1.8ex]
-        \input{sections/tables/highered-returns.tex}
-        \\[-1.8ex]\hline \\[-1.8ex]
-    \end{tabular}
-    }
-    \vspace{-0.25cm}
-    \label{tab:highered-returns}
-    \justify
-    \footnotesize
-    \textbf{Note:}
-    Talk about it.
-    Note this is among the sibling analysis subsample.
-\end{table}
-
-\textbf{Change the above to be GCSE, A-Level, then university degree (not ed years).}
-
-This gives lower bounds on the direct effect, after accounting for multiple levels of education in this manner.
-
-\subsection{The Ed PGI Direct Effect}
 
 \begin{table}[!h]
     \small
@@ -69,23 +14,25 @@ This gives lower bounds on the direct effect, after accounting for multiple leve
     \centering
     \caption{Direct and Indirect Effect Estimates, with Multiple Levels of Education.}
     \centerline{
-    \begin{tabular}{l c c c c c c c c}
+    \begin{tabular}{l c c c c c c c c c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
         & \multicolumn{4}{c}{OLS}
-            & \multicolumn{4}{c}{OLS with Sibling FEs}\\
-        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+            & \multicolumn{4}{c}{OLS with Sibling FEs}
+            & \multicolumn{4}{c}{MLSA IV} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
         Outcome: &
+        \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} & 
         \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} & 
         \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} \\
         \cmidrule(lr){2-3} \cmidrule(lr){4-5}
         \cmidrule(lr){6-7} \cmidrule(lr){8-9}
-        & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
+        \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+        & (1) & (2) & (3) & (4) & (5) & (6) \\
         \\[-1.8ex]\hline \\[-1.8ex]
         Direct, Ed PGI effect \\ 
-        Indirect, education effect \\
         GCSEs channel \\ 
-        A-Levels channel\\ 
         University degree channel \\ 
+        Indirect, education effect \\
         \\[-1.8ex]\hline \\[-1.8ex]
     \end{tabular}
     }

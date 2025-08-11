@@ -1,18 +1,74 @@
 \section{Direct and Indirect Effects}
 \label{sec:direct}
+The Ed PGI exhibits clear labour-market effects in the data.
+IV estimates that isolate the random component of genetic inheritance indicate that a one-standard-deviation increase in the Ed PGI causally raises education and improves labour earnings: the preferred ORIV specifications imply roughly 0.74 additional years of education and about a 6.1\% increase in occupation-coded hourly wages per s.d. of the Ed PGI.
+These causal effects exceed earlier reports that did not correct for measurement error in PGI weights, consistent with the stacked/ORIV adjustments materially inflating both education and earnings relationships once attenuation is addressed.
 
-Two or 3 paragraphs describing how genetic wage effects can be direct or indirect.
+The size and robustness of these labour-market effects has led to a common interpretation that at least part of the Ed PGI's influence must be direct, operating through traits such as intelligence rather than exclusively through education.
+This view is often motivated by the fact that the Ed PGI predicts fluid-intelligence scores and by results that show earnings associations even when conditioning on education \citep{carvalho2024genetics}.
+Such claims appear, for example, in work that argues the Ed PGI captures skills related to financial literacy and other non-educational attributes \citep{barth2020genetic}.
 
-Describe what the sources of direct or indirect, and why a composition of education-focused genes would matter for this.
+This section examines those claims with a Causal Mediation (CM) framework to separate direct genetic effects from indirect effects via take-up and returns to education.
+The direct and indirect average partial effects are defined as follows, where $Y_i$ is again a measure of labour market wages or income, and $D_i$ a measure of education (education years or a binary measure for an education qualification).
+\[ \text{Direct Effect } = \partialdiff{z'}
+    \E{Y_i(z', D_i(Z_i^\text{\textcolor{ForestGreen}{Child}}))}, \;\;\;\; 
+    \text{Indirect Effect } = \partialdiff{z'}
+    \E{Y_i(Z_i^\text{\textcolor{ForestGreen}{Child}}, D_i(z'))}. \]
 
-Define the causal effects, and then the estimation equation.
+The direct effect corresponds to the average partial effect of the Ed PGI on wages or income while holding the education channel $D_i$ fixed; the indirect effect captures the average partial effect that operates through the education response $D_i(z')$.
+This decomposition maps to the empirical question raised above: ``do education-linked genes affect earnings directly, or mainly by shifting the education margin?''
 
-Say that it is not identified
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Structural Causal Model for Direct and Indirect Effects.}
+    \label{fig:scm-model}
+    \begin{tikzpicture}
+        \node[state,thick,ForestGreen] (mediator) at (0,0) {$D_i$};
+        \node[state,thick,blue] (treatment) [left=3cm of mediator] {$Z_i$};
+        \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
+        % Label Z_i, D, Y_i
+        \node[color=ForestGreen] [above=0.25cm of mediator] {Education};
+        \node[color=blue] [left=0.1cm of treatment] {Ed PGI};
+        \node[color=red] [right=-0.01cm of outcome] {Income \& Wages};
+        % Draw the causal arrows
+        \path[->, thick] (treatment) edge (mediator);
+        \path[->, thick] (mediator) edge (outcome);
+        \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
+        \node[color=orange] [below=0.4cm of mediator] {Direct Effect};
+        % Add in the unobserved confounding
+        \path[<->,dashed,thick,color=RoyalBlue] (mediator) edge[bend right=-45] (outcome);
+    \end{tikzpicture}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    This figure shows the structural causal model behind direct and indirect effects, where $Z_i \to D_i$ represents a causal relationship of $Z_i$ on $D_i$.
+    The dotted line between education and income \& wages represents the fact that education returns are not causally identified by simple correlational estimates.
+\end{figure}
+
+Point identification of these average causal effects is not available.
+Education is not randomly assigned, so causal returns to education are not directly identified in the sibling analysis sample; this limits what can be learned about the indirect path without additional structure or external variation.\footnote{
+    See \cite{hogan2025causal} for full explanation of this non-identification issue for CM in general.
+}
+In light of this, the analysis proceeds on two complementary avenues that anchor the education channel with credible information on returns: (i) the 1972 British Minimum School-Leaving Age (MSLA) reform, which induces exogenous schooling for to estimate education returns for MLSA compliers; and (ii) sibling fixed-effects estimates, which offer conservative, design-consistent benchmarks within the UKB sibling analysis sample.
+These ingredients are used below to interpret the mediated component of the Ed PGI's labour-market effect and, residually, to assess the scope for a direct effect.
 
 \subsection{Minimum School Leaving Age (MSLA)}
+In 1972, the UK increased the Minimum School Leaving Age (MSLA) by one year, from age 15 to 16.
+The change took effect at the start of the 1972-73 school year, and applied to those who were 15 or younger on 1 September 1972, i.e., those born on or after 1 September 1957.
+The reform therefore induced extra school for individuals born around date 1 September 1957.
+At the end of the school year which became compulsory, British school children sit exams for the GCSE qualification, so the reform pushed a larger share of the UKB cohorts to remain in school to 16 and to complete these qualifications.
+The 1972 MLSA change has been previously used for labour market returns to education \citep{oreopoulos2006estimating} and health returns to education \citep{clark2013effect}.
+The UKB population overlaps well with the birth date cut-off, and so has been used in a series of papers for estimating returns to education in the UKB \citep{barcellos2021effect,barcellos2023distributional}.
 
-Describe that education (or at least one year) is randomly assigned for compliers of the increased minimum school leavers' age law, which in 1972 raised the minimum age one can leave school (legally) from 15 to 16.
-Following this, GCSE completion rate immediately increased by 6 percentage points, and average education years by 0.2 for those born around the cusp of the September 1957.
+The analysis treats exact birth month  as the running variable in a fuzzy regression discontinuity design (RDD), using the indicator for being born September 1957 and after as an instrument.
+Because not all those eligible necessarily stayed beyond 15, the post-cutoff indicator instruments (i) GCSE completion, in specifications focussed on credentials, (ii) education years, where mentioned.
+I estimate the following RDD equation, to estimate the effect of the MSLA change on education,
+\[ D_i = l_0(b_i) + \indicator{1957.75 \leq b_i} + l_1(b_i) + \epsilon_i \]
+where $b_i$ represents individual $i$'s birth year plus birth month divided by 12 (so that 1957.75 represents born in September 1957), and $l_0, l_1$ are control trends either side of the cut-off.
+
+I estimate the RDD equation with triangular kernel weights (weighting closer to the cut-off), and in two main specifications --- one with a linear trend before and after the cutoff and a bandwidth of 5 years, and another with a polynomial in birth month, and a bandwidth of 10 years (following \citealt{barcellos2021effect}).
+The polynomial specification thus has more observations, as it includes people who are born further before or after the MSLA change.
 
 \begin{figure}[h!]
     \centering
@@ -33,13 +89,24 @@ Following this, GCSE completion rate immediately increased by 6 percentage point
     \justify
     \footnotesize
     \textbf{Note}:
-    These numbers are calculated using the entire UKB sample; the sibling subsample has too few data points for inference around the law change cut-off.
+    These figures show the first-stage education effects of the 1972 MSLA rise, where individuals born after September 1957 (the dashed line) were leggally compelled to stay in school until 16, whereas before only until age 15.
+    Birth cohort trends were calculated with a squared polynomial before and after the cutoff.
+    These estimates are calculated from all UKB respondents, born within 10 years of the cutoff and who have reported years of education.
 \end{figure}
 
-Further writing about how identifying 
+A practical constraint concerns sample size around the 1 September 1957 threshold.
+The sibling subsample is too small to deliver precise RD estimates for years of education: there are too few sibling observations in the immediate neighbourhood of the cutoff to identify a stable first-stage effect on education.
+For the RD analysis, the estimation therefore uses the broader UK Biobank cohort --- restricting to births within 5 or 10 years of the cutoff --- to increase the density of observations close to the threshold while preserving local comparability.
+This design yields substantially more information at the policy margin and improves power for both the discontinuity in schooling and the corresponding fuzzy RD/IV estimates.
+All RD results are reported with both specifications, showing that conclusions are unchanged across the 5 and 10 year windows; SEs are clustered two-way at the month $+$ birth year level.
+\autoref{fig:rosla} shows the effect of the MSLA change on GCSE completion rate and mean education years, using a squared polynomial either side of the cut-off and a bandwidth of 10 years before and after September 1975.
+
+The policy generated a clear discontinuity in schooling at the date-of-birth cutoff: the share completing the GCSE qualifications rose after for students born in September 1957 and afterwards, with a corresponding (smaller) increase in mean education years
+These first-stage effects are visible in UK Biobank and are consistent with nationally representative evidence on the same reform --- and previous research that estimate this same cut-off.
 
 \begin{table}[!h]
     \singlespacing
+    \small
     \centering
     \caption{First-stage of the MSLA Change, and Returns to Education Estimates.}
     \centerline{
@@ -81,29 +148,51 @@ Further writing about how identifying
     Note this is among the entire sample, and not the sibling analysis subsample.
 \end{table}
 
+Panel A of \autoref{tab:msla-iv} documents clear discontinuities at the September 1957 cutoff.
+In the narrower bandwidth with linear cohort trends (columns 1 and 3), the post-cutoff indicator increases the probability of completing GCSE/O-level by 5.3 p.p. (s.e. 0.2 p.p.) and raises education years by 0.122 (s.e. 0.016) years. In the wider bandwidth with quadratic trends (columns 2 and 4), the corresponding effects are 6.0 p.p. (0.7 p.p.) and 0.201 (0.033) years. 
+Reduced-form impacts on log hourly wages and log annual income are mechanically small and positive—0.006--0.011 and 0.001--0.014 log points, respectively—consistent with modest average shifts in schooling.
+IV relevance is very strong for the education outcomes (e.g., F = 1049, 79 for GCSE completion; 56, 37 for education years).
+
+Using the post-cutoff indicator as an instrument yields estimates for labour market returns to education among MLSA compliers on the leaving-age margin, shown in Panel B of \autoref{tab:msla-iv}.
+For log hourly wages, OLS estimates imply 6.1\% per additional year of education across both bandwidths, and the MLSA IV estimates lie in the 4.5--5.5\% range.
+For log annual income, OLS returns are 6.5--6.6\%, while the IV range is 1.2--7.1\% across specifications.
+For labour market returns to to GCSE completion rate, OLS associations are 0.258--0.272 log points and the IV estimates 0.104--0.231.
+Overall, the IV returns are of similar order of magnitude to their OLS counterparts, supporting the use of these MLSA-anchored LATEs as credible benchmarks for the mediation exercise.
+
+\subsection{Returns to Higher Education}
+Write a section how correlational estimates give an estimate for returns to education, which are often not so different from causally identified version.
+
+And then estimates which control for family variation by fixed effects (siblings FEs) give lower bounds for returns to education.
 
 
+\begin{table}[!h]
+    \small
+    \singlespacing
+    \centering
+    \caption{Returns to Multiple Levels of Education, OLS and Sibling FE Estimates.}
+    \centerline{
+    \begin{tabular}{l c c c c c c c c}
+        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+        & \multicolumn{4}{c}{OLS}
+            & \multicolumn{4}{c}{OLS with Sibling FEs}\\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        Outcome: &
+        \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} & 
+        \multicolumn{2}{c}{Wage} & \multicolumn{2}{c}{Income.} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5}
+        \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+        & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \input{sections/tables/highered-returns.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+    \end{tabular}
+    }
+    \vspace{-0.25cm}
+    \label{tab:highered-returns}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    Talk about it.
+    Note this is among the sibling analysis subsample.
+\end{table}
 
-Show some tables here for the MSLA first-stage, and how they get that education returns are roughly the same as correlational estimates.
-
-
-Lead into to estimating mediation equations in specifications which include the MSLA instrument, where possible, and correlation returns to education when noted.
-Indeed, education is not randomly assigned so that causal estimates of mediation effects will be affected by not identifying causal returns to education (see \citealt{hogan2025causal})
-
-
-
-
-
-\subsection{Old Writing:}
-
-Given the inherent limitations of identifying causal effects of education—particularly the absence of a credible external instrument in my setting—I adopt a sensitivity-analysis-based approach to interpret the role of education and genetic predictors in shaping later-life outcomes. Rather than asserting point identification, I rely on a range of plausible estimates for the return to education, derived from both conventional cross-sectional regressions and family fixed effects models (e.g., sibling comparison).
-
-The benchmark correlational estimate suggests that each additional year of education is associated with approximately a 6-7\% increase in income. However, when controlling for family fixed effects, the estimated return falls to around 4\%, consistent with prior literature showing downward bias in FE models due to measurement error, but still providing a plausible lower bound.
-
-I then use these benchmarks to evaluate the direct effect of the polygenic index (PGI) for education on income. Conditioning on educational attainment, the direct effect of the education PGI becomes statistically indistinguishable from zero. Given that the total effect of the PGI on income remains positive, this implies that the indirect effect of the PGI—operating through education—is dominant. Indeed, under the assumption that the true causal return to education is at least as large as the family fixed effects estimate, the implied indirect effect is even stronger, reinforcing the conclusion that the direct (non-educational) effect of the PGI on later-life income is negligible.
-
-In this way, the sensitivity analysis does not rely on strong causal identification of the education-income link, but instead uses conservative bounds to demonstrate the robustness of a mediation pattern in which the genetic influence of the education PGI operates almost entirely through educational attainment.
-
-Explain this with a simple Roy model.
-
-Note that this now allows for a choice channel, when previously it had not.
