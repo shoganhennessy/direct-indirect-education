@@ -20,10 +20,17 @@ output.folder <- file.path(data.folder, "cleaned")
 ################################################################################
 ## Load raw data
 
+# Load rows to remove
+rows_remove.data <- input.folder %>%
+    file.path("rows-remove.csv") %>%
+    read_csv()
+
 # Load the phenotype data (raw format from UKB RAP servers).
 ukb_pheno.data <- input.folder %>%
     file.path("phenotype-extract.csv") %>%
-    read_csv()
+    read_csv() %>%
+    # Extract withdrawn rows
+    filter(!(participant.eid %in% rows_remove.data$eid))
 
 # SHow how these data look.
 print(ukb_pheno.data)

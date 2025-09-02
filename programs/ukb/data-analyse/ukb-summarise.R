@@ -251,9 +251,10 @@ edyears.plot <- analysis.data %>%
     geom_bar(aes(y = after_stat(count)),
         fill = colour.list[2], colour = 1) +
     #geom_vline(xintercept = mean.edyears, linetype = "dashed") +
-    annotate("text", colour = colour.list[2], x = 16, y = 5000,
+    annotate("text", colour = colour.list[2], x = 16, y = 7500,
         fontface = "bold",
-        label = paste0("Mean Ed years \n= ", round(mean.edyears, 2), " (Sec. school)"),
+        label = paste0("Mean Ed years \n= ", round(mean.edyears, 2),
+            " (Sec. school)"),
         size = 4.25, hjust = 1, vjust = 0) +
     theme_bw() +
     scale_x_continuous(expand = c(0.01, 0.01),
@@ -263,7 +264,7 @@ edyears.plot <- analysis.data %>%
     scale_y_continuous(expand = c(0, 0),
         name = "",
         breaks = seq(0, 10000, by = 1000),
-        limits = c(0, 7500)) +
+        limits = c(0, 9000)) +
     ggtitle(TeX(r"(Observations, \textit{N})")) +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
         plot.title.position = "plot",
@@ -340,45 +341,6 @@ ggsave(file.path(figures.folder, "edyears-earnings.png"),
 ggsave(file.path(presentation.folder, "edyears-earnings.png"),
     plot = edyears_earnings.plot,
     units = "cm", width = presentation.width, height = presentation.height)
-
-## Show correlation between edyears and income
-# Get mean eductaion gain between high-school and uni degree.
-analysis.data %>%
-    filter(edyears >= 12) %>%
-    mutate(college_degree = as.integer(degree_reported >= 5)) %>%
-    lm(log(soc_median_annual) ~ 1 + college_degree, data = .) %>%
-    summary() %>%
-    print()
-# SHow this in a plot.
-college_earnings.plot <- analysis.data %>%
-    filter(edyears >= 12) %>%
-    mutate(college_degree = as.character(edyears > 14)) %>%
-    group_by(college_degree) %>%
-    summarise(soc_median_annual = mean(soc_median_annual, na.rm = TRUE)) %>%
-    ungroup() %>%
-    ggplot(aes(x = college_degree, y = soc_median_annual)) +
-    geom_bar(stat = "identity", colour = 1, fill = colour.list[3]) +
-    annotate("text", colour = colour.list[3],
-        x = 0.5, y = 100,
-        label = TeX(r"(Mean ≈ +45%)"),
-        size = 4.25, hjust = 0, vjust = 0) +
-    theme_bw() +
-    scale_x_discrete(
-        #expand = c(0.05, 0.05),
-        name = "Higher Education?",
-        labels = c("TRUE" = "Undergrad+", "FALSE" = "Sec. School+")) +
-    scale_y_continuous(expand = c(0, 0),
-        name = "",
-        limits = c(0, 150),
-        breaks = seq(0, 150, by = 25)) +
-    ggtitle("Annual Income, £ thousands") +
-    theme(plot.title = element_text(size = rel(1), hjust = 0),
-        plot.title.position = "plot",
-        plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
-# Save this plot
-ggsave(file.path(figures.folder, "college-earnings.png"),
-    plot = college_earnings.plot,
-    units = "cm", width = fig.width, height = fig.height)
 
 # Show correlation between Ed PGI and edyears
 analysis.data %>%
@@ -538,71 +500,31 @@ ggsave(file.path(figures.folder, "edpgi-earnings-causal.png"),
 ################################################################################
 ## Correlation matrix, including Ed PGI
 
-# Show how Ed PGI is related to demographics, lm(Z ~ 1 + X)
-demographic.reg <- analysis.data %>%
-    transmute(
-        edpgi_all_imputed_self = edpgi_all_imputed_self,
-        "Childhood SES: Family poor"            = family_poor,
-        "Childhood SES: Family moved"           = family_move,
-        "Childhood SES: Family financial help"  = family_finhelp,
-        "Childhood SES: Father missing"         = father_missing,
-        "Childhood SES: Father unemployed"      = father_unemp,
-        "Childhood SES: Father manual labourer" = father_manualjob,
-        "Childhood SES: Parents smoked"         = parents_smoke,
-        "Childhood SES: Childhood head injury"  = child_headinjury,
-        "Age"                                   = indiv_agey,
-        "No. children"                          = child,
-        "Size household"                        = hhres,
-        "Father Ed years"                       = ifelse(is.na(father_edyears), 0, father_edyears),
-        "Mother Ed years"                       = ifelse(is.na(mother_edyears), 0, mother_edyears),
-        "Mean Parent Ed years"                  = parent_edyears,
-        "Female"                                = gender_female) %>%
-    lm(reformulate(".", response = "edpgi_all_imputed_self"), data = .)
-print(summary(demographic.reg))
-# Plot the coefficients.
-demographic.plot <- modelsummary::modelplot(demographic.reg,
-        coef_omit = "Intercept", colour = "blue", size = 1) +
-    theme_bw() +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    scale_x_continuous(expand = c(0.005, 0.005),
-        name = TeX(r"(Association Estimates, Ed PGI$_i = \beta\,' \, X_i + \epsilon_i$)"),
-        breaks = seq(-1, 1, by = 0.05)) +
-    ggtitle(TeX("Demographic Information")) +
-    theme(plot.title = element_text(size = rel(1), hjust = 0),
-        plot.title.position = "plot",
-        plot.margin = unit(c(0.5, 3, 0, 0), "mm"),
-        axis.text.y = element_text(hjust = 0))
-demographic.plot
-# Save this plot
-ggsave(file.path(figures.folder, "demographic-plot.png"),
-    plot = demographic.plot,
-    units = "cm",
-    width = 1.5 * presentation.width, height = 1.25 * presentation.height)
-
-# Calculate the correlation plot.
-edpgi_correlation.matrix <- analysis.data %>%
-    # Select the Ed PGIs
-    transmute(
-        EA           = edpgi_all_imputed_self,
-        Cognition    = edpgi_gencog_euro,
-        BMI          = edpgi_bmi_euro,
-        Alcoholism   = edpgi_alcohol_euro,
-        Alzheimers   = edpgi_alzh_euro,
-        Wellbeing    = edpgi_wellbeing_euro,
-        Bipolar      = edpgi_bipolar_euro,
-        ADHD         = edpgi_adhd_euro,
-        Longevity    = edpgi_longevity_euro,
-        Antisocial   = edpgi_antisocial_euro,
-        Depression   = edpgi_mdepressived_euro,
-        Anxiety      = edpgi_anxietyfactor_euro) %>%
-    cor()
-# Plot the matrix, only the lower left.
-edpgi_correlation.matrix[
-    upper.tri(edpgi_correlation.matrix, diag = FALSE)] <- NA
-edpgi_correlation.plot <- edpgi_correlation.matrix %>%
-    ggcorrplot::ggcorrplot(hc.order = FALSE,
-        type = "full")
-# Save this file
-ggsave(file.path(figures.folder, "edpgi-correlation.png"),
-    plot = edpgi_correlation.plot,
-    units = "cm", width = 1.5 * fig.width, height = 1.25 * fig.height)
+## Calculate the correlation plot.
+#edpgi_correlation.matrix <- analysis.data %>%
+#    # Select the Ed PGIs
+#    transmute(
+#        EA           = edpgi_all_imputed_self,
+#        Cognition    = edpgi_gencog_euro,
+#        BMI          = edpgi_bmi_euro,
+#        Alcoholism   = edpgi_alcohol_euro,
+#        Alzheimers   = edpgi_alzh_euro,
+#        Wellbeing    = edpgi_wellbeing_euro,
+#        Bipolar      = edpgi_bipolar_euro,
+#        ADHD         = edpgi_adhd_euro,
+#        Longevity    = edpgi_longevity_euro,
+#        Antisocial   = edpgi_antisocial_euro,
+#        Depression   = edpgi_mdepressived_euro,
+#        Anxiety      = edpgi_anxietyfactor_euro) %>%
+#    cor()
+## Plot the matrix, only the lower left.
+#edpgi_correlation.matrix[
+#    upper.tri(edpgi_correlation.matrix, diag = FALSE)] <- NA
+#edpgi_correlation.plot <- edpgi_correlation.matrix %>%
+#    ggcorrplot::ggcorrplot(hc.order = FALSE,
+#        type = "full")
+## Save this file
+#ggsave(file.path(figures.folder, "edpgi-correlation.png"),
+#    plot = edpgi_correlation.plot,
+#    units = "cm", width = 1.5 * fig.width, height = 1.25 * fig.height)
+#
