@@ -377,46 +377,6 @@ ggsave(file.path(presentation.folder, "edpgi-edyears.png"),
     plot = edpgi_edyears.plot,
     units = "cm", width = presentation.width, height = presentation.height)
 
-# Generate a version with the (implied) causal design.
-edpgi_edyears_causal.plot <- analysis.data %>%
-    filter(10 <= edyears, edyears <= 17) %>%
-    binscatter.plot(data = ., "edpgi_all_imputed_self", "edyears",
-        colour.list[2], option = "half-line") +
-    annotate("text", colour = colour.list[2],
-        x = 0.875, y = 10.5,
-        fontface = "bold",
-        label = ("Slope = +0.61 (0.02) Ed years"),
-        size = 4.25, hjust = 0.5, vjust = 0) +
-    # Add on the part with a lower slope.
-    annotate("text", colour = "orange",
-        x = 1.125, y = 11.25,
-        fontface = "bold",
-        label = ("Slope = +0.30 (Young et al., 2022)"),
-        size = 4.25, hjust = 0.5, vjust = 0) +
-    annotate("curve", colour = "orange",
-        x = 1.75, y = 14.75,
-        xend = 2, yend = 14.00,
-        linewidth = 1,
-        curvature = -0.25,
-        arrow = arrow(length = unit(0.25, 'cm'))) +
-    theme_bw() +
-    scale_x_continuous(expand = c(0, 0),
-        name = "Ed PGI, s.d. units",
-        breaks = seq(-5, 5, by = 1),
-        limits = c(-3, 3)) +
-    scale_y_continuous(expand = c(0, 0.1),
-        name = "",
-        limits = c(10, 17),
-        breaks = seq(0, 20, by = 1)) +
-    ggtitle("Education Years") +
-    theme(plot.title = element_text(size = rel(1), hjust = 0),
-        plot.title.position = "plot",
-        plot.margin = unit(c(0.5, 3, 0, 0), "mm"))
-# Save this plot.
-ggsave(file.path(presentation.folder, "edpgi-edyears-causal.png"),
-    plot = edpgi_edyears_causal.plot,
-    units = "cm", width = presentation.width, height = presentation.height)
-
 # Show correlation between Ed PGI and income
 # Reduced-form OLS no controls 0.100560
 # First-stage OLS no controls 0.66519

@@ -43,15 +43,16 @@ This decomposition maps to the empirical question raised above: ``do education-l
     \footnotesize
     \textbf{Note}:
     This figure shows the structural causal model behind direct and indirect effects, where $Z_i \to D_i$ represents a causal relationship of $Z_i$ on $D_i$.
-    The dotted line between education and income \& wages represents the fact that education returns are not causally identified by simple correlational estimates.
+    The dotted line between education and income \& wages represents the fact that education is not randomly assigned, and a strategy for identifying returns to education is needed for valid CM estimates.
 \end{figure}
 
-Point identification of these average causal effects is not available.
-Education is not randomly assigned, so causal returns to education are not directly identified in the sibling analysis sample; this limits what can be learned about the indirect path without additional structure or external variation.\footnote{
-    See \cite{hogan2025causal} for full explanation of CM in observational settings.
-}
-In light of this, the analysis proceeds on two complementary avenues that anchor the education channel with credible information on returns: (i) the 1972 British Minimum School-Leaving Age (MSLA) reform, which induces exogenous schooling for to estimate education returns for MLSA compliers; and (ii) sibling fixed-effects estimates, which offer conservative, design-consistent benchmarks within the UKB sibling analysis sample.
-These ingredients are used below to interpret the mediated component of the Ed PGI's labour-market effect and, residually, to assess the scope for a direct effect.
+Valid inference on CM effects requires valid causal estimates of returns to education, to avoid selection bias in CM estimates and contaminted inference (see \citealt{hogan2025causal}).
+
+Education is not randomly assigned, so I proceed on two complementary avenues for credible returns to education estimates: (i) exploiting the 1972 British Minimum School-Leaving Age (MSLA) reform, which induces an extra year of schooling to estimate education returns for MLSA compliers; and (ii) sibling fixed-effects estimates, which offer conservative, design-consistent benchmarks within the UKB sibling analysis sample.
+These ingredients are used below to interpret the mediated component of the Ed PGI's labour-market effect, and to assess the scope for a direct effect.
+
+Also note that one cannot use the ORIV to purge measurement error in this analysis, as it makes everything too imprecise for meaningful inference.
+So this part is using estimates that suffer from measurement error; if one assumes that average direct and indirect effects suffer equally from  attenuation bias, then the proportion going through the indirect education channel is representative.
 
 \subsection{Minimum School Leaving Age (MSLA)}
 In 1972, the UK increased the Minimum School Leaving Age (MSLA) by one year, from age 15 to 16.
@@ -108,7 +109,7 @@ These first-stage effects are visible in UK Biobank and are consistent with nati
     \singlespacing
     \small
     \centering
-    \caption{First-stage of the MSLA Change, and Returns to Education Estimates.}
+    \caption{First-stage of the MSLA Change, and Returns to Education IV Estimates.}
     \centerline{
     \begin{tabular}{l c c c c c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex]
@@ -124,7 +125,7 @@ These first-stage effects are visible in UK Biobank and are consistent with nati
         & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
         \\[-1.8ex]\hline \\[-1.8ex]
         \input{sections/tables/mlsa-firststage.tex}
-        \\[-1.8ex]\hline \hline \\[-1.8ex]
+        \\[-1.8ex]\hline \\[-1.8ex]
         \textbf{Panel B: Second-stage.} \\
             & \multicolumn{4}{c}{OLS.}
                 & \multicolumn{4}{c}{MLSA IV.} \\
@@ -159,7 +160,7 @@ For log annual income, OLS returns are 6.5--6.6\%, while the IV range is 1.2--7.
 For labour market returns to to GCSE completion rate, OLS associations are 0.258--0.272 log points and the IV estimates 0.104--0.231.
 Overall, the IV returns are of similar order of magnitude to their OLS counterparts, supporting the use of these MLSA-anchored LATEs as credible benchmarks for the mediation exercise.
 
-\subsection{Sibling Fixed Effects}
+\subsection{OLS and Sibling Fixed Effects}
 Write a section how correlational estimates give an estimate for returns to education, which are often not so different from causally identified version.
 
 And then estimates which control for family variation by fixed effects (siblings FEs) give lower bounds for returns to education.
@@ -195,3 +196,4 @@ And then estimates which control for family variation by fixed effects (siblings
     Note this is among the sibling analysis subsample.
 \end{table}
 
+Together, these strategies give credible returns to education among the UKB sample, which purges selection bias from CM estimates in this observational setting.

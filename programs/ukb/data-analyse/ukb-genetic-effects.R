@@ -225,10 +225,11 @@ edyears.iv <- c(edyears.est[1, 7], edyears.est[2, 7]) %>%
 
 # Show correlation between Ed PGI and edyears in a Bin-scatter plot.
 edpgi_edyears.plot <- analysis.data %>%
-    binscatter.plot(data = ., "edpgi_all_imputed_self", "edyears", colour.list[2],
+    binscatter.plot(data = .,
+        "edpgi_all_imputed_self", "edyears", colour.list[2],
         option = "half-line",
         half.line.slope = edyears.iv[1] / edyears.ols[1],
-        half.line.intercept = 3.5) +
+        half.line.intercept = 2.5) +
     # Annotate OLS
     annotate("text", colour = colour.list[2],
         x = -2.5, y = 17.25,
@@ -270,7 +271,9 @@ ggsave(file.path(figures.folder, "edpgi-edyears-causal.png"),
 ## Figure: Ed PGI -> Ed years
 
 # Extract point-estimates from the OLS + ORIV estimates.
-earnings.est <- causal_edpgi.reg("log(soc_median_hourly)", "Occupation hourly wage")
+earnings.est <- causal_edpgi.reg(
+    "log(soc_median_hourly)", "Occupation hourly wage",
+    analysis.data, control.list)
 earnings.ols <- c(earnings.est[1, 2], earnings.est[2, 2]) %>%
     str_replace("\\(", "") %>%
     str_replace("\\)", "") %>%
@@ -286,22 +289,22 @@ edpgi_earnings.plot <- analysis.data %>%
     binscatter.plot(data = ., "edpgi_all_imputed_self", "soc_median_hourly", colour.list[3],
         option = "half-line",
         half.line.slope = earnings.iv[1] / earnings.ols[1],
-        half.line.intercept = 5) +
+        half.line.intercept = 2) +
     # Annotate OLS
     annotate("text", colour = colour.list[3],
-        x = -2.5, y = 26.25,
+        x = -2.5, y = 24.25,
         fontface = "bold",
         label = paste0("Raw OLS = +", earnings.ols[1], " (", earnings.ols[2], ")"),
         size = 4.25, hjust = 0, vjust = 0) +
     # Annotate IV
     annotate("text", colour = "orange",
-        x = 0.5, y = 15.25,
+        x = 0.5, y = 13.75,
         fontface = "bold",
         label = paste0("ORIV = +", earnings.iv[1], " (", earnings.iv[2], ")"),
         size = 4.25, hjust = 0.5, vjust = 0) +
     annotate("curve", colour = "orange",
-        x = 1.7, y = 22.5,
-        xend = 2, yend = 21.5,
+        x = 1.7, y = 21,
+        xend = 2, yend = 19.5,
         linewidth = 1,
         curvature = -0.25,
         arrow = arrow(length = unit(0.25, 'cm'))) +
@@ -312,7 +315,7 @@ edpgi_earnings.plot <- analysis.data %>%
         limits = c(-3, 3)) +
     scale_y_continuous(expand = c(0, 0.1),
         name = "",
-        limits = c(14.5, 27),
+        limits = c(12.5, 25.1),
         breaks = seq(0, 50, by = 2.5)) +
     ggtitle("Occupation Hourly Wages, £") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),

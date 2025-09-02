@@ -93,13 +93,6 @@ This result came about purely from random chance, conditional on at least one of
 $x_{i,j}^\text{\textcolor{red}{Random}}$ is the random variation in presence of SNP at position $j$.
 From the possible values of the parents' variants, $x_{i,j}^\text{\textcolor{red}{Random}}$ equals zero if both parents have 0 or 2 copies, equals $\frac 12$ if the child actually inherited 1 copy when both parents had one copy each ($- \frac 12$ if they did not inherit), and 1 if they inherited 2 copies and the parents had one each ($-1$ if they inherited 0).
 
-\subsection{Imputed Parental PGI}
-\label{sec:mendel-imputed}
-
-Describe here how sibling imputed, from $x_{i,j}^\text{\textcolor{ForestGreen}{Child}}$ and $x_{s(i),j}^\text{\textcolor{purple}{Sibling}}$, lead to mean parental values.
-
-\textbf{Remove?}
-
 \subsection{Mendelian Independent Inheritance in the Ed PGI}
 \label{sec:mendel-pgi}
 Moving from a single variant to the PGI simply means summing across the same random-segregation for all the variants.
@@ -185,7 +178,7 @@ ORIV then combines the estimates optimally and clustering the standard errors to
 This yields unbiased estimates while efficiently accounting for estimation uncertainty from both sets of GWAS weights --- see \citealt{van2023overcoming} for full details.
 % Appendix \ref{appendix:oriv} provides a detailed exposition of this econometric approach and its implementation in the context of PGIs.
 
-\subsection{Identification Strategy}
+\subsection{Causal Identification Strategy}
 Formally, let $D_i(z')$ denote the potential education level and $Y_i(z', D_i(z'))$ labour market outcome for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
 Observed education and wages/income data are a sum of their respective potential outcomes.
 \[ D_i = \sum_{z'} \indicator{

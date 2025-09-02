@@ -49,6 +49,18 @@ print(analysis.data)
 print(names(analysis.data))
 hist(analysis.data$birthyear + 18)
 
+
+################################################################################
+## A function to estimate the mediation effects, with option to bootstrap + FEs.
+
+#TODO: write the function
+
+ols.mediation.point <- function(treatment, mediator, outcome, input.data,
+    index = NULL)
+
+
+
+
 ################################################################################
 #! Exploratory: correlational mediation (i.e., suffering from selection bias).
 
