@@ -130,7 +130,7 @@ summary.table <- function(given.data){
             "Other PGI: Asthma"             = asthma_pgi,
             "Other PGI: Bipolar"            = bipolar_pgi,
             "Other PGI: BMI"                = bmi_pgi,
-            "Other PGI: Diabetes (T2)"      = t2diabetes_pgi,
+            "Other PGI: Diabetes type 2"    = t2diabetes_pgi,
             "Other PGI: Height"             = height_pgi,
             "Other PGI: Schizophrenia"      = schizophrenia_pgi,
             # Education variables

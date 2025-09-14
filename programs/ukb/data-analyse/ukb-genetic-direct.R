@@ -12,8 +12,10 @@ library(xtable)
 library(latex2exp)
 # Library to sumamrise models in plots
 library(modelsummary)
+library(gtsummary)
 # The standard, linear, IV estimator package.
-library(ivreg)
+library(fixest)
+setFixest_notes(FALSE)
 # Define number of digits in tables and graphs
 digits.no <- 3
 # Size for figures
@@ -63,483 +65,351 @@ print(names(analysis.data))
 
 
 ################################################################################
-## Code up the mediation results, with correlational estimates of ed returns.
+## 1. OLS mediation results.
+
+# Estimate mediation with OLS.
+mediate_ols_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
+    indices = NULL){
+    # Bootstrap sample, if indices provided.
+    if (!is.null(indices)){
+        input.data <- input.data[indices, ]
+    }
+    # 1. Total effect (not with ORIV)
+    totaleffect.reg <- lm(formula(paste0(outcome,
+            "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
+            control.vars)),
+        data = input.data)
+    #print(summary(totaleffect.reg))
+    # 2. Mediation first-stage (controlling for parents).
+    firststage.reg <- lm(formula(paste0(mediator,
+            "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
+            control.vars)),
+        data = input.data)
+    # 3. Mediation second-stage (controlling for parents).
+    secondstage.reg <- lm(formula(paste0(outcome,
+            "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self * ",
+            mediator, " + ", control.vars)),
+        data = input.data)
+    # Extract the total effect.
+    total.est <- coeftable(totaleffect.reg)["edpgi_all_imputed_self", "Estimate"]
+    # Extract the direct effect.
+    direct.effect <- coeftable(secondstage.reg)["edpgi_all_imputed_self", "Estimate"]
+    interaction.effect <- coeftable(secondstage.reg)[
+        paste0("edpgi_all_imputed_self:", mediator), "Estimate"]
+    ade.est <- direct.effect + (interaction.effect * mean(input.data[[mediator]]))
+    # Extract the indirect effect.
+    firststage.effect <- coeftable(firststage.reg)["edpgi_all_imputed_self", "Estimate"]
+    indirect.effect <- coeftable(secondstage.reg)[mediator, "Estimate"]
+    aie.est <- firststage.effect * (indirect.effect +
+        interaction.effect * mean(input.data[["edpgi_all_imputed_self"]]))
+    # Return the estimates.
+    output.list <- c(
+        firststage.effect,
+        total.est,
+        ade.est,
+        aie.est,
+        aie.est / total.est)
+    return(output.list)
+}
 
 
+################################################################################
+## 2. Two sample IV mediation estimates.
+
+#TODO: Load the external data.
+# External data IV analysis.
+poly.count <- 2
+bandwidth <- 11
+cutoff <- 1957.75
+dist <- abs((full.data$birthyearmonth - cutoff) / bandwidth)
+full.data$kernel.wt <- (1 - dist) * (dist <= 1) / bandwidth
+
+# First-stage
+edyears_firststage.reg <- full.data %>%
+    feols(edyears ~ 1 + rosla +
+        poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
+        weights = full.data$kernel.wt,
+        data = .)
+edyears_firststage.reg %>% summary() %>% print()
+edyears_firststage.reg %>% fstat.get("rosla") %>% print()
+    
+
+# Estimate mediation with OLS.
+mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
+    indices = NULL){
+    # Bootstrap sample, if indices provided.
+    if (!is.null(indices)){
+        input.data <- input.data[indices, ]
+        external.data <- external.data[
+            sample(1:nrow(external.data), nrow(external.data), replace = TRUE), ]
+    }
+    
+    # First-stage
+    edyears_firststage.reg <- full.data %>%
+        feols(edyears ~ 1 + rosla +
+            poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
+            weights = full.data$kernel.wt,
+            data = .)
+    #TODO: implement this IV on the full data, within each iV estimate.
+
+    # 1. Total effect (not with ORIV)
+    totaleffect.reg <- lm(formula(paste0(outcome,
+            "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
+            control.vars)),
+        data = input.data)
+    #print(summary(totaleffect.reg))
+    # 2. Mediation first-stage (controlling for parents).
+    firststage.reg <- lm(formula(paste0(mediator,
+            "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
+            control.vars)),
+        data = input.data)
+    # 3. Mediation second-stage (controlling for parents).
+    secondstage.reg <- lm(formula(paste0(outcome,
+            "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self * ",
+            mediator, " + ", control.vars)),
+        data = input.data)
+    # Extract the total effect.
+    total.est <- coeftable(totaleffect.reg)["edpgi_all_imputed_self", "Estimate"]
+    # Extract the direct effect.
+    direct.effect <- coeftable(secondstage.reg)["edpgi_all_imputed_self", "Estimate"]
+    interaction.effect <- coeftable(secondstage.reg)[
+        paste0("edpgi_all_imputed_self:", mediator), "Estimate"]
+    ade.est <- direct.effect + (interaction.effect * mean(input.data[[mediator]]))
+    # Extract the indirect effect.
+    firststage.effect <- coeftable(firststage.reg)["edpgi_all_imputed_self", "Estimate"]
+    indirect.effect <- coeftable(secondstage.reg)[mediator, "Estimate"]
+    aie.est <- firststage.effect * (indirect.effect +
+        interaction.effect * mean(input.data[["edpgi_all_imputed_self"]]))
+    # Return the estimates.
+    output.list <- c(
+        firststage.effect,
+        total.est,
+        ade.est,
+        aie.est,
+        aie.est / total.est)
+    return(output.list)
+}
+
+
+################################################################################
+## 3. Sibling FE mediation estimates.
+
+# Estimate mediation with sibling FEs.
+mediate_fe_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
+    indices = NULL){
+    # Bootstrap sample, if indices provided.
+    if (!is.null(indices)){
+        input.data <- input.data[indices, ]
+    }
+    # 1. Total effect (not with ORIV)
+    totaleffect.reg <- feols(formula(paste0(outcome,
+            "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
+            control.vars, "| birthyear + famid")),
+        data = input.data)
+    # 2. Mediation first-stage (controlling for parents).
+    firststage.reg <- feols(formula(paste0(mediator,
+            "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
+            control.vars, "| birthyear + famid")),
+        data = input.data)
+    # 3. Mediation second-stage (controlling for parents).
+    secondstage.reg <- feols(formula(paste0(outcome,
+            "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self * ",
+            mediator, " + ", control.vars, "| birthyear + famid")),
+        data = input.data)
+    # Extract the total effect.
+    total.est <- coeftable(totaleffect.reg)["edpgi_all_imputed_self", "Estimate"]
+    # Extract the direct effect.
+    direct.effect <- coeftable(secondstage.reg)["edpgi_all_imputed_self", "Estimate"]
+    interaction.effect <- coeftable(secondstage.reg)[
+        paste0("edpgi_all_imputed_self:", mediator), "Estimate"]
+    ade.est <- direct.effect + (interaction.effect * mean(input.data[[mediator]]))
+    # Extract the indirect effect.
+    firststage.effect <- coeftable(firststage.reg)["edpgi_all_imputed_self", "Estimate"]
+    indirect.effect <- coeftable(secondstage.reg)[mediator, "Estimate"]
+    aie.est <- firststage.effect * (indirect.effect +
+        interaction.effect * mean(input.data[["edpgi_all_imputed_self"]]))
+    # Return the estimates.
+    output.list <- c(
+        firststage.effect,
+        total.est,
+        ade.est,
+        aie.est,
+        aie.est / total.est)
+    return(output.list)
+}
+
+
+################################################################################
+## Wrapper for boostrapping the mediation estimates.
+
+# Define a function to bootstrap.
+mediate.bootstrap <- function(outcome, mediator, input.data, control.vars,
+        type = c("OLS", "IV", "Sibling FE"), boot.reps = 10){
+    # Define an empty data.frame.
+    boot.data <- data.frame(matrix(ncol = 5, nrow = 0))
+    names(boot.data) <- c(
+        "First-stage", "ATE", "ADE", "AIE", "AIE / ATE")
+    j <- 1
+    for (i in 1:boot.reps){
+        if ((boot.reps >= 100) & ((100 * i / boot.reps) %% 5 == 0)){
+            cat(paste0(i, " out of ", boot.reps, ", ", 100 * (i / boot.reps),
+                "% done.", "\n"))
+        }
+        boot.indices <- sample(
+            1:nrow(input.data), nrow(input.data), replace = TRUE)
+        if (type == "OLS"){
+            point.est <- mediate_ols_edpgi.reg(outcome, mediator,
+                input.data, control.vars, indices = boot.indices)
+            }
+        else if (type == "Sibling FE"){
+            point.est <- mediate_fe_edpgi.reg(outcome, mediator,
+                input.data, control.vars, indices = boot.indices)
+            }
+        else {
+            stop(paste0("The type option only takes values of ",
+                'c("OLS", "IV", "Sibling FE").'))
+        }
+        boot.data[i, ] <- point.est
+    }
+    return(boot.data)
+}
+
+# Test it out.
+mediate.boot <- mediate.bootstrap(
+    outcome = "log(soc_median_hourly)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "Sibling FE",
+    boot.reps = 10)
+print(mediate.boot)
+
+
+## Define a function to wrap around all the others.
+mediate.model <- function(outcome, mediator, input.data, control.vars,
+        type = c("OLS", "IV", "Sibling FE"), boot.reps = 10){
+    # Calculate the point estimates.
+    if (type == "OLS"){
+        point.est <- mediate_ols_edpgi.reg(outcome, mediator,
+            input.data, control.vars)
+    }
+    else if (type == "Sibling FE"){
+        point.est <- mediate_fe_edpgi.reg(outcome, mediator,
+            input.data, control.vars)
+        }
+    else {
+        stop(paste0("The type option only takes values of ",
+            'c("OLS", "IV", "Sibling FE").'))
+    }
+    # Calculate the SEs by a non-parametric bootstrap.
+    if (!is.null(boot.reps)){
+        if (boot.reps < 500){
+            print(paste0("Attempting to bootstrap with fewer than 500 reps.",
+                "  Are you sure?  This is likely not enough for convergence."))
+        }
+        point.boot <- mediate.bootstrap(
+            outcome, mediator, input.data, control.vars,
+            type = type, boot.reps = boot.reps) 
+    }
+    # Report output
+    point.est <- as.matrix(point.est)
+    point.se <- as.matrix(c(
+        sd(point.boot$"First-stage"),
+        sd(point.boot$"ATE"),
+        sd(point.boot$"ADE"),
+        sd(point.boot$"AIE"),
+        sd(point.boot$"AIE / ATE")))
+    tratio <- as.matrix(point.est / point.se)
+    ptratio <- as.matrix(2 * pt(abs(tratio),
+        df = nrow(input.data), lower.tail = FALSE))
+    # Preapred object to putput.
+    out <- list(
+        coefficients = point.est,
+        SE = point.se,
+        tratio = tratio,
+        ptratio = ptratio,
+        type = type,
+        variables = paste("Ed PGI", mediator, outcome, sep = ", "),
+        boot.reps = boot.reps)
+    rownames(out$coefficients) <-
+        c("First-stage", "ATE", "ADE", "AIE", "Proportion, AIE / ATE")
+    rownames(out$SE)      <-rownames(out$coefficients)
+    rownames(out$tratio)  <-rownames(out$coefficients)
+    rownames(out$ptratio) <-rownames(out$coefficients)
+    class(out) <- "mediate.model"
+    return(out)
+}
+
+# Print applied to the function.
+print.mediate.model <- function(x, digits = 4, ...){
+    cat("Treatment, Mediator, Outcome: \n")
+    cat(x$variables)
+    cat("\n")
+    est <- cbind(x$coefficients, x$SE)
+    colnames(est) <- c("Coefficients", "SE")
+    cat(paste0("\n", x$type, " estimates, SEs from ", x$boot.reps, " bootstrap replications."))
+    cat("\n\n")
+    print.default(format(est, digits = digits), quote = FALSE)
+}
+
+# Apply the summary function, to get a presentable output.
+summary.mediate.model <- function(object, ...){
+    TAP <- cbind(
+        Estimate = coef(object),
+        SE = object$SE,
+        ptratio = object$ptratio)
+    colnames(TAP) <- c("Estimate", "SE", "P")
+    res <- list(variables = object$variables, coefficients = TAP)  
+    class(res) <- "summary.larf"
+    return(res)
+}
+
+# Presentable summary, via printing.
+print.summary.mediate.model <- function(x, digits = 4, ...){
+    cat("Treatment, Mediator, Outcome: \n")
+    cat(x$variables)
+    cat("\n")
+    print.default(round(x$coefficients, digits = digits), quote = FALSE)
+}
+
+
+################################################################################
+## Estimate mediation on the data, to fill the mediation table.
+
+# Decide how many bootstrap samples to use.
+boot.n <- 10^2
+
+# Standardise the controls.
 control.formula <- paste0("sex_male + recruitedage + sibling_count + urban +",
     "adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi +",
     "schizophrenia_pgi + t2diabetes_pgi")
 
+# 1. OLS regression
+mediate_ols.reg <- mediate.model(
+    outcome = "log(soc_median_hourly)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "OLS",
+    boot.reps = boot.n)
+print(mediate_ols.reg)
 
-source("oriv.R")
-# Causal first-stage
-firststage.reg <- GORIV(edyears ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list = c(
-        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    IID = "eid", FID = NULL,
-    data = analysis.data)
-print(summary(firststage.reg))
-names(firststage.reg)
-# Correlational second-stage
-t_secondstage.list <- GORIV(edyears ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list = c(
-        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    IID = "eid", FID = NULL,
-    data = analysis.data)
-#!Testing with my own function.
-source("oriv.R")
-analysis.data$log_soc_mean_hourly <- log(analysis.data$soc_mean_hourly)
-GORIV_mediate("log_soc_mean_hourly", "edyears", control.formula,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    #control.list = c(
-    #    "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    IID = "eid", #FID = "famid",
-    data = analysis.data %>% slice_sample(prop = 1, replace = TRUE))
+# 2. IV regression
+mediate_iv.reg <- mediate.model(
+    outcome = "log(soc_median_hourly)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "IV",
+    boot.reps = boot.n)
+print(mediate_iv.reg)
 
-
-secondstage.reg <- GORIV(log(soc_mean_hourly) ~ 1 +
-    edyears +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list = c(
-        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    IID = "eid", FID = NULL,
-    data = analysis.data)
-print(summary(secondstage.reg))
-direct.est <- coeftable(oriv_Z_random.reg)["fit_PGI_MAIN", "Estimate"],
-
-
-
-
-
-
-analysis.data %>% pull(edpgi_all_imputed_self) %>% summary() %>% print()
-analysis.data %>% pull(edpgi_all_imputed_self) %>% sd() %>% print()
-analysis.data %>% pull(edpgi_all_imputed_random) %>% summary() %>% print()
-analysis.data %>% pull(edpgi_all_imputed_random) %>% var() %>% print()
-
-# Get the demographic possible confounders.
-demographic.data <- analysis.data %>%
-    select(
-        edpgi_all_imputed_self,
-        edpgi_all_imputed_random,
-        sex_male,
-        recruitedage,
-        sibling_count,
-        urban,
-        adhd_pgi,
-        asthma_pgi,
-        bipolar_pgi,
-        bmi_pgi,
-        height_pgi,
-        schizophrenia_pgi,
-        t2diabetes_pgi)
-# Label the confounders.
-demographic.labels <- c(
-    "sex_male"          = "Male",
-    "recruitedage"      = "Age",
-    "urban"             = "In city",
-    "sibling_count"     = "Sibling count",
-    "adhd_pgi"          = "Other PGI: ADHD",
-    "asthma_pgi"        = "Other PGI: Asthma",
-    "bipolar_pgi"       = "Other PGI: Bipolar",
-    "bmi_pgi"           = "Other PGI: BMI",
-    "t2diabetes_pgi"    = "Other PGI: Diabetes, Type-2",
-    "height_pgi"        = "Other PGI: Height",
-    "schizophrenia_pgi" = "Other PGI: Schizophrenia")
-
-# Estimate correlations with the regular Ed PGI.
-demographic.reg <- demographic.data %>%
-    select(- edpgi_all_imputed_random) %>%
-    lm(reformulate(".", response = "edpgi_all_imputed_self"), data = .)
-# Estimate the correlation with the random component.
-demographic_random.reg <- demographic.data %>%
-    select(- edpgi_all_imputed_self) %>%
-    lm(reformulate(".", response = "edpgi_all_imputed_random"), data = .)
-
-# Plot the first correlations, with the regular Ed PGI.
-demographic.plot <- modelplot(demographic.reg,
-        coef_map = rev(demographic.labels),
-        coef_omit = "Intercept", colour = "blue", size = 1) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    scale_x_continuous(expand = c(0.005, 0.005),
-        name = "Correlation Estimate, and 95% Confidence Interval",
-        breaks = seq(-1, 1, by = 0.05)) +
-    ggtitle(TeX("Demographic Information")) +
-    theme(plot.title = element_text(size = rel(1), hjust = 0),
-        plot.title.position = "plot",
-        plot.margin = unit(c(0.5, 3, 0, 0), "mm"),
-        axis.text.y = element_text(hjust = 0))
-
-# Overlay the random component
-combined.plot <- list(
-    "Ed PGI" = demographic.reg,"Random component" = demographic_random.reg) %>%
-    modelplot(., coef_map = rev(demographic.labels),
-        coef_omit = "Intercept", size = 1) +
-    scale_color_manual(values = colour.list[c(2, 3)]) +
-    geom_vline(xintercept = 0, linetype = "dashed") +
-    scale_x_continuous(expand = c(0.005, 0.005),
-        name = "Correlation Estimate",
-        breaks = seq(-1, 1, by = 0.05)) +
-    ggtitle(TeX("Demographic Information")) +
-    theme(plot.title = element_text(size = rel(1), hjust = 0),
-        plot.title.position = "plot",
-        plot.margin = unit(c(0.5, 3, 0, 0), "mm"),
-        legend.position = "bottom", #c(0.25, 0.95),
-        axis.text.y = element_text(hjust = 0))
-
-# Save this plot
-ggsave(file.path(figures.folder, "demographic-correlates.png"),
-    plot = combined.plot,
-    dpi = 300, units = "cm",
-    width = fig.width, height = fig.height)
-
-
-################################################################################
-## Testing out the first-stage, with random component of Ed PGI (both sources).
-# For notation, write Z for main Ed PGI using Okbay (2022) weights (23&Me)
-# and Ztilde for the supplementary Ed PGI from UKB subsample.
-
-# Random component Z -> Z
-Z_Z_random.reg <- lm(edpgi_all_imputed_self ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi +
-    edpgi_all_imputed_random + edpgi_all_imputed_parental,
-    data = analysis.data)
-Z_Z_random.reg %>% summary() %>% print()
-
-# Random component Ztilde -> Z
-Ztilde_Z_random.reg <- lm(edpgi_all_imputed_self ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi + 
-    edpgi_exclude_imputed_random + edpgi_exclude_imputed_parental,
-    data = analysis.data)
-Ztilde_Z_random.reg %>% summary() %>% print()
-
-# Random component Z -> Ztilde
-Z_Ztilde_random.reg <- lm(edpgi_exclude_imputed_self ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi + 
-    edpgi_all_imputed_random + edpgi_all_imputed_parental,
-    data = analysis.data)
-Z_Ztilde_random.reg %>% summary() %>% print()
-
-# Random component Ztilde -> Ztilde
-Ztilde_Ztilde_random.reg <- lm(edpgi_exclude_imputed_self ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi +
-    edpgi_exclude_imputed_random + edpgi_exclude_imputed_parental,
-    data = analysis.data)
-Ztilde_Ztilde_random.reg %>% summary() %>% print()
-
-## Estimate as an ORIV first-stage (stacked).
-source("oriv.R")
-# Z main
-oriv_Z_random.reg <- GORIV(edpgi_all_imputed_self ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
-    "edpgi_all_imputed_random", "edpgi_exclude_imputed_random",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list = c(
-        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    IID = "eid",
-    data = analysis.data)
-oriv_Z_random.reg %>% summary() %>% print()
-# Z tilde
-oriv_Ztilde_random.reg <- GORIV(edpgi_exclude_imputed_self ~ 1 +
-    sex_male + recruitedage + sibling_count + urban + adhd_pgi + asthma_pgi +
-    bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi,
-    "edpgi_all_imputed_random", "edpgi_exclude_imputed_random",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list = c(
-        "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    IID = "eid",
-    data = analysis.data)
-oriv_Ztilde_random.reg %>% summary() %>% print()
-
-
-################################################################################
-## LaTeX Table of the genetic first-stage.
-
-# Compose all the point estimates and SEs, then F stat, obs count, R^2.
-point_est.data <- data.frame(
-    # column 1: Z -> Z
-    col1 = c(
-        coef(summary(Z_Z_random.reg))["edpgi_all_imputed_random", "Estimate"],
-        coef(summary(Z_Z_random.reg))["edpgi_all_imputed_random", "Std. Error"],
-        NA, NA, NA, NA,
-        NA, # fstat.get(Z_Z_random.reg, "edpgi_all_imputed_random"),
-        summary(Z_Z_random.reg)$r.squared,
-        NROW(analysis.data)),
-    # column 2: Ztilde -> Z
-    col2 = c(NA, NA,
-        coef(summary(Ztilde_Z_random.reg))["edpgi_exclude_imputed_random", "Estimate"],
-        coef(summary(Ztilde_Z_random.reg))["edpgi_exclude_imputed_random", "Std. Error"],
-        NA, NA,
-        fstat.get(Ztilde_Z_random.reg, "edpgi_exclude_imputed_random"),
-        summary(Ztilde_Z_random.reg)$r.squared,
-        NROW(analysis.data)),
-    # column 3: obviously related Z, Ztilde -> Z
-    col3 = c(NA, NA, NA, NA,
-        coeftable(oriv_Z_random.reg)["fit_PGI_MAIN", "Estimate"],
-        coeftable(oriv_Z_random.reg)["fit_PGI_MAIN", "Std. Error"],
-        fstat.get(oriv_Z_random.reg, "fit_PGI_MAIN"),
-        NA,
-        NROW(analysis.data)),
-    # Column 4: Z -> Ztilde
-    col4 = c(
-        coef(summary(Z_Ztilde_random.reg))["edpgi_all_imputed_random", "Estimate"],
-        coef(summary(Z_Ztilde_random.reg))["edpgi_all_imputed_random", "Std. Error"],
-        NA, NA, NA, NA,
-        fstat.get(Z_Ztilde_random.reg, "edpgi_all_imputed_random"),
-        summary(Z_Ztilde_random.reg)$r.squared,
-        NROW(analysis.data)),
-    # column 5: Ztilde -> Ztilde
-    col5 = c(NA, NA,
-        coef(summary(Ztilde_Ztilde_random.reg))["edpgi_exclude_imputed_random", "Estimate"],
-        coef(summary(Ztilde_Ztilde_random.reg))["edpgi_exclude_imputed_random", "Std. Error"],
-        NA, NA,
-        NA, # fstat.get(Ztilde_Ztilde_random.reg, "edpgi_exclude_imputed_random"),
-        summary(Ztilde_Ztilde_random.reg)$r.squared,
-        NROW(analysis.data)),
-    # column 6: obviously related Z, Ztilde -> Z
-    col6 = c(NA, NA, NA, NA,
-        coeftable(oriv_Ztilde_random.reg)["fit_PGI_MAIN", "Estimate"],
-        coeftable(oriv_Ztilde_random.reg)["fit_PGI_MAIN", "Std. Error"],
-        fstat.get(oriv_Ztilde_random.reg, "fit_PGI_MAIN"),
-        NA,
-        NROW(analysis.data))
-    )
-
-# Show what you get.
-print(point_est.data)
-
-# Round and remove NAs.
-point_est.data <- round(point_est.data, digits.no)
-point_est.data <- data.frame(lapply(point_est.data, as.character), stringsAsFactors = FALSE) %>%
-    replace_na(list(
-        col1 = " ",
-        col2 = " ",
-        col3 = " ",
-        col4 = " ",
-        col5 = " ",
-        col6 = " "))
-
-# Bracket the SEs
-for (col.index in 1:3){
-    point_est.data[2 * col.index, col.index] <- 
-        point_est.data[2 * col.index, col.index]  %>%
-        as.numeric() %>%
-        signif(digits.no) %>%
-        format(scientific = FALSE) %>%
-        paste0("(", ., ")")
-    point_est.data[2 * col.index, col.index + 3] <-
-        point_est.data[2 * col.index, col.index + 3]  %>%
-        as.numeric() %>%
-        signif(digits.no) %>%
-        format(scientific = FALSE) %>%
-        paste0("(", ., ")")
-}
-# Add on variable names (first column)
-point_est.data$names = c(
-    r"(Primary Ed PGI, $Z_i^\text{\textcolor{red}{Random}}$)", " ",
-    r"(Secondary Ed PGI, $Z_i^\text{\textcolor{red}{Random}}$)", " ",
-    "Combined, ORIV", " ",
-    r"(\\[-1.8ex]\hline \\[-1.8ex] $F$-statistics)",
-    "$R^2$",
-    "Observations")
-point_est.data <- point_est.data[, c(7, 1:6)]
-
-# Show the LaTeX table
-point_est.data %>%
-    xtable() %>%
-    print(
-        digits = digits.no,
-        sanitize.colnames.function = identity,
-        sanitize.text.function = identity,
-        NA.string = " ",
-        include.colnames = FALSE,
-        include.rownames = FALSE,
-        only.contents = TRUE,
-        hline.after = NULL,
-        format.args = list(big.mark = ","),
-        file = file.path(tables.folder, "genetic-firststage.tex"))
-
-
-################################################################################
-## Genetic effects
-
-## OLS versus random component.
-lm(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data) %>% summary()
-lm(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
-ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
-    edpgi_all_imputed_random  + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
-
-ivreg(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
-    edpgi_exclude_imputed_random  + edpgi_exclude_imputed_parental, data = analysis.data) %>% summary()
-
-
-ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental |
-    edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
-#! About twice as large as literature estimates, when using diferent weights for imputed random/parental component.
-
-
-# Family FEs?
-fam.data <- analysis.data %>%
-    group_by(famid) %>%
-    mutate(fam_count = 1) %>%
-    mutate(fam_count = sum(fam_count)) %>%
-    ungroup() %>%
-    filter(fam_count > 1) %>%
-    select(-fam_count)
-
-# Base line: which Ed PGI is most predictive (within families) of Ed years?
-feols(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data) %>% summary()
-feols(edyears ~ 1 + edpgi_all_imputed_self | famid,
-    #famid | edpgi_all_imputed_self ~ edpgi_all_imputed_random,
-    data = fam.data) %>% summary()
-# Ed PGI (all raw)              gives 1.09, 0.54
-# Phased Ed PGI (all imputed)   gives 1.1, 0.54
-# Unphased Ed PGI (all imputed) gives ?, ?
-# Ed PGI (exclude raw)          gives 0.186, 0.111
-# Ed PGI (exclude imputed)      gives 0.19, 0.116
-#! Conclusion: use the unphased Ed PGI.
-fam.data
-
-
-lm(edpgi_all_imputed_self ~ 1 + edpgi_exclude_imputed_random, data = analysis.data) %>% summary()
-
-
-
-ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental | edpgi_all_imputed_random + edpgi_all_imputed_parental, data = analysis.data) %>% summary()
-
-ivreg(as.integer(edyears >= 18) ~ 1 + edpgi_all_imputed_self | edpgi_all_imputed_random , data = analysis.data) %>% summary()
-
-
-# The gain from ORIV (correlation)
-summary(lm(edyears ~ 1 + edpgi_all_imputed_self, data = analysis.data))
-summary(GORIV(edyears ~ 1,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    data = analysis.data, IID = "eid"))
-
-# The gain from ORIV (causal)
-source("oriv.R")
-summary(lm(edyears ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental,
-    data = analysis.data))
-summary(GORIV(edyears ~ 1,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list =
-        c("edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    data = analysis.data, IID = "eid"))
-
-# For higher ed attendance
-summary(lm(I(edyears >= 18) ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental,
-    data = analysis.data))
-summary(GORIV(I(edyears >= 18) ~ 1,
-    "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-    IV.list = c(
-        "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-    control.list =
-        c("edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-    data = analysis.data, IID = "eid"))
-
-
-
-
-# Causal, with + with/out ORIV measurement error adjustment.
-summary(lm(edyears ~ 1 + edpgi_all_imputed_random, data = analysis.data))
-summary(ivreg(edyears ~ 1 + edpgi_all_imputed_self | edpgi_all_imputed_random , data = analysis.data))
-summary(GORIV(edyears ~ 1,
-    "edpgi_all_imputed_random", "edpgi_exclude_imputed_random",
-    IID = "eid", FID = "famid",
-    data = analysis.data))
-# Causal, with + with/out ORIV measurement error adjustment.
-summary(lm(log(soc_mean_hourly) ~ 1 + edpgi_all_imputed_random, data = analysis.data))
-summary(GORIV(log(soc_mean_hourly) ~ 1,
-    "edpgi_all_imputed_random", "edpgi_exclude_imputed_random",
-    data = analysis.data, IID = "eid", FID = "famid"))
-
-
-################################################################################
-## Quasi second-stage, Ed PGI -> Ed Years
-
-# OLS (not causal)
-analysis.data %>%
-    lm(edyears ~ 1 + edpgi_self, data = .) %>%
-    summary() %>%
-    print()
-
-# Show the correlation between the random value, and Ed years
-analysis.data %>%
-    lm(edyears ~ 1 + edpgi_random, data = .) %>%
-    summary() %>%
-    print()
-
-# Show the correlation between the self + parents value, and Ed years
-analysis.data %>%
-    lm(edyears ~ 1 + edpgi_self + edpgi_parents, data = .) %>%
-    summary() %>%
-    print()
-
-# Try it with the random part as an instrument.
-analysis.data %>%
-    ivreg::ivreg(edyears ~ 1 + edpgi_self | 1 + edpgi_random,
-        data = .) %>%
-    summary() %>%
-    print()
-
-# Show the mean Ed PGI random component across the parent dist
-analysis.data$parental_quantile <-
-    ecdf(analysis.data$edpgi_parents)(analysis.data$edpgi_parents)
-analysis.data$parental_quantile <- factor(
-    round(10 * analysis.data$parental_quantile))
-# Compare this to Houmark+ (2024) Figure 1.
-analysis.data %>%
-    group_by(parental_quantile) %>%
-    summarise(
-        edpgi_random_mean   = mean(edpgi_random),
-        edpgi_random_sd     = sd(edpgi_random),
-        edpgi_self_mean     = mean(edpgi_self),
-        edpgi_self_sd       = sd(edpgi_self),
-        edpgi_parental_mean = mean(edpgi_parents),
-        edpgi_parental_sd   = sd(edpgi_parents)) %>%
-    View()
-mean(analysis.data$edpgi_self > analysis.data$edpgi_parents)
-# Ensure this does not vary across the parental distribution.
-analysis.data %>%
-    lm(edpgi_self ~ 1 + edpgi_random * parental_quantile, data = .) %>%
-    summary() %>%
-    print()
-#  TEST: does this association hold true among people for whom we observe one or both parents? -> Yes.
-analysis.data %>%
-    filter(father_present + mother_present > 0) %>%
-    lm(edpgi_random ~ 1 + 
-        sex_male * (edpgi_father + edpgi_mother), data = .) %>%
-    summary() %>%
-    print()
-# Compare to the Ed PGI in raw form.
-analysis.data %>%
-    filter(father_present + mother_present > 0) %>%
-    lm(edpgi_self ~ 1 +
-        sex_male * (edpgi_father + edpgi_mother), data = .) %>%
-    summary() %>%
-    print()
+# 3. Sibling FE regression
+mediate_fe.reg <- mediate.model(
+    outcome = "log(soc_median_hourly)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "Sibling FE",
+    boot.reps = boot.n)
+print(mediate_fe.reg)

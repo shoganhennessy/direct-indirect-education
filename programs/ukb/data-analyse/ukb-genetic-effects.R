@@ -213,7 +213,8 @@ pgi_controls.table %>%
 ## Figure: Ed PGI -> Ed years
 
 # Extract point-estimates from the OLS + ORIV estimates.
-edyears.est <- causal_edpgi.reg("edyears", "Education years", analysis.data, control.list)
+edyears.est <- causal_edpgi.reg("edyears", "Education years",
+    analysis.data, control.list)
 edyears.ols <- c(edyears.est[1, 2], edyears.est[2, 2]) %>%
     str_replace("\\(", "") %>%
     str_replace("\\)", "") %>%
