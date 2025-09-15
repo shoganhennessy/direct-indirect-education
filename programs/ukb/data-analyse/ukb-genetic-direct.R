@@ -63,6 +63,50 @@ analysis.data <- data.folder %>%
 print(analysis.data)
 print(names(analysis.data))
 
+# Load the full UKB, for the MLSA IV first-stage.
+full.data <- data.folder %>%
+    file.path("ukb-cleaned-pheno.csv") %>%
+    read_csv() %>%
+    filter(!is.na(edyears) & !is.na(soc_median_hourly)) %>%
+    transmute(
+        eid = eid,
+        famid = famid,
+        edyears = edyears,
+        soc_median_hourly = soc_median_hourly,
+        soc_median_annual = soc_median_annual,
+        bandwidth = 11,
+        cutoff = 1957 + (8 / 12),
+        birthyearmonth = birthyear + ((birthmonth - 1) / 12),
+        rosla_year = birthyearmonth - cutoff,
+        rosla = as.integer(rosla_year >= 0),
+        rosla_year = birthyearmonth - cutoff,
+        rosla_year_above = rosla_year * rosla,
+        rosla_year_below = rosla_year * (1 - rosla),
+        dist = abs((birthyearmonth - cutoff) / bandwidth),
+        kernel.wt = (1 - dist) * (dist <= 1) / bandwidth) %>%
+    filter(kernel.wt > 0)
+
+# Put these MLSA IV columns onto the analysis.data.
+analysis.data <- full.data %>%
+    select(eid,
+        bandwidth,
+        cutoff,
+        birthyearmonth,
+        rosla_year,
+        rosla,
+        rosla_year,
+        rosla_year_above,
+        rosla_year_below,
+        dist,
+        kernel.wt) %>%
+    right_join(analysis.data, by = "eid") %>%
+    mutate(kernel.wt = ifelse(is.na(kernel.wt), 0, kernel.wt))
+
+# Standardise the controls.
+control.formula <- paste0("sex_male + recruitedage + sibling_count + urban +",
+    "adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi +",
+    "schizophrenia_pgi + t2diabetes_pgi")
+
 
 ################################################################################
 ## 1. OLS mediation results.
@@ -116,48 +160,32 @@ mediate_ols_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
 ################################################################################
 ## 2. Two sample IV mediation estimates.
 
-#TODO: Load the external data.
-# External data IV analysis.
-poly.count <- 2
-bandwidth <- 11
-cutoff <- 1957.75
-dist <- abs((full.data$birthyearmonth - cutoff) / bandwidth)
-full.data$kernel.wt <- (1 - dist) * (dist <= 1) / bandwidth
-
-# First-stage
-edyears_firststage.reg <- full.data %>%
-    feols(edyears ~ 1 + rosla +
-        poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
-        weights = full.data$kernel.wt,
-        data = .)
-edyears_firststage.reg %>% summary() %>% print()
-edyears_firststage.reg %>% fstat.get("rosla") %>% print()
-    
-
 # Estimate mediation with OLS.
 mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
-    indices = NULL){
+    external.data = full.data, indices = NULL){
     # Bootstrap sample, if indices provided.
     if (!is.null(indices)){
         input.data <- input.data[indices, ]
-        external.data <- external.data[
-            sample(1:nrow(external.data), nrow(external.data), replace = TRUE), ]
+        # ALso boot index the full data.
+        full.indicies <- sample(
+            1:nrow(external.data), nrow(external.data), replace = TRUE)
+        external.data <- external.data[full.indicies, ]
     }
-    
-    # First-stage
-    edyears_firststage.reg <- full.data %>%
-        feols(edyears ~ 1 + rosla +
-            poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
-            weights = full.data$kernel.wt,
-            data = .)
-    #TODO: implement this IV on the full data, within each iV estimate.
-
+    # MLSA IV First-stage
+    poly.count <- 2
+    mlsa_firststage.reg <- lm(formula(paste0(mediator, "~ 1 + rosla",
+        "+ poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count)")),
+        weights = kernel.wt,
+        data = external.data)
+    # Get the predicted values for 2SLS.
+    hat.mediator <- paste0("hat.", mediator)
+    input.data[[hat.mediator]] <- predict(
+        mlsa_firststage.reg, newdata = input.data)
     # 1. Total effect (not with ORIV)
     totaleffect.reg <- lm(formula(paste0(outcome,
             "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
             control.vars)),
         data = input.data)
-    #print(summary(totaleffect.reg))
     # 2. Mediation first-stage (controlling for parents).
     firststage.reg <- lm(formula(paste0(mediator,
             "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
@@ -165,21 +193,26 @@ mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
         data = input.data)
     # 3. Mediation second-stage (controlling for parents).
     secondstage.reg <- lm(formula(paste0(outcome,
-            "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self * ",
-            mediator, " + ", control.vars)),
-        data = input.data)
+        "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self * ",
+        hat.mediator, " + ", control.vars,
+        "+ rosla_year_below + rosla_year_above")),
+        weights = kernel.wt,
+        data = input.data[!is.na(input.data$rosla_year_below), ])
+    print(summary(secondstage.reg))
     # Extract the total effect.
     total.est <- coeftable(totaleffect.reg)["edpgi_all_imputed_self", "Estimate"]
     # Extract the direct effect.
     direct.effect <- coeftable(secondstage.reg)["edpgi_all_imputed_self", "Estimate"]
     interaction.effect <- coeftable(secondstage.reg)[
-        paste0("edpgi_all_imputed_self:", mediator), "Estimate"]
-    ade.est <- direct.effect + (interaction.effect * mean(input.data[[mediator]]))
+        paste0("edpgi_all_imputed_self:", hat.mediator), "Estimate"]
+    ade.est <- direct.effect + (
+        interaction.effect * mean(input.data[[hat.mediator]], na.rm = TRUE))
     # Extract the indirect effect.
     firststage.effect <- coeftable(firststage.reg)["edpgi_all_imputed_self", "Estimate"]
-    indirect.effect <- coeftable(secondstage.reg)[mediator, "Estimate"]
+    indirect.effect <- coeftable(secondstage.reg)[hat.mediator, "Estimate"]
     aie.est <- firststage.effect * (indirect.effect +
-        interaction.effect * mean(input.data[["edpgi_all_imputed_self"]]))
+        interaction.effect * mean(input.data[["edpgi_all_imputed_self"]], na.rm = TRUE))
+    ade.est <- total.est - aie.est
     # Return the estimates.
     output.list <- c(
         firststage.effect,
@@ -189,6 +222,14 @@ mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
         aie.est / total.est)
     return(output.list)
 }
+
+#!TEST: 
+mediate_iv_edpgi.reg(
+    outcome = "log(soc_median_hourly)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    indices = sample(1:nrow(analysis.data), nrow(analysis.data), replace = TRUE))
 
 
 ################################################################################
@@ -244,7 +285,9 @@ mediate_fe_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
 
 # Define a function to bootstrap.
 mediate.bootstrap <- function(outcome, mediator, input.data, control.vars,
-        type = c("OLS", "IV", "Sibling FE"), boot.reps = 10){
+        external.data = full.data,
+        type = c("OLS", "IV", "Sibling FE"),
+        boot.reps = 10){
     # Define an empty data.frame.
     boot.data <- data.frame(matrix(ncol = 5, nrow = 0))
     names(boot.data) <- c(
@@ -259,6 +302,10 @@ mediate.bootstrap <- function(outcome, mediator, input.data, control.vars,
             1:nrow(input.data), nrow(input.data), replace = TRUE)
         if (type == "OLS"){
             point.est <- mediate_ols_edpgi.reg(outcome, mediator,
+                input.data, control.vars, indices = boot.indices)
+            }
+        else if (type == "IV"){
+            point.est <- mediate_iv_edpgi.reg(outcome, mediator,
                 input.data, control.vars, indices = boot.indices)
             }
         else if (type == "Sibling FE"){
@@ -280,10 +327,9 @@ mediate.boot <- mediate.bootstrap(
     mediator = "edyears",
     input.data = analysis.data,
     control.vars = control.formula,
-    type = "Sibling FE",
+    type = "IV",
     boot.reps = 10)
 print(mediate.boot)
-
 
 ## Define a function to wrap around all the others.
 mediate.model <- function(outcome, mediator, input.data, control.vars,
@@ -293,6 +339,10 @@ mediate.model <- function(outcome, mediator, input.data, control.vars,
         point.est <- mediate_ols_edpgi.reg(outcome, mediator,
             input.data, control.vars)
     }
+    else if (type == "IV"){
+        point.est <- mediate_iv_edpgi.reg(outcome, mediator,
+            input.data, control.vars)
+        }
     else if (type == "Sibling FE"){
         point.est <- mediate_fe_edpgi.reg(outcome, mediator,
             input.data, control.vars)
@@ -378,11 +428,6 @@ print.summary.mediate.model <- function(x, digits = 4, ...){
 
 # Decide how many bootstrap samples to use.
 boot.n <- 10^2
-
-# Standardise the controls.
-control.formula <- paste0("sex_male + recruitedage + sibling_count + urban +",
-    "adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi +",
-    "schizophrenia_pgi + t2diabetes_pgi")
 
 # 1. OLS regression
 mediate_ols.reg <- mediate.model(
