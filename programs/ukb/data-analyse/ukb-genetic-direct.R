@@ -162,7 +162,8 @@ mediate_ols_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
 
 # Estimate mediation with OLS.
 mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
-    external.data = full.data, indices = NULL){
+    external.data = full.data, poly.count = 2, bandwidth = 11, cutoff = 1957.75,
+    indices = NULL){
     # Bootstrap sample, if indices provided.
     if (!is.null(indices)){
         input.data <- input.data[indices, ]
@@ -171,48 +172,49 @@ mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
             1:nrow(external.data), nrow(external.data), replace = TRUE)
         external.data <- external.data[full.indicies, ]
     }
-    # MLSA IV First-stage
-    poly.count <- 2
-    mlsa_firststage.reg <- lm(formula(paste0(mediator, "~ 1 + rosla",
-        "+ poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count)")),
-        weights = kernel.wt,
+    # MLSA IV First-stage, for IV estimated returns to education.
+    dist <- abs((external.data$birthyearmonth - cutoff) / bandwidth)
+    external.data$kernel.wt <- (1 - dist) * (dist <= 1) / bandwidth
+    mlsa_education.reg <- feols(formula(paste0(outcome, " ~ 1 + ",
+        "poly(rosla_year_below, poly.count) + ",
+        "poly(rosla_year_above, poly.count)",
+        " | ", mediator, " ~ rosla")),
+        weights = external.data$kernel.wt,
         data = external.data)
-    # Get the predicted values for 2SLS.
-    hat.mediator <- paste0("hat.", mediator)
-    input.data[[hat.mediator]] <- predict(
-        mlsa_firststage.reg, newdata = input.data)
+    indirect.effect <- coeftable(mlsa_education.reg)[
+        paste0("fit_", mediator), "Estimate"]
     # 1. Total effect (not with ORIV)
     totaleffect.reg <- lm(formula(paste0(outcome,
             "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
             control.vars)),
+        weights = kernel.wt,
         data = input.data)
     # 2. Mediation first-stage (controlling for parents).
     firststage.reg <- lm(formula(paste0(mediator,
             "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental + ",
             control.vars)),
+        weights = kernel.wt,
         data = input.data)
     # 3. Mediation second-stage (controlling for parents).
     secondstage.reg <- lm(formula(paste0(outcome,
-        "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self * ",
-        hat.mediator, " + ", control.vars,
-        "+ rosla_year_below + rosla_year_above")),
+        "~ 1 + edpgi_all_imputed_parental + edpgi_all_imputed_self + ",
+        "edpgi_all_imputed_self * ", mediator, " + ", control.vars)),
         weights = kernel.wt,
-        data = input.data[!is.na(input.data$rosla_year_below), ])
+        data = input.data)
     print(summary(secondstage.reg))
     # Extract the total effect.
     total.est <- coeftable(totaleffect.reg)["edpgi_all_imputed_self", "Estimate"]
     # Extract the direct effect.
     direct.effect <- coeftable(secondstage.reg)["edpgi_all_imputed_self", "Estimate"]
     interaction.effect <- coeftable(secondstage.reg)[
-        paste0("edpgi_all_imputed_self:", hat.mediator), "Estimate"]
+        paste0("edpgi_all_imputed_self:", mediator), "Estimate"]
     ade.est <- direct.effect + (
-        interaction.effect * mean(input.data[[hat.mediator]], na.rm = TRUE))
+        interaction.effect * mean(input.data[[mediator]], na.rm = TRUE))
     # Extract the indirect effect.
     firststage.effect <- coeftable(firststage.reg)["edpgi_all_imputed_self", "Estimate"]
-    indirect.effect <- coeftable(secondstage.reg)[hat.mediator, "Estimate"]
-    aie.est <- firststage.effect * (indirect.effect +
-        interaction.effect * mean(input.data[["edpgi_all_imputed_self"]], na.rm = TRUE))
-    ade.est <- total.est - aie.est
+    aie.est <- firststage.effect * (indirect.effect + interaction.effect *
+        mean(input.data[["edpgi_all_imputed_self"]], na.rm = TRUE))
+    #ade.est <- total.est - aie.est
     # Return the estimates.
     output.list <- c(
         firststage.effect,
@@ -223,13 +225,13 @@ mediate_iv_edpgi.reg <- function(outcome, mediator, input.data, control.vars,
     return(output.list)
 }
 
-#!TEST: 
+#!TEST:
 mediate_iv_edpgi.reg(
     outcome = "log(soc_median_hourly)",
     mediator = "edyears",
     input.data = analysis.data,
-    control.vars = control.formula,
-    indices = sample(1:nrow(analysis.data), nrow(analysis.data), replace = TRUE))
+    control.vars = control.formula)
+    #indices = sample(1:nrow(analysis.data), nrow(analysis.data), replace = TRUE))
 
 
 ################################################################################
@@ -458,3 +460,67 @@ mediate_fe.reg <- mediate.model(
     type = "Sibling FE",
     boot.reps = boot.n)
 print(mediate_fe.reg)
+
+
+################################################################################
+## Estimate mediation on the data, to fill the mediation table.
+
+# Decide how many bootstrap samples to use.
+boot.n <- 10^2
+
+# 1. OLS regression
+mediate_ols.reg <- mediate.model(
+    outcome = "log(soc_median_annual)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "OLS",
+    boot.reps = boot.n)
+print(mediate_ols.reg)
+
+# 2. IV regression
+mediate_iv.reg <- mediate.model(
+    outcome = "log(soc_median_annual)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "IV",
+    boot.reps = boot.n)
+print(mediate_iv.reg)
+
+# 3. Sibling FE regression
+mediate_fe.reg <- mediate.model(
+    outcome = "log(soc_median_annual)",
+    mediator = "edyears",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "Sibling FE",
+    boot.reps = boot.n)
+print(mediate_fe.reg)
+
+#! Test: for each level education.
+mediate_ols.reg <- mediate.model(
+    outcome = "log(soc_median_annual)",
+    mediator = "edqual_gcses",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "OLS",
+    boot.reps = boot.n)
+print(mediate_ols.reg)
+
+mediate_ols.reg <- mediate.model(
+    outcome = "log(soc_median_annual)",
+    mediator = "edqual_alevels",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "Sibling FE",
+    boot.reps = boot.n)
+print(mediate_ols.reg)
+mediate_ols.reg <- mediate.model(
+    outcome = "log(soc_median_annual)",
+    mediator = "edqual_highered",
+    input.data = analysis.data,
+    control.vars = control.formula,
+    type = "Sibling FE",
+    boot.reps = boot.n)
+print(mediate_ols.reg)

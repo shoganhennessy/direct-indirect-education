@@ -63,16 +63,18 @@ full.data <- data.folder %>%
 print(full.data)
 print(names(full.data))
 
+# Define the birthdate cutoff (born 1957 Sept and later) for ROSLA.
+cutoff <- 1957.75
 # Calculate yearmonth of birth
 full.data <- full.data %>%
     mutate(birthyearmonth = birthyear + (birthmonth / 12)) %>%
     mutate(
-        rosla_year = birthyearmonth - 1957.75,
+        rosla_year = birthyearmonth - cutoff,
         rosla = as.integer(rosla_year >= 0),
-        rosla_year = birthyearmonth - 1957.75,
+        rosla_year = birthyearmonth - cutoff,
         rosla_year_above = rosla_year * rosla,
         rosla_year_below = rosla_year * (1 - rosla),
-        edage16 = as.integer(edyears  >= 11))
+        edage16 = as.integer(edyears >= 11))
 # Get the sibling imputed analysis sample.
 analysis.data <- full.data %>%
     # Get the sibling imputed analysis sample.
@@ -89,14 +91,61 @@ analysis.data <- full.data %>%
 library(fixest)
 poly.count <- 2
 bandwidth <- 11
-cutoff <- 1957.75
-dist <- abs((full.data$birthyearmonth - cutoff) / bandwidth)
-full.data$kernel.wt <- (1 - dist) * (dist <= 1) / bandwidth
+tri.dist <- abs((full.data$birthyearmonth - cutoff) / bandwidth)
+full.data$kernel.wt <- (1 - tri.dist) * (tri.dist <= 1) / bandwidth
+
+#! TESTING: RD ROBUST
+### Load RDROBUST package
+library(rdrobust)
+### Load data base
+load("~/Downloads/rdrobust_RDsenate.rda")
+print(head(rdrobust_RDsenate))
+
+rdplot(x = rdrobust_RDsenate$margin,y = rdrobust_RDsenate$vote,
+    binselect="es",
+    ci=95, 
+    title="RD Plot: U.S. Senate Election Data", 
+    y.label="Vote Share in Election at time t+2",
+    x.label="Vote Share in Election at time t")
+
+summary(rdrobust(x = rdrobust_RDsenate$margin,y = rdrobust_RDsenate$vote))
+
+
+full.data <- full.data %>%
+    mutate(soc_median_annual_all =
+        (soc_median_hourly_all * hours_workweek * 40) / 1000)
+
+## RD Estimates on  UKB data.
+summary(rdrobust(x = full.data$birthyearmonth,
+    y = full.data$edyears,
+    c = cutoff, all = TRUE))
+summary(rdrobust(x = full.data$birthyearmonth,
+    fuzzy = full.data$edyears,
+    y = log(full.data$soc_median_hourly_all),
+    c = cutoff, all = TRUE))
+
+
+# Compare to OLS.
+ols.reg <- feols(log(soc_median_hourly) ~ edage16 * edyears | birthyear,
+    weights = full.data$kernel.wt,
+    data = full.data)
+plot(full.data$edyears[full.data$kernel.wt > 0], predict(ols.reg))
+print(summary(ols.reg))
+
+
+#TODO: change this polynomial BC to that recommended in Gelman Imbens (2018).
+# Local linear/poly instead.
+# https://rdpackages.github.io/rdrobust/
+
+library(splines)
 
 # First-stage
+seq(-bandwidth, bandwidth, length.out = 11)
 edyears_firststage.reg <- full.data %>%
     feols(edyears ~ 1 + rosla +
-        poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
+        bs(rosla_year, knots = seq(-bandwidth, bandwidth, length.out = 11)),
+        #bs(rosla_year_below) + bs(rosla_year_above),
+        #poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
         weights = full.data$kernel.wt,
         data = .)
 edyears_firststage.reg %>% summary() %>% print()
@@ -104,14 +153,17 @@ edyears_firststage.reg %>% fstat.get("rosla") %>% print()
 # Reduced form
 reduced.reg <- full.data %>%
     feols(log(soc_median_hourly) ~ 1 + rosla +
-        poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
+        bs(rosla_year, knots = seq(-bandwidth, bandwidth, length.out = 11)),
+        #poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count),
         weights = full.data$kernel.wt,
         data = .)
 reduced.reg %>% summary() %>% print()
 # Labour market returns to staying in school until 16.
 iv.reg <- full.data %>%
     feols(log(soc_median_hourly) ~ 1 +
-        poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count)
+        bs(rosla_year, knots = seq(-bandwidth, bandwidth, length.out = 11))
+        #bs(rosla_year_below, knots = 20) + bs(rosla_year_above, knots = 20)
+        #poly(rosla_year_below, poly.count) + poly(rosla_year_above, poly.count)
         | edyears ~ rosla,
         weights = full.data$kernel.wt,
         data = .)
@@ -259,13 +311,13 @@ ggsave(file.path(figures.folder, "rosla-wages.png"),
 # Set up the linear limits
 linear.limit <- 6
 linear.count <- 1
-dist <- abs((full.data$birthyearmonth - cutoff) / linear.limit)
-full.data$linear.wt <- (1 - dist) * (dist <= 1) / linear.limit
+tri.dist <- abs((full.data$birthyearmonth - cutoff) / linear.limit)
+full.data$linear.wt <- (1 - tri.dist) * (tri.dist <= 1) / linear.limit
 # Set up the polynomials
 poly.limit <- 11
 poly.count <- 2
-dist <- abs((full.data$birthyearmonth - cutoff) / poly.limit)
-full.data$poly.wt <- (1 - dist) * (dist <= 1) / poly.limit
+tri.dist <- abs((full.data$birthyearmonth - cutoff) / poly.limit)
+full.data$poly.wt <- (1 - tri.dist) * (tri.dist <= 1) / poly.limit
 
 ## Estimate every model necessary
 # 1. GCSEs
@@ -735,8 +787,8 @@ returns.table %>%
 analysis.data <- analysis.data %>%
     filter(abs(birthyearmonth - cutoff) <= bandwidth) %>%
     mutate(log_soc_median_hourly = log(soc_median_hourly))
-dist <- abs((analysis.data$birthyearmonth - cutoff) / bandwidth)
-analysis.data$kernel.wt <- (1 - dist) * (dist <= 1) / bandwidth
+tri.dist <- abs((analysis.data$birthyearmonth - cutoff) / bandwidth)
+analysis.data$kernel.wt <- (1 - tri.dist) * (tri.dist <= 1) / bandwidth
 
 #! Bootstrap test.
 full_boot.data <- full.data
@@ -1270,7 +1322,7 @@ full.data %>%
     summary() %>%
     print()
 
-# Show the mean Ed PGI random component across the parent dist
+# Show the mean Ed PGI random component across the parent distribution.
 full.data$parental_quantile <-
     ecdf(full.data$edpgi_parents)(full.data$edpgi_parents)
 full.data$parental_quantile <- factor(
