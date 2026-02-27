@@ -6,6 +6,7 @@
 *.zip
 *.tar.gz
 *.gz
+*.Rout
 
 ## Core latex/pdflatex auxiliary files:
 *.aux

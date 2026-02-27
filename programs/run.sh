@@ -53,7 +53,7 @@ R CMD BATCH --no-save ukb-first-stage.R
 # Total genetic effect estimates.
 R CMD BATCH --no-save ukb-genetic-effects.R
 # Returns to Education, including MSLA effects.
-R CMD BATCH --no-save ukb-rosla.R
+R CMD BATCH --no-save ukb-msla.R
 # Mediation analysis, direct + indirect effects of Ed PGI.
 R CMD BATCH --no-save ukb-direct-indirect.R
 # Go back to base folder.

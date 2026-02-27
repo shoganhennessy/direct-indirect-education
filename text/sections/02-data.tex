@@ -2,6 +2,9 @@
 %% Data section
 \section{Data and Genetic Context}
 \label{sec:data}
+This paper draws on data from the UK Biobank, a large-scale cohort study of the British population with both rich socioeconomic measures and detailed genetic data.
+I construct a Education PolyGenic Index (Ed PGI) summarising each participant's genetic predisposition toward educational attainment, and impute parental PGI values using genetic data from siblings.
+Together, these data enable a within-family research design that separates the role of inherited genetic factors from the shared family environment in shaping socioeconomic outcomes.
 
 \subsection{UK Biobank (UKB)}
 \label{sec:data-UKB}
@@ -11,7 +14,7 @@ Letters were sent to a random sample of addresses in the National Health Service
     The UKB may not be representative of the entire UK population, as it only represents willing respondents.
     As such, the findings of this paper should only be taken as internally valid among the UKB respondents, and the sibling analysis sample described.
 }
-Participants, aged 40-69 years at recruitment, underwent comprehensive baseline assessments, asked many questions for socioeconomic information either by interview, automated survey answers, or follow-up sessions.
+Participants, aged 40-69 years at recruitment, underwent comprehensive baseline assessments, were asked many questions for socioeconomic information either by interview, automated survey answers, or follow-up sessions.
 Key socioeconomic variables include educational attainment (measured in education qualifications), household income brackets, employment status, and industry of employment.
 % Participants also provided saliva samples, to collect DNA for genetic measures.
 See \cite{sudlow2015uk} for a full description of the UKB organisation and data.
@@ -48,7 +51,7 @@ See \cite{sudlow2015uk} for a full description of the UKB organisation and data.
 
 The UKB collected detailed information on educational qualifications, including completion of primary school, GCSEs (typically completed at age 16), A-Levels (completed at age 18), and completion of an higher education degree.
 I convert these qualifications into education years based on each participant's highest reported qualification, following the International Standard Classification of Education.\footnote{
-    As noted by \cite{okbay2022polygenic}, British vocational degrees inconsistently coded by the International Standard Classification of Education.
+    As noted by \cite{okbay2022polygenic}, British vocational degrees are inconsistently coded by the International Standard Classification of Education.
     I follow the literature by assigning education years as the age they reported leaving full-time education minus five, among those with a vocational degree as their highest qualification.
 }
 While the UKB collected household income data, this information was recorded only in categorical bins, limiting its utility for continuous analysis.
@@ -107,11 +110,9 @@ While genetic data provide rich information about individual variation, the rela
 The biological pathways from DNA to observable traits remain largely opaque --- the exact relationship between a single gene, its resulting protein (or its moderating role), and the effects of those proteins are only known for a small number of genes in the human genome.
 For example, a single gene (and its recessive variant) is known to lead to a protein which does not break down the by-products of alcohol digestion; individuals with this gene generally do not drink alcohol at all because of the simple limit on digestion \citep{millwood2023alcohol}.
 Complex social behaviours, on the other hand, have no single genes with a known biological pathway, so cannot be summarised in a single gene, nor single biological pathway.
-Instead complex social behaviours are a result on thousands of genes, and their interactions with the environment --- they are polygenic.
+Instead, complex social behaviours are a result on thousands of genes, and their interactions with the environment --- they are polygenic.
 
-Rather than attempting to trace all of these intricate biological mechanisms, researchers have developed PolyGenic Indices (PGIs) as dimensional reduction tools that summarise the statistical relationship between thousands of genetic variants and outcomes of interest.\footnote{
-    See \cite{uffelmann2021genome} for a full explanation of how a GWAS works, and the approach to calculating PGIs.
-}
+Rather than attempting to trace all of these intricate biological mechanisms, researchers have developed PolyGenic Indices (PGIs) as dimensional reduction tools that summarise the statistical relationship between thousands of genetic variants and outcomes of interest.
 This aggregation approach is particularly valuable because individual genetic variants typically have tiny effects on complex traits like educational attainment --- often explaining less than 0.01\% of the variation.
 However, by combining information across hundreds of thousands of variants, each contributing a small effect, PGIs can capture meaningful portions of the genetic contribution to these outcomes.
 These indices are fundamentally correlational measures: they capture statistical associations between genetic variants and outcomes observed in large samples, not well understood biological pathways, and without a clear case for causal relationships.
@@ -119,18 +120,20 @@ The weights used to construct PGIs reflect population-level correlations that ma
 
 The Education PGI (Ed PGI) is a summary measure that aggregates genetic information across thousands of genetic variants into a single index predictive of educational attainment.
 The construction of the Ed PGI relies on weights derived from a Genome-Wide Association Study (GWAS), which analyse the correlation between genetic variants and education years.
-In a GWAS, researchers test the correlation between each Single Nucleotide Polymorphism (SNP) --- a one-letter change in the DNA sequence at a specific location --- and the outcome of interest, in this case education years.
+In a GWAS, researchers test the correlation between each Single Nucleotide Polymorphism (SNP) --- a one-letter change in the DNA sequence at a specific location --- and the outcome of interest,\footnote{
+    See \cite{uffelmann2021genome} for a full explanation of how a GWAS works, and the approach to calculating PGIs.
+} in this case education years.
 I use the weights calculated in the GWAS conducted by \cite{okbay2022polygenic}, which used a sample of over 3 million individuals of European ancestry, primarily from 23\&Me data.
 
 The Ed PGI is defined as the weighted sum of whether individual $i$ has the relevant SNP at each DNA location $j$,
 \[ Z_i = \sum_{j = 1}^{J} w_j x_{i,j} \]
 where $w_j$ are the Ed PGI weights (provided in the supplementary data to \citealt{okbay2022polygenic}), and $x_{i,j}$ is an indicator of whether individual $i$ has the relevant SNP at DNA location $j$.\footnote{
-    Every person has two copies of each chromosome, so that $x_{i,j}$ takes values 0, 1, 2 corresponding to how many copies of the SNP $i$ has.
+    Every person has two copies of each chromosome, so that $x_{i,j}$ takes values 0, 1, 2 corresponding to how many copies of the SNP individual $i$ has inherited.
     The genetics literature has generally accepted that complex social behaviours are explained by additive effects (see \citealt{hill2008data}), and \cite{okbay2022polygenic} found little evidence for dominance in the Ed PGI SNPs, so that the Ed PGI makes sense as a weighted sum.
 }
 The \cite{okbay2022polygenic} GWAS found that over 8,000 individual SNPs were significant in predicting education years, after passing a battery of biostatistical tests and finding no evidence for significant interactions.
 The resulting Ed PGI is standardised to have mean zero and standard deviation one within the entire sample, making it interpretable as the number of standard deviations from the population mean.
-The Ed PGI captures approximately 12-15\% of the variation in educational attainment, making it one of the most predictive PGIs for any complex behavioural trait to date.
+The Ed PGI captures approximately 12--15\% of the variation in educational attainment, making it one of the most predictive PGIs for any complex behavioural trait to date.
 
 \begin{figure}[h!]
     \centering
@@ -157,13 +160,11 @@ The Ed PGI captures approximately 12-15\% of the variation in educational attain
     Ed PGI is normalised to have mean 0 and standard deviation 1 among the entire UKB sample; it is roughly normally distributed regardless of this normalisation.
 \end{figure}
 
-The Ed PGI is highly correlated with education years, as it is constructed to be so.
+If education had no relationship with SNP variants, then we would expect the correlation between the Ed PGI and education years was indistinguishable from zero; it is, however, highly correlated with education years.
 A one standard deviation increase in the Ed PGI is associated with 0.93 extra education years (standard error 0.02), with an $R^2$ value of 0.10 for the raw regression of education years on Ed PGI.
 It is roughly normally distributed, with standard deviation normalised to 1.
-It is not surprising that the Ed PGI is normally distributed; it is the weighted sum of thousands of binary variables, among a few thousand individuals, so we should expect the central limit theorem to apply.
-Additionally, it is not surprising that the Ed PGI is correlated with education years; it was literally constructed to be so.
-The main take-away is that the correlation is strong, and has meaningful predictive power for education years.
-If education had no relationship with genetic variants, then we may expect the correlation would be indistinguishable from zero.
+This distribution is not surprising, as the Ed PGI is the weighted sum of a few thousand binary variables, so we should expect convergence towards a normal distribution among the population.
+The main take-away is that the correlation between a summary measure of genetic values is strong, and has meaningful predictive power for education years.
 
 The Ed PGI is not the only PGI that can be constructed.
 Following the same methodology, I construct additional PGIs for six health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
@@ -179,53 +180,55 @@ It would be ideal if the UKB contained genetic information for the parents of ev
 While there are 6,239 participants with a parent also included in the UKB, there are only 72 with both parents.
 To overcome this missing data problem, I use siblings' genetic data to impute the mean parental PGIs from the sample of \input{../text/sections/tables/ukb-analysis-count.txt} participants with at least one sibling also in the UKB --- the sibling analysis sample described above.
 
-I use the \cite{young2022mendelian} procedure, to impute mean parental PGI values using genetic data on participants' siblings.
-To briefly summarise how this works, consider that each person inherits exactly half their DNA from their mother and half from their father.
-When we observe two siblings, we can partially reconstruct their parents' genetic information because siblings both inherit their DNA from parents.
-Consider observing two different samples from the same underlying distribution --- the parents' genetics.
-At some genetic locations, siblings inherited the same variant from a parent (like both getting mum's brown-eye variant), whilst at others they inherited different variants (one got mum's brown-eye variant, the other her blue-eye variant).
-By comparing siblings' genetics across thousands of genetic variants, we can recover about 75\% of their parents' combined genetic information --- enough to construct a reasonably accurate parental PGI.
-
 \begin{figure}[h!]
     \centering
     \singlespacing
     \caption{Imputing One SNP for Parents from Sibling Data.}
     \label{fig:pgi-imputing}
-    \input{sections/figures/imputing-pgi-tikz.tex}
-    \input{sections/figures/imputing-pgi-tikz-simple.tex}
+    \input{sections/figures/imputing-pgi-tikz-update.tex}
     \justify
     \footnotesize
     \textbf{Note}:
-    This figure illustrates the logic of imputing parental genotypes from sibling data at a single SNP.
-    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a particular variant inherited from their parents.
-    A child, and their sibling, jointly imply the possible options for the parents.
-    The first option comes from the fact that child and sibling configuration of $\{1,0\}$ is only possible with the configuration of parents of $\{0,1\}, \{1,0\}$ or $\{1,1\}$.
-    With a parent configuration of $\{0,1\}$ or $\{1,0\}$, there are 4 possible realisations with a child and a sibling taking $\{1,0\}$, and 3 for parental configuration of $\{1,1\}$.
-    The second option is only possible with one parent configuration, so their is no uncertainty in what the parent values were.
-    This gives the relevant probabilities as a result of this combinatorial mixing, which is also shown in \autoref{fig:mendelian-indep}.
+    This figure illustrates the logic of imputing the sum of parental genotypes from sibling data at a single SNP, following \cite{young2022mendelian}.
+    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a reference allele inherited from their parents; this figure shows the case where both the child and their sibling have genotype 1, across the three possible identity-by-descent (IBD) states.
+    In IBD0, the siblings share no alleles by descent, so all four parental alleles are directly observed and the parental sum is known exactly as 2.
+    In IBD1, the siblings share one allele by descent, leaving one parental allele unobserved; the imputed parental sum is $1 + f$ or $2+f$, depending on whether the shared allele is the reference allele, where $f$ denotes the population frequency of the reference allele.
+    In IBD2, the siblings share both alleles by descent, so only two parental alleles are observed and the imputed parental sum is $1 + 2f$
+    In all cases, unobserved parental alleles are replaced by the population allele frequency $f$
 \end{figure}
 
-\autoref{fig:pgi-imputing} visualises the logic behind imputing parental SNP values based on an individual's, and their sibling(s)'s, genetic data.
-In the middle panel, the individual has genotype 1 and their sibling has genotype 0.
-Since the individual must have inherited their 1 variant from one parent and their 0 variant from the other, while the sibling inherited two 0 variants, we can infer that one parent has genotype 0 (contributing 0 to both children) and the other has genotype 1 (contributing 1 to the individual and 0 to the sibling).
-The right panel shows an alternative configuration yielding the same sibling genotypes.
-When parental genotypes cannot be uniquely determined, the imputation uses the expected values based on observed variants and population frequencies.
-By applying this logic across hundreds of thousands of SNPs and accounting for segments of DNA shared identically by descent between siblings, we can accurately reconstruct parental PGIs despite never observing the parents directly.
+I use the \cite{young2022mendelian} procedure to impute mean parental PGI values using genetic data on participants' siblings.
+The key insight is that since siblings both inherit their DNA from the same two parents, observing two siblings' genotypes allows us to partially reconstruct the parental genotypes they were drawn from.
+At each SNP, the imputation proceeds in two steps.
+First, the procedure classifies each sibling pair as being in one of three identity-by-descent (IBD) states using a hidden Markov model that exploits information across all SNPs: IBD0, in which the siblings share no alleles inherited from the same parent; IBD1, in which they share one such allele; and IBD2, in which they share both.
+This IBD classification has been shown to be correct 99.65\% of the time in validation samples \citep{young2022mendelian}.
+Second, given the inferred IBD state, the procedure imputes the sum of the two parental genotypes at that SNP --- which is the quantity needed to construct a parental PGI --- by summing the directly observed parental alleles and replacing any unobserved alleles with the population allele frequency $f \in [0,1]$.
 
-The imputation procedure performs well in the UKB analysis sample.
-Following the \cite{young2022mendelian} validation approach, I verify the accuracy by examining the small subset of families where parental genotypes are actually observed.
-The imputed parental PGIs show a correlation of over 99\% with true parental PGIs, and regression coefficients are statistically indistinguishable from 1, confirming the imputation is unbiased.
-\appendixref{appendix:pgi-impute} describes the full technical detail behind the imputation procedure, and this validation exercise.
-This high accuracy means I can confidently use the imputed parental PGIs in place of directly observed parental PGI values.
+\autoref{fig:pgi-imputing} illustrates this logic for the case where both the child and their sibling have observed SNP value of 1 (one copy of the reference allele).
+In IBD0, the siblings share no alleles, so all four parental alleles are directly observed across the two children, and the parental sum is known exactly as 2.
+In IBD1, one allele is shared between the siblings, leaving one parental allele unobserved; depending on whether the shared allele is the reference allele or not, the imputed parental sum is either $1 + f$ or $2 + f$, depending on value of the inherited shared allele.\footnote{
+    Phased haplotype data from neighbouring SNPs used to resolve this ambiguity.
+}
+In IBD2, both siblings inherited the same two alleles, so only two of the four parental alleles are observed (summing to 1), and the two unobserved alleles are each imputed as $f$, giving sum of parents $1 + 2f$.
+In all cases, the imputed value is the conditional expectation of the parental sum given the observed sibling genotypes and IBD state, where unobserved alleles are replaced by the population frequency.
+Averaging across the three IBD states --- which occur with probabilities 1/4, 1/2, and 1/4 respectively --- siblings jointly reveal on average three of the four parental alleles, meaning approximately 75\% of parental genetic information is directly observed rather than imputed.\footnote{
+    See \cite{young2022mendelian} for further reasoning on the imputation performance relative to observed parents in the UKB, and \autoref{sec:discussion} for a discussion on validating this design in an alternative data source which observes both siblings and parents.
+}
+
+%The imputation procedure performs well in the UKB analysis sample.
+%Following the \cite{young2022mendelian} validation approach, I verify the accuracy by examining the small subset of families where parental genotypes are actually observed.
+%The imputed parental PGIs show a correlation of over 99\% with true parental PGIs, and regression coefficients are statistically indistinguishable from 1, confirming the imputation is unbiased.
+%\appendixref{appendix:pgi-impute} describes the full technical detail behind the imputation procedure, and this validation exercise.
+%This high accuracy means I can confidently use the imputed parental PGIs in place of directly observed parental PGI values.
 
 \subsection{Ethical Considerations}
 \label{sec:ethics}
-It is crucial to emphasise that the genetic measures in this study should not be misinterpreted as evidence of genetic determinism.
-Having a higher Ed PGI does not destine someone to higher education or income; it merely represents only a small statistical tendency, not fate.
+The genetic measures in this study should not be misinterpreted as evidence of genetic determinism.
+Having a higher Ed PGI does not destine someone to higher education or income; it represents a statistical tendency, not fate.
 These tendencies are fundamentally shaped by social policies, institutional structures, and cultural contexts that vary across time and place.
 Just as eyesight correcting glasses  can eliminate the practical consequences of genetic variation in eyesight, education and economic policies can modify or eliminate the consequences of genetic variation in traits relevant to socioeconomic outcomes.
 
-Furthermore, this research provides no support whatsoever for ideas about ``natural'' social hierarchies or genetic justifications for inequality.
+Furthermore, this research provides no support for ideas about ``natural'' social hierarchies or genetic justifications for inequality.
 In addition, genetic associations identified within one ancestry group cannot be meaningfully compared across groups due to different genetic architectures, environmental contexts, and historical experiences.
-Any claim using the measures consider in this paper for inference across racial groups, or different racial groups would be both scientifically invalid, and ethically deficient.
-The appropriate interpretation of these results is that they highlight how both social and genetic  factors influence socioeconomic outcomes, which should inspire greater solidarity and support for policies that promote equality of opportunity rather than acceptance of inequality as natural or inevitable.
+Any claim using the measures considered in this paper for inference across racial groups, or different racial groups, would be both invalid and ethically deficient.
+The appropriate interpretation of these results is that they highlight how both social and genetic factors influence socioeconomic outcomes, which should inspire greater solidarity and support for policies that promote equality of opportunity rather than acceptance of inequality as ``natural'' or inevitable.
