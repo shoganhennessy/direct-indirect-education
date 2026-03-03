@@ -130,7 +130,7 @@ summary.table <- function(given.data){
             "Other PGI: Asthma"             = asthma_pgi,
             "Other PGI: Bipolar"            = bipolar_pgi,
             "Other PGI: BMI"                = bmi_pgi,
-            "Other PGI: Diabetes type 2"    = t2diabetes_pgi,
+            "Other PGI: Diabetes (type 2)"  = t2diabetes_pgi,
             "Other PGI: Height"             = height_pgi,
             "Other PGI: Schizophrenia"      = schizophrenia_pgi,
             # Education variables
@@ -152,7 +152,8 @@ summary.table <- function(given.data){
             "Household income, $\\pounds 18-31k$"          = householdincome_18to31k,
             "Household income, $\\pounds 31-52k$"          = householdincome_31to52k,
             "Household income, $\\pounds 52-100k$"         = householdincome_52to100k,
-            "Household income, $\\pounds 100k <$"          = householdincome_above100k)
+            "Household income, $\\pounds 100k <$"          = householdincome_above100k,
+            "Household income, thousands $\\pounds$ (midpoint imputed)" = householdincome_midpoint)
     # Generate summary data, for provided data (MEAN)
     summary.mean <- table.data %>%
         summarise_all(mean, na.rm = TRUE) %>%

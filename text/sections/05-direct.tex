@@ -21,21 +21,24 @@ This decomposition maps to the empirical question raised above: ``do education-l
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Structural Causal Model for Direct and Indirect Effects.}
-    \label{fig:scm-model}
+    \caption{Structural Causal Model for Ed PGI Effects.}
+    \label{fig:scm-cm}
     \begin{tikzpicture}
         \node[state,thick,ForestGreen] (mediator) at (0,0) {$D_i$};
         \node[state,thick,blue] (treatment) [left=3cm of mediator] {$Z_i$};
         \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
         % Label Z_i, D, Y_i
-        \node[color=ForestGreen] [above=0.25cm of mediator] {Education};
-        \node[color=blue] [left=0.1cm of treatment] {Ed PGI};
-        \node[color=red] [right=-0.01cm of outcome] {Income \& Wages};
+        \node[color=ForestGreen, align=center] [above=0.25cm of mediator] {Education \\ years};
+        \node[color=blue] [left=0.1cm of treatment, align=right] {Ed PGI};
+        \node[color=red] [right=-0.01cm of outcome, align=left] {Occupation \\ Wages};
         % Draw the causal arrows
         \path[->, thick] (treatment) edge (mediator);
         \path[->, thick] (mediator) edge (outcome);
         \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
-        \node[color=orange] [below=0.4cm of mediator] {Direct Effect};
+        % Label the effects
+        \node[color=orange] [below=1.2cm of mediator] {Direct effect};
+        \node[color=orange] [above left= -0.4cm and 0.5cm of mediator, align=right] {First-stage};
+        \node[color=orange] [right= 0.5cm of mediator, align=center] {Education \\ returns};
         % Add in the unobserved confounding
         \path[<->,dashed,thick,color=RoyalBlue] (mediator) edge[bend right=-45] (outcome);
     \end{tikzpicture}

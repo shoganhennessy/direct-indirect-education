@@ -49,7 +49,7 @@ cd ukb/data-analyse
 # Summarise UKB data.
 R CMD BATCH --no-save ukb-summarise.R
 # First-stage effects, justifying the imputation research design.
-R CMD BATCH --no-save ukb-first-stage.R
+R CMD BATCH --no-save ukb-genetic-firststage.R
 # Total genetic effect estimates.
 R CMD BATCH --no-save ukb-genetic-effects.R
 # Returns to Education, including MSLA effects.

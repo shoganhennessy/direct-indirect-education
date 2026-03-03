@@ -230,6 +230,14 @@ cleaned_pheno.data <- ukb_pheno.data %>%
             as.integer(householdincome_cat == 5)),
         householdincome_missing = ifelse(is.na(householdincome_cat) |
             householdincome_cat == 6 | householdincome_cat == 7, 1, 0),
+        # householdincome banded to midpoint imputed
+        householdincome_midpoint =
+            ifelse(householdincome_less18k == 1,   9,
+            ifelse(householdincome_18to31k == 1,   24.5,
+            ifelse(householdincome_31to52k == 1,   41.5,
+            ifelse(householdincome_52to100k == 1,  76,
+            ifelse(householdincome_above100k == 1, 100,
+            ifelse(householdincome_missing == 1,   NA, NA)))))),
         # Urban category
         urban = ifelse(urban_cat %in% c(3, 5, 11, 12), 1,
             ifelse(is.na(urban_cat), 0, 0)),
@@ -586,7 +594,6 @@ final_pheno.data <- cleaned_pheno.data %>%
         householdincome_cat,
         recruitedage,
         jobcode_soc,
-        #TODO employment -> fix in the python extract because lists.
         hours_workweek,
         soc_mean_hourly,
         soc_median_annual,

@@ -8,7 +8,6 @@ Together, these data enable a within-family research design that separates the r
 
 \subsection{UK Biobank (UKB)}
 \label{sec:data-UKB}
-
 The UK Biobank (UKB) is a large-scale prospective cohort study comprising approximately half a million members of the British public, recruited between 2006 and 2010.
 Letters were sent to a random sample of addresses in the National Health Service registry, and the final UKB data represent voluntary respondents.\footnote{
     The UKB may not be representative of the entire UK population, as it only represents willing respondents.
@@ -20,11 +19,12 @@ Key socioeconomic variables include educational attainment (measured in educatio
 See \cite{sudlow2015uk} for a full description of the UKB organisation and data.
 
 \begin{table}[!htbp]
-    \vskip-0.5cm
+    \vskip-0.75cm
     \singlespacing
     \centering
     \small
     \caption{Descriptive Statistics, UKB.}
+    \vskip-0.25cm
     \begin{tabular}{l c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
             & \multicolumn{2}{c}{Analysis sample}
@@ -193,8 +193,8 @@ To overcome this missing data problem, I use siblings' genetic data to impute th
     At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a reference allele inherited from their parents; this figure shows the case where both the child and their sibling have genotype 1, across the three possible identity-by-descent (IBD) states.
     In IBD0, the siblings share no alleles by descent, so all four parental alleles are directly observed and the parental sum is known exactly as 2.
     In IBD1, the siblings share one allele by descent, leaving one parental allele unobserved; the imputed parental sum is $1 + f$ or $2+f$, depending on whether the shared allele is the reference allele, where $f$ denotes the population frequency of the reference allele.
-    In IBD2, the siblings share both alleles by descent, so only two parental alleles are observed and the imputed parental sum is $1 + 2f$
-    In all cases, unobserved parental alleles are replaced by the population allele frequency $f$
+    In IBD2, the siblings share both alleles by descent, so only two parental alleles are observed and the imputed parental sum is $1 + 2f$.
+    In all cases, unobserved parental alleles are replaced by the population allele frequency $f$.
 \end{figure}
 
 I use the \cite{young2022mendelian} procedure to impute mean parental PGI values using genetic data on participants' siblings.

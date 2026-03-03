@@ -6,7 +6,7 @@ Because parents transmit genetic material to their children, those who inherit a
 Consequently, correlations between an individual's Ed PGI and outcomes may reflect not only direct genetic effects but also indirect effects mediated through family environment, making these correlations confounded.
 
 However, while genetic inheritance generates systematic associations between genes and environments, it also includes a random component.
-Specifically, Mendelian inheritance ensures that, conditional upon parental genetics, there is random variation in the genetic variants a child inherits.
+Specifically, Mendelian inheritance ensures that there is random variation in the genetic variants a child inherits --- conditional on parental genetics.
 I use this random variation to estimate causal effects of the Ed PGI.
 
 \subsection{Mendelian Independent Inheritance}
@@ -34,13 +34,12 @@ This result came about purely from random chance, conditional on at least one of
 
 \subsection{Mendelian Independent Inheritance in the Ed PGI}
 \label{sec:mendel-pgi}
-
-Senan note: include the random component figure here.
-
 Moving from a single variant to the PGI simply means summing across the same random-segregation for all the variants.
 The Ed PGI is constructed by summing the 0, 1, or 2 copy indicators across the $J \approx 8,000$ different SNPs, each multiplied by the externally estimated weights $w_{j'}$ that capture how strongly each SNP predicts education years.
+
 \[ Z_i^\text{\textcolor{ForestGreen}{Child}}
 = \sum_{j = 1}^{J} w_j x_{i,j}^\text{\textcolor{ForestGreen}{Child}}, \]
+and similarly for child $i$'s parents, to give $Z_{m(i)}^\text{\textcolor{orange}{Mother}}$ and $Z_{f(i)}^\text{\textcolor{blue}{Father}}$ from summing across binary values $x_{m(i),j}^\text{\textcolor{orange}{Mother}}$ and $x_{f(i),j}^\text{\textcolor{blue}{Father}}$, respectively.
 
 Because every variant copy enters the child's genome through an independent random draw (conditional on parental values), the child's Ed PGI is the weighted sum of thousands of such draws.
 This means the Ed PGI can be decomposed into the component that was inherited as a result of a random draws from parent(s) who had 1 copy of the variant, and the certainty component from draws where parent(s) had 0 or 2 copies.
@@ -54,16 +53,34 @@ This means the Ed PGI can be decomposed into the component that was inherited as
 where $u_i$ is a mean zero random error term arising from Mendelian independent assortment.
 The only determining factor for $u_i$ is the randomness of inheriting exact counts of SNPs $x_{i,j}^\text{\textcolor{ForestGreen}{Child}}$ from their parents, relative to what they were expected to inherit, $\frac 12 \Big( x_{m(i),j}^\text{\textcolor{orange}{Mother}} + x_{f(i),j}^\text{\textcolor{blue}{Father}} \Big)$.
 
-Ideally, the random genetic component $Z_i^\text{\textcolor{red}{Random}}$ is constructed from observed parental Ed PGI values, $Z_{m(i)}^\text{\textcolor{orange}{Mother}}, Z_{f(i)}^\text{\textcolor{blue}{Father}}$.
-However, parental PGI values are not observed for a large enough sample in the UKB.
+Ideally, the expected inheritance is constructed from observed parental Ed PGI values, $Z_{m(i)}^\text{\textcolor{orange}{Mother}}, Z_{f(i)}^\text{\textcolor{blue}{Father}}$.
+However, parental PGI values are not observed for a large enough sample in the UKB for statistical inference.
 Thus, I follow \cite{young2022mendelian} and leverage siblings' genetic data to impute parental PGI values.
-This random component, therefore, is using the same within-family variation that early genetic studies did by examining within family differences.
+The expected Ed PGI inheritance, therefore, is calculated using the same within-family variation that early genetic studies did by examining within family differences.
 An individual's Ed PGI is drawn from the same distribution as their sibling, because they had the same parents; in absence of observing both parents directly, this approach uses the sibling to infer this distribution.
+
+This approach is equivalent to using observed parents because of the simple fact that children and parents are two independent draws from the parental genetic distribution.
+Write $Z_{s(i)}^\text{\textcolor{purple}{Sibling}}$ for child $i$'s observed sibling Ed PGI value, and $Z_{i, s(i)}^\text{\textcolor{purple}{Parental}} = \frac 12 \left( Z_i^\text{\textcolor{ForestGreen}{Child}} 
+        + Z_{s(i)}^\text{\textcolor{purple}{Sibling}} \right)$
+the imputed parental value.
+In expectation, a child and their observed sibling's Ed PGI together proxy for their unobserved parental PGI values.
+\[ \E{Z_{i, s(i)}^\text{\textcolor{purple}{Parental}}}
+    = \frac12 \Big(
+        Z_{m(i)}^\text{\textcolor{orange}{Mother}}
+            + Z_{f(i)}^\text{\textcolor{blue}{Father}} \Big)
+    = \Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
+        Z_{m(i)}^\text{\textcolor{orange}{Mother}},
+            Z_{f(i)}^\text{\textcolor{blue}{Father}}}. \]
+
+However, because siblings collectively reveal approximately 75\% of the parental genetic variation, the resulting imputed values contain measurement error compared to the ideal (but unobserved) parental mean.
+The sibling-imputed parental mean PGI can be viewed as a proxy for the true parental mean PGI, inflating the variance in error term $u_i$ in \autoref{eqn:pgi-child}.
+This error reduces precision of using the imputed proxy measure, compared true parental values.
+Also, the coefficient between a child's Ed PGI and their expected inheritance will suffer from attenuation bias from using sibling imputed data, so is estimated in every regression in this paper (i.e., included as a control variable).
 
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Distribution of the Ed PGI and Mendelian Random Error, Relative to Imputed Parental Decile.}
+    \caption{Distribution of the Ed PGI, Relative to Imputed Parental Decile.}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
         \caption{Ed PGI.}
@@ -87,24 +104,10 @@ An individual's Ed PGI is drawn from the same distribution as their sibling, bec
     Parental imputed Ed PGI decile 1 shows the distributions for the bottom 10\% of parental imputed values, decile 2 shows distribution among 10--20\%, and so on.
 \end{figure}
 
-This approach is equivalent, in expectation, to using observed parents because of the simple fact that children and parents are two independent draws from the parental genetic distribution.
-Thus, in expectation, they both proxy for the parental PGI values,
-\[ \E{\frac 12 \left( Z_i^\text{\textcolor{ForestGreen}{Child}} 
-        + Z_{s(i)}^\text{\textcolor{purple}{Sibling}} \right)}
-    = \frac12 \Big(
-        Z_{m(i)}^\text{\textcolor{orange}{Mother}}
-            + Z_{f(i)}^\text{\textcolor{blue}{Father}} \Big). \]
-However, because siblings collectively reveal approximately 75\% of the parental genetic variation, the resulting imputed values contain measurement error compared to the ideal (but unobserved) parental mean.
-The sibling-imputed parental mean PGI can be viewed as a proxy for the true parental mean PGI, inflating the variance in error term $\nu_i$ in \autoref{eqn:pgi-child} denotes the measurement error arising from the incomplete observation of parental genotypes.
-Notably, however, this error reduced precision of using the imputed proxy measure, compared true parental values.\footnote{
-    Also note that PGI weights are calculated with measurement error, leading to attenuation bias relative to an infeasible truth Ed PGI with oracle weights.
-    See \cite{van2023overcoming} for further discussion on measurement error of this kind.
-}
-
-Consequently, controlling for sibling imputed parental values maintains the same core identification properties as use of observed parental values --- notably, Mendelian independent inheritance --- though it inherently includes measurement error due to sibling-based imputation.
-The precision of this method precision, therefore, depends on how genetically distinct each sibling pair is: sibling pairs who differ widely provide clearer signals, whereas genetically similar pairs introduce greater measurement noise.
-For estimation, an Ordinary Least Squares (OLS) regression will implicitly weight observations by variance \citep{angrist1998estimating}, meaning sibling pairs with larger genetic differences disproportionately influence the estimated effects.
-Thus, while the sibling-based imputation approach preserves unbiasedness in estimating genetic effects, it comes at the cost of increased standard errors and potentially reduced generalisability if sibling genetic divergence is not representative for the entire population.
+Children with a higher Ed PGI value inheritance this from their parents, and so had parents with higher Ed PGI values.
+\autoref{fig:edpgi-dist} shows this tendency, where children with parents in the top decile of the imputed Ed PGI distribution have a mean Ed PGI 1.5 standard deviations above the mean --- and similarly for those at the bottom.
+This means parental Ed PGI values, with their effects on the children and the environment they are raised in, are a meaningful confounder for the effects of the child's own Ed PGI on education and labour market outcomes.
+But, after conditioning for parental imputed values, there is no correlation across the distribution; this reflects the fact that Mendelian independent assortment induces random quasi-random variation in the child's realised Ed PGI.
 
 \subsection{Causal Identification Strategy}
 Let $D_i(z')$ denote the potential education level and $Y_i(z', D_i(z'))$ labour market outcome for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $Z_i^\text{\textcolor{ForestGreen}{Child}} = z'$.
@@ -114,69 +117,93 @@ Observed education and wages/income data are a sum of their respective potential
     Y_i = \sum_{z'} \indicator{
     Z_i^\text{\textcolor{ForestGreen}{Child}} = z'} Y_i(z', D_i(z')).
 \]
-Note that potential labour market outcomes $Y_i(z', D_i(z'))$ are a function of both hypothetical Ed PGI value, and resulting education $D_i(z')$; \autoref{sec:direct} returns to this distinction.
+Potential labour market outcomes $Y_i(z', D_i(z'))$ are a function of both the Ed PGI value, and resulting education $D_i(z')$.
+This distinction is not important for measuring average genetic effects in this section, but will become the main focus in \autoref{sec:direct}.
 
-\noindent
-\textbf{Target Parameters.}
-This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following average partial effects:
-\[ \partialdiff{z'} \E{D_i(z')}, \;\;\;\; 
+\paragraph{Target Parameters.}
+This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following average effects:
+\[ \text{Average first-stage } \partialdiff{z'} \E{D_i(z')}, \;\;\;\; 
+    \text{Average partial effect } 
     \partialdiff{z'} \E{Y_i(z', D_i(z'))}. \]
-The first average partial effect represents the average effect of a one standard deviation change in the Ed PGI on a measure of education, and the second on labour market wages or income, \textit{ceteris paribus}.
+The average first-stage effect represents the average effect of a one standard deviation increase in the Ed PGI on education, and the average partial effect on labour market wages or income, \textit{ceteris paribus}.
 
-The Ed PGI, however, is neither randomly assigned nor directly manipulatable, so that we may not observe $Y_i(z', D_i(z'))$ for different values of $z'$ for the same individual, and causal effects are not identifiable without further assumptions.
-Thus, I rely on controlling for parental (imputed) Ed PGI values for causal inference.
+\begin{figure}[h!]
+    \centering
+    \singlespacing
+    \caption{Structural Causal Model for Ed PGI Effects.}
+    \label{fig:scm-edpgi}
+    \begin{tikzpicture}
+        \node[state,thick,ForestGreen] (mediator) at (0,0) {$D_i$};
+        \node[state,thick,blue] (treatment) [left=3cm of mediator] {$Z_i$};
+        \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
+        % Label Z_i, D, Y_i
+        \node[color=ForestGreen, align=center] [above=0.25cm of mediator] {Education};
+        \node[color=blue] [left=0.1cm of treatment, align=right] {Ed PGI};
+        \node[color=red] [right=-0.01cm of outcome, align=left] {Occupation \\ Income $+$ \\Wages};
+        % Draw the causal arrows
+        \path[->, thick] (treatment) edge (mediator);
+        %\path[->, thick] (mediator) edge (outcome);
+        \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
+        % Label the effects
+        \node[color=orange] [below=1.2cm of mediator] {Average partial effect};
+        \node[color=orange] [left=0.4cm of mediator, align=center] {Average \\first-stage};
+        % Add in the controlled variable confounding
+        \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
+    \end{tikzpicture}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    This figure shows the structural causal model, representing the two causal effects estimated in this section.
+    The causal effects of the child's Ed PGI on education and later labour market outcomes are identified by controlling for parental (imputed) Ed PGI values.
+\end{figure}
 
-\textbf{Senan Note: Fix all of this, and make it simple conditional independence.}
-
-\noindent
-\textbf{Identifying Assumptions.}
-I use the random component of the Ed PGI, $\tilde Z_i^\text{\textcolor{red}{Random}}$, as an instrument for the Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
-This requires a number of assumptions to recover valid average causal effects.
-\begin{enumerate}[label=(\arabic*)]
-    \item Instrument Relevance and Independence: The random component of the Ed PGI strongly predicts the individual's Ed PGI, and is unrelated to potential outcomes.
-    \item Instrument Monotonicity: 
-    A higher value of the random component (weakly) increases the Ed PGI, with probability 1.
-    \item Exclusion Restriction:
-    The random genetic component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, affects the potential outcomes only via the Ed PGI, $Z_i^\text{\textcolor{ForestGreen}{Child}}$.
-\end{enumerate}
-
-The three identifying assumptions are justified by the biology of genetic inheritance and the design of the empirical strategy.
-The relevance and independence assumption (1) holds because the random genetic component arises solely from Mendelian inheritance, ensuring both predictive strength (see \autoref{tab:genetic-firststage}) and independence from unobserved confounding conditional on parental genetics and observed covariates.
-The monotonicity assumption (2) is satisfied because inheriting a higher random genetic component can only additively increase the Ed PGI, never reducing it.
-Indeed, the random component mechanically changes the Ed PGI for anyone who receives a higher random component, so that everyone is a complier, too.
-Finally, the exclusion restriction (3) is credible given that genetic variants used in the random component influence socioeconomic outcomes only through their aggregation into the Ed PGI, by construction.
-
-\noindent
-\textbf{Estimation Strategy.}
-I estimate the genetic first-stage as follows, 
+\paragraph{Identifying Assumptions.}
+I rely on controlling for parental (imputed) Ed PGI values, for causal inference.
+This yields estimates of causal effects if a child's Ed PGI is quasi-randomly assigned, conditional on their parents' Ed PGI mean --- the child's expected inheritance.
 \begin{equation}
-    \label{eqn:genetic-firststage}
     Z_i^\text{\textcolor{ForestGreen}{Child}}
-        = \gamma + \theta \tilde Z_i^\text{\textcolor{red}{Random}}
-            + \vec\zeta' \vec X_i + \eta_i,
+    \indep D_i(z'), Y_i(z', D_i(z'))
+    \;\;\;\; \Big | \;\;\;\; 
+    Z_{i, s(i)}^\text{\textcolor{purple}{Parental}}
 \end{equation}
-where $\theta$ is the first-stage average contribution of the random component (with measurement error), and $\vec X_i$ is a vector of controls including parental imputed PGI levels, gender, age, sibling count, in city indicator, and the other PGIs (i.e., all demographic variables in \autoref{fig:demographic-correlates}).
-Since $\tilde Z_i^\text{\textcolor{red}{Random}}$ serves as a formula instrument, it must be re-centred with respect to the control variables to produce valid causal effects \citep{borusyak2023nonrandom}.
-I do this by calculating
-$\Egiven{Z_i^\text{\textcolor{ForestGreen}{Child}}}{
-    Z_{m(i)}^\text{\textcolor{orange}{Mother}},
-        Z_{f(i)}^\text{\textcolor{blue}{Father}}}$
-with interactions for the imputed parental PGI values and demographic variables.
 
-I estimate the second-stage with a regression specification as follows, where $\vec X_i$ is a vector of control variables described previously.
+The identifying assumption --- that a child's Ed PGI is quasi-randomly assigned conditional on parental PGI values --- is credible precisely because of the biology described above.
+The deviation away from expected inheritance represents the difference between a child's realised Ed PGI and the Ed PGI they were expected to inherit given their imputed parents' PGI values.
+This deviation arises solely from the random segregation of chromosomes during meiosis: at each of the thousands of SNPs entering the Ed PGI, whether a parent with one copy passes it on is determined by an independent coin flip, with no connection to the family environment, the child's later circumstances, or any other factor that might influence education or labour market outcomes.
+
+This generates credible quasi-experimental genetic variation, conditional on parental PGI values.
+A child who drew a higher Ed PGI than their expected inheritance is not systematically different in family background, parental environment, or any other confounding factor from another who drew a lower value; the only difference is the outcome independent biological coin flips at conception.
+Controlling for parental PGI values therefore isolates this random component, enabling causal inference on the average effects of the Ed PGI on education and labour market outcomes.
+
+\paragraph{Estimation Strategy.}
+I estimate the average effects of Ed PGI values on education and labour market outcomes with the following regression equations.
 \begin{align}
+    \label{eqn:parametric-firststage}
+    D_i &= \phi_1 + \pi Z_i^\text{\textcolor{ForestGreen}{Child}}
+        + \zeta_1 Z_{i, s(i)}^\text{\textcolor{purple}{Parental}}
+        + \vec \varphi_1' \vec X_i
+        + \eta_i,  \\
     \label{eqn:parametric-secondstage}
-    Y_i &= \alpha + \beta Z_i^\text{\textcolor{ForestGreen}{Child}}
-        + \vec \varphi' \vec X_i + \varepsilon_i.
+    Y_i &= \phi_2 + \theta Z_i^\text{\textcolor{ForestGreen}{Child}}
+        + \zeta_2 Z_{i, s(i)}^\text{\textcolor{purple}{Parental}}
+        + \vec \varphi_2' \vec X_i
+        + \varepsilon_i,
 \end{align}
-$\beta$ represents the average effect of the Ed PGI on the education variables, and on wages and annual income (measured in $\log$ values).
-I use the Ed PGI random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, to instrument for the Ed PGI in the IV specifications, using the ORIV method (with Ed PGI calculated using two independent weights) where mentioned.
-The IV first-stage is shown in \autoref{eqn:genetic-firststage}, with the same set of control variables as the second-stage.
+where $\pi$ is the effect of the Ed PGI on education variables (average first-stage effect), $\theta$ the effect on later labour market outcomes (average partial effect).
+Inclusion of parental imputed Ed PGI values yields causal inference, and $\vec X_i$ includes a birth set of control variables including gender, sibling count, in city indicator, birth year and UKB data collection year fixed effects, and inclusion of other PGI values as controls.\footnote{
+    The other PGI variables are shown in Summary \autoref{tab:ukb-summary}, including estimated PGIs for ADHD, asthma, bipolar disorder, body mass index, diabetes (type 2), height, and schizophrenia.
+}
+Including these other PGI controls isolates the effects of the Ed PGI minus contribution from SNPs highly associated with other outcomes.
 
-\noindent
-\textbf{Limitations.}
-The OLS and IV estimates place greater weight on individuals with larger deviations in the random component, $\tilde Z_i^\text{\textcolor{red}{Random}}$, which might not represent effects for the entire population --- potentially limiting external validity.
-Additionally, despite independent Mendelian inheritance, the random genetic component remains modestly correlated with other PGIs.
-While I control for these other PGI values, these correlations further constrain generalisability beyond the analysis sample, by implying overlap with the Ed PGI and these other PGIs.
-Finally, the linear specifications employed (OLS and ORIV) yield weighted averages of individual-level causal effects.
-This linear specification might not fully reflect heterogeneity in causal effects across the PGI distribution, or provide weights for the average causal effects representative for the entire UKB population --- see \cite{blandhol2022tsls} for further details.
+\paragraph{Limitations.}
+Several limitations apply to the estimates presented here.
+First, the OLS estimates of average first-stage and average partial effects (\autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}) are not simple averages across individuals, but rather convex weighted averages of individual-level causal effects, with weights determined by the OLS projection.\footnote{See \cite{angrist1999} and \cite[Section~3.5]{angrist2009mostly}}
+Without assuming homogeneity of effects across the Ed PGI distribution, these estimates need not coincide with the population average partial effect, and may place disproportionate weight on individuals whose Ed PGI deviates most from its conditional mean.
+
+Second, the analysis sample is restricted to UKB participants of European ancestry who have at least one observed sibling, as described in \autoref{sec:data}.
+Internal validity is sound within this sample, although the estimated average effects may not generalise to the broader British population, whose observed and unobserved structure may systematically differ from this selected group.
+Third, the sibling-based imputation of parental PGI values introduces additional measurement error relative to the ideal case of directly observing true parental genotypes, attenuating the estimated coefficients.
+This attenuation is compounded by the fact that the Ed PGI itself is constructed from GWAS weights estimated with error, further understating the true causal effects of genetic predisposition toward educational attainment.\footnote{
+    The Ed PGI weights used in this paper (from \citealt{okbay2022polygenic}) are calculated with measurement error, leading to attenuation bias relative to an infeasible truth Ed PGI with oracle weights.
+    See \cite{van2023overcoming} for further discussion on measurement error of this kind.
+}

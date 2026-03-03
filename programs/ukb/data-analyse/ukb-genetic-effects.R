@@ -81,7 +81,12 @@ analysis.data <- data.folder %>%
     file.path("ukb-cleaned-pheno.csv") %>%
     read_csv() %>%
     # Get the sibling imputed analysis sample.
-    filter(analysis_sample == 1)
+    filter(analysis_sample == 1) %>%
+    # calculate log values for convenience
+    mutate(
+        log_soc_median_hourly = log(soc_median_hourly),
+        log_soc_median_annual = log(soc_median_annual),
+        log_householdincome_midpoint = log(householdincome_midpoint))
 
 # Show the construction
 print(analysis.data)
@@ -89,83 +94,86 @@ print(names(analysis.data))
 
 
 ################################################################################
-## Effect on education years Ed PGI -> Ed Years
+## Effect on education years Ed PGI -> education, income.
 
-# Define the set of demographic controls.
+# Estimate effect of PGI on outcomes.
+edyears.reg <- feols(edyears
+    ~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental
+    + adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi
+    | sex_male + birthyear + visityear + urban + sibling_count + mother_present + father_present,
+    data = analysis.data)
+print(summary(edyears.reg))
+
+# Define the same piece-wise
+outcome.list <- c("edyears", "agefinishededuc", "edqual_highered",
+    "log_soc_median_hourly",
+    "log_soc_median_annual", "log_householdincome_midpoint")
+regressors.entry <- "~ 1 + edpgi_all_imputed_self + edpgi_all_imputed_parental"
 control.list <- paste0(
-    "+ sex_male + factor(visityear) + poly(recruitedage, 3) + factor(sibling_count)")
+    "+ adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi",
+    " | visityear + sibling_count + sex_male + birthyear + urban + mother_present + father_present")
 
-causal_edpgi.reg <- function(outcome, outcome.name, input.data, control.vars){
-    ## Run ech of the 6 models.
-    # (1) raw OLS, Ed PGI -> outcome.
-    raw.ols <- lm(formula(paste0(outcome, "~ 1 + edpgi_all_imputed_self")),
-        data = input.data)
-    # (2) OLS + controls, Ed PGI -> outcome
-    controls.ols <- lm(formula(paste0(outcome, "~ 1 + edpgi_all_imputed_self",
-        control.vars)),
-        data = input.data)
-    # (3) OLS (correlational ORIV), Ed PGI -> outcome
-    oriv.ols <- GORIV(formula(paste0(outcome, "~ 1 ", control.vars)),
-        "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-        IV.list = NULL, control.list = NULL,
-        IID = "eid",
-        data = input.data)
-    # (4) Reduced form, random component -> outcome
-    reducedform.iv <- lm(formula(paste0(outcome,
-        "~ 1 + edpgi_exclude_imputed_random + edpgi_all_imputed_parental",
-        control.vars)),
-        data = input.data)
-    # (5) Regular IV, Ed PGI -> outcome
-    regular.iv <- feols(formula(paste0(
-        outcome, "~ 1 + edpgi_all_imputed_parental",
-        control.vars, "| edpgi_all_imputed_self ~ edpgi_exclude_imputed_random")),
-        data = input.data)
-    # (6) ORIV, Ed PGI -> outcome
-    oriv.iv <- GORIV(formula(paste0(outcome, "~ 1 ", control.vars)),
-        "edpgi_all_imputed_self", "edpgi_exclude_imputed_self",
-        IV.list = c(
-            "edpgi_all_imputed_random", "edpgi_exclude_imputed_random"),
-        control.list = c(
-            "edpgi_all_imputed_parental", "edpgi_exclude_imputed_parental"),
-        IID = "eid",
-        data = input.data)
-    # Get the point estimates, and SEs, in a row.
-    table.point <- c(
-        coeftable(raw.ols)["edpgi_all_imputed_self", "Estimate"],
-        coeftable(controls.ols)["edpgi_all_imputed_self", "Estimate"],
-        coeftable(oriv.ols)["fit_PGI_MAIN", "Estimate"],
-        coeftable(reducedform.iv)["edpgi_exclude_imputed_random", "Estimate"],
-        coeftable(regular.iv)["fit_edpgi_all_imputed_self", "Estimate"],
-        coeftable(oriv.iv)["fit_PGI_MAIN", "Estimate"]) %>% 
-        #signif(digits.no) %>%
-        style_sigfig(digits = digits.no, decimals = digits.no) %>%
-        format(scientific = FALSE) %>%
-        c(outcome.name, ., as.character(round(regular.iv$nobs)))
-    table.se <- c(
-        coeftable(raw.ols)["edpgi_all_imputed_self", "Std. Error"],
-        coeftable(controls.ols)["edpgi_all_imputed_self", "Std. Error"],
-        coeftable(oriv.ols)["fit_PGI_MAIN", "Std. Error"],
-        coeftable(reducedform.iv)["edpgi_exclude_imputed_random", "Std. Error"],
-        coeftable(regular.iv)["fit_edpgi_all_imputed_self", "Std. Error"],
-        coeftable(oriv.iv)["fit_PGI_MAIN", "Std. Error"]) %>% 
-        #signif(digits.no) %>%
-        style_sigfig(digits = digits.no, decimals = digits.no) %>%
-        format(scientific = FALSE) %>%
-        paste0("(", ., ")") %>%
-        c(" ", ., " ")
-    # Return both rows.
-    return(rbind(table.point, table.se))
+# Run the regression across a list.
+reg.list <- list()
+i <- 0
+for (outcome.entry in outcome.list){
+    print(outcome.entry)
+    i <- i + 1
+    reg.list[[i]] <- feols(formula(
+        paste0(outcome.entry, regressors.entry, control.list)),
+        data = analysis.data)
 }
 
-# Calculate the relevant rows.
-reg.table <- rbind(
-    causal_edpgi.reg("edyears", "Education years", analysis.data, control.list),
-    causal_edpgi.reg("edqual_highered", "University degree", analysis.data, control.list),
-    causal_edpgi.reg("log(soc_median_hourly)", "Occupation hourly wage", analysis.data, control.list),
-    causal_edpgi.reg("log(soc_median_annual)", "Occupation annual income", analysis.data, control.list)
-)
+# Define a function to get the table of coefficients extracted.
+extract.table <- function(model, data, outcome.name, causal = TRUE) {
+    # Coefficient table
+    table <- summary(model)$coeftable
+    # Extract estimates and standard errors
+    beta_self  <- table["edpgi_all_imputed_self", "Estimate"]
+    se_self    <- table["edpgi_all_imputed_self", "Std. Error"]
+    if (causal == TRUE){
+        beta_parent <- table["edpgi_all_imputed_parental", "Estimate"]
+        se_parent   <- table["edpgi_all_imputed_parental", "Std. Error"]
+    } else {
+        beta_parent <- NA
+        se_parent <- NA
+    }
+    # Model statistics
+    r2  <- summary(model)$sq.cor
+    n   <- nobs(model)
+    outcome_mean <- mean(data[[outcome.name]], na.rm = TRUE)
+    if ("log(" %in% outcome.name){
+        outcome_mean <- mean(exp(data[[outcome.name]]), na.rm = TRUE)
+    }
+    # Construct formatted table
+    results <- data.frame(
+        value = c(
+            sprintf("%.3f", beta_self),
+            sprintf("(%.3f)", se_self),
+            sprintf("%.3f", beta_parent),
+            sprintf("(%.3f)", se_parent),
+            sprintf("%.3f", outcome_mean),
+            sprintf("%.3f", r2),
+            prettyNum(n, big.mark = ",", scientific = FALSE)))
+    return(results)
+}
+
+# Extract the coefficients
+row.term <- c(
+    "Ed PGI", "",
+    "Parental Ed PGI", "",
+    r"( \\[-1.8ex]\hline \\[-1.8ex] Outcome mean)",
+    r"(Adjusted $R^2$)",
+    "Observations")
+results.list <- lapply(seq_along(reg.list), function(i) {
+    extract.table(
+        model = reg.list[[i]],
+        data = analysis.data,
+        outcome.name = outcome.list[i])})
+results.table <- cbind(row.term, do.call(cbind, results.list))
+print(results.table)
 # Save the LaTeX table
-reg.table %>%
+results.table %>%
     xtable() %>%
     print(
         digits = digits.no,
@@ -179,22 +187,72 @@ reg.table %>%
         format.args = list(big.mark = ","),
         file = file.path(tables.folder, "genetic-effects.tex"))
 
-## Same, but now with other PGI as controls.
-pgi_control.list <- paste0(
-    "+ adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi",
-    "+ schizophrenia_pgi + t2diabetes_pgi",
-    "+ sex_male + factor(visityear) + poly(recruitedage, 3) + factor(sibling_count)")
 
-# Calculate the relevant rows.
-pgi_controls.table <- rbind(
-    causal_edpgi.reg("edyears", "Education years", analysis.data, pgi_control.list),
-    causal_edpgi.reg("edqual_highered", "University degree", analysis.data, pgi_control.list),
-    causal_edpgi.reg("log(soc_median_hourly)", "Occupation hourly wage", analysis.data, pgi_control.list),
-    causal_edpgi.reg("log(soc_median_annual)", "Occupation annual income", analysis.data, pgi_control.list)
-)
+################################################################################
+## Estimate the same table with (1) raw OLS (2) Ed PGI no controls (3) fam FEs.
 
+regressors_ols.entry <- "~ 1 + edpgi_all_imputed_self"
+no_control.list <- ""
+fam_control.list <- paste0(
+    "+ adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi",
+    " | famid + visityear + sibling_count + sex_male + birthyear + urban + mother_present + father_present")
+
+# Run the regression across a list.
+reg_ols.list <- list()
+reg_nocontrol.list <- list()
+reg_fam.list <- list()
+i <- 0
+for (outcome.entry in outcome.list){
+    print(outcome.entry)
+    i <- i + 1
+    reg_ols.list[[i]] <- feols(formula(
+        paste0(outcome.entry, regressors_ols.entry, no_control.list)),
+        data = analysis.data)
+    reg_nocontrol.list[[i]] <- feols(formula(
+        paste0(outcome.entry, regressors.entry, no_control.list)),
+        data = analysis.data)
+    reg_fam.list[[i]] <- feols(formula(
+        paste0(outcome.entry, regressors_ols.entry, fam_control.list)),
+        data = analysis.data)
+}
+
+# Define a function to get the table of coefficients extracted.
+extract_robust.table <- function(model, data, outcome.name, causal = TRUE) {
+    # Coefficient table
+    table <- summary(model)$coeftable
+    # Extract estimates and standard errors
+    beta_self  <- table["edpgi_all_imputed_self", "Estimate"]
+    se_self    <- table["edpgi_all_imputed_self", "Std. Error"]
+    if (causal == TRUE){
+        beta_parent <- table["edpgi_all_imputed_parental", "Estimate"]
+        se_parent   <- table["edpgi_all_imputed_parental", "Std. Error"]
+    } else{
+        beta_parent <- NA
+        se_parent <- NA
+    }
+    # Construct formatted table
+    results <- data.frame(
+        value = c(
+            sprintf("%.3f", beta_self),
+            sprintf("(%.3f)", se_self),
+            sprintf("%.3f", beta_parent),
+            sprintf("(%.3f)", se_parent)))
+    return(results)
+}
+
+## 1. OLS table.
+row_lone.term <- c(
+    "Ed PGI", "",
+    "Parental Ed PGI", "")
+results_ols.list <- lapply(seq_along(reg_ols.list), function(i) {
+    extract_robust.table(causal = FALSE,
+        model = reg_ols.list[[i]],
+        data = analysis.data,
+        outcome.name = outcome.list[i])})
+results_ols.table <- cbind(row_lone.term, do.call(cbind, results_ols.list)) %>% head(2)
+print(results_ols.table)
 # Save the LaTeX table
-pgi_controls.table %>%
+results_ols.table %>%
     xtable() %>%
     print(
         digits = digits.no,
@@ -206,46 +264,86 @@ pgi_controls.table %>%
         only.contents = TRUE,
         hline.after = NULL,
         format.args = list(big.mark = ","),
-        file = file.path(tables.folder, "genetic-effects-pgicontrols.tex"))
+        file = file.path(tables.folder, "genetic-ols.tex"))
+
+# 2. Including parental Ed PGI with no controls.
+results_nocontrol.list <- lapply(seq_along(reg_nocontrol.list), function(i) {
+    extract_robust.table(causal = TRUE,
+        model = reg_nocontrol.list[[i]],
+        data = analysis.data,
+        outcome.name = outcome.list[i])})
+results_nocontrol.table <- cbind(row.term[1:4], do.call(cbind, results_nocontrol.list))
+print(results_nocontrol.table)
+# Save the LaTeX table
+results_nocontrol.table %>%
+    xtable() %>%
+    print(
+        digits = digits.no,
+        sanitize.colnames.function = identity,
+        sanitize.text.function = identity,
+        NA.string = " ",
+        include.colnames = FALSE,
+        include.rownames = FALSE,
+        only.contents = TRUE,
+        hline.after = NULL,
+        format.args = list(big.mark = ","),
+        file = file.path(tables.folder, "genetic-nocontrol.tex"))
+
+# 3. Including parental Ed PGI with fam fixed effects
+results_fam.list <- lapply(seq_along(reg_fam.list), function(i) {
+    extract.table(causal = FALSE,
+        model = reg_fam.list[[i]],
+        data = analysis.data,
+        outcome.name = outcome.list[i])})
+results_fam.table <- cbind(row.term, do.call(cbind, results_fam.list))[-c(3,4, 6), ]
+print(results_fam.table)
+# Save the LaTeX table
+results_fam.table %>%
+    xtable() %>%
+    print(
+        digits = digits.no,
+        sanitize.colnames.function = identity,
+        sanitize.text.function = identity,
+        NA.string = " ",
+        include.colnames = FALSE,
+        include.rownames = FALSE,
+        only.contents = TRUE,
+        hline.after = NULL,
+        format.args = list(big.mark = ","),
+        file = file.path(tables.folder, "genetic-fam.tex"))
 
 
 ################################################################################
 ## Figure: Ed PGI -> Ed years
 
 # Extract point-estimates from the OLS + ORIV estimates.
-edyears.est <- causal_edpgi.reg("edyears", "Education years",
-    analysis.data, control.list)
-edyears.ols <- c(edyears.est[1, 2], edyears.est[2, 2]) %>%
-    str_replace("\\(", "") %>%
-    str_replace("\\)", "") %>%
-    as.numeric()
-edyears.iv <- c(edyears.est[1, 7], edyears.est[2, 7]) %>%
-    str_replace("\\(", "") %>%
-    str_replace("\\)", "") %>%
-    as.numeric()
+edyears.ols <- as.numeric(results_ols.table[1, 2])
+edyears.ols.text <- paste(results_ols.table[1, 2], results_ols.table[2, 2])
+edyears.causal <- as.numeric(results.table[1, 2])
+edyears.causal.text <- paste(results.table[1, 2], results.table[2, 2])
 
 # Show correlation between Ed PGI and edyears in a Bin-scatter plot.
 edpgi_edyears.plot <- analysis.data %>%
     binscatter.plot(data = .,
         "edpgi_all_imputed_self", "edyears", colour.list[2],
         option = "half-line",
-        half.line.slope = edyears.iv[1] / edyears.ols[1],
-        half.line.intercept = 2.5) +
+        half.line.slope = edyears.causal / edyears.ols,
+        half.line.intercept = 5) +
     # Annotate OLS
     annotate("text", colour = colour.list[2],
         x = -2.5, y = 17.25,
         fontface = "bold",
-        label = paste0("Raw OLS = +", edyears.ols[1], " (", edyears.ols[2], ")"),
+        label = paste0("Raw OLS = +", edyears.ols.text),
         size = 4.25, hjust = 0, vjust = 0) +
     # Annotate IV
     annotate("text", colour = "orange",
-        x = 0.5, y = 11.25,
+        x = 0.5, y = 10.25,
         fontface = "bold",
-        label = paste0("ORIV = +", edyears.iv[1], " (", edyears.iv[2], ")"),
+        label = paste0("Causal = +", edyears.causal.text),
         size = 4.25, hjust = 0.5, vjust = 0) +
     annotate("curve", colour = "orange",
-        x = 1.75, y = 15.25,
-        xend = 2, yend = 14.5,
+        x = 1.5, y = 15.25,
+        xend = 2, yend = 13.5,
         linewidth = 1,
         curvature = -0.25,
         arrow = arrow(length = unit(0.25, 'cm'))) +
@@ -256,7 +354,7 @@ edpgi_edyears.plot <- analysis.data %>%
         limits = c(-3, 3)) +
     scale_y_continuous(expand = c(0, 0.1),
         name = "",
-        limits = c(11, 17.75),
+        limits = c(10, 17.75),
         breaks = seq(0, 20, by = 1)) +
     ggtitle("Education Years") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),
@@ -272,40 +370,33 @@ ggsave(file.path(figures.folder, "edpgi-edyears-causal.png"),
 ## Figure: Ed PGI -> Ed years
 
 # Extract point-estimates from the OLS + ORIV estimates.
-earnings.est <- causal_edpgi.reg(
-    "log(soc_median_hourly)", "Occupation hourly wage",
-    analysis.data, control.list)
-earnings.ols <- c(earnings.est[1, 2], earnings.est[2, 2]) %>%
-    str_replace("\\(", "") %>%
-    str_replace("\\)", "") %>%
-    as.numeric()
-earnings.iv <- c(earnings.est[1, 7], earnings.est[2, 7]) %>%
-    str_replace("\\(", "") %>%
-    str_replace("\\)", "") %>%
-    as.numeric()
+earnings.ols <- as.numeric(results_ols.table[1, 5])
+earnings.ols.text <- paste(results_ols.table[1, 5], results_ols.table[2, 5])
+earnings.causal <- as.numeric(results.table[1, 5])
+earnings.causal.text <- paste(results.table[1, 5], results.table[2, 5])
 
 # Show correlation between Ed PGI and edyears in a Bin-scatter plot.
 edpgi_earnings.plot <- analysis.data %>%
     mutate(log_soc_median_hourly = log(soc_median_hourly)) %>%
     binscatter.plot(data = ., "edpgi_all_imputed_self", "soc_median_hourly", colour.list[3],
         option = "half-line",
-        half.line.slope = earnings.iv[1] / earnings.ols[1],
-        half.line.intercept = 2) +
+        half.line.slope = earnings.causal[1] / earnings.ols[1],
+        half.line.intercept = 5.5) +
     # Annotate OLS
     annotate("text", colour = colour.list[3],
         x = -2.5, y = 24.25,
         fontface = "bold",
-        label = paste0("Raw OLS = +", earnings.ols[1], " (", earnings.ols[2], ")"),
+        label = paste0("Raw OLS = +", earnings.ols.text),
         size = 4.25, hjust = 0, vjust = 0) +
     # Annotate IV
     annotate("text", colour = "orange",
-        x = 0.5, y = 13.75,
+        x = 0.5, y = 12.75,
         fontface = "bold",
-        label = paste0("ORIV = +", earnings.iv[1], " (", earnings.iv[2], ")"),
+        label = paste0("Causal = +", earnings.causal.text),
         size = 4.25, hjust = 0.5, vjust = 0) +
     annotate("curve", colour = "orange",
         x = 1.7, y = 21,
-        xend = 2, yend = 19.5,
+        xend = 2.25, yend = 18.5,
         linewidth = 1,
         curvature = -0.25,
         arrow = arrow(length = unit(0.25, 'cm'))) +
@@ -316,7 +407,7 @@ edpgi_earnings.plot <- analysis.data %>%
         limits = c(-3, 3)) +
     scale_y_continuous(expand = c(0, 0.1),
         name = "",
-        limits = c(12.5, 25.1),
+        limits = c(12, 25.1),
         breaks = seq(0, 50, by = 2.5)) +
     ggtitle("Occupation Hourly Wages, £") +
     theme(plot.title = element_text(size = rel(1), hjust = 0),

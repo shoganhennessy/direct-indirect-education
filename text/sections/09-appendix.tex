@@ -34,21 +34,58 @@ Reference their supplementary data, and thanks for additional guidance on it.
 
 Describe here.
 
-\subsection{Validation of the parental PGI Imputation}
-\label{appendix:pgi-impute}
+%\subsection{Validation of the parental PGI Imputation}
+%\label{appendix:pgi-impute}
 
-
-\subsection{Two PGIs as Obviously Related Instrument Variables}
-\label{appendix:oriv}
+\subsection{Genetic Effects}
 
 \begin{figure}[h!]
     \centering
     \singlespacing
-    \caption{Correlation for Ed PGI, or Random Component, and Demographic Variables.}
+    \caption{Correlation for Ed PGI, and Ed PGI Minus Parental Mean, with Demographic Variables.}
     \label{fig:demographic-correlates}
     \includegraphics[width=0.85\textwidth]{sections/figures/demographic-correlates.png}
     \justify
     \footnotesize
     \textbf{Note}:
-    Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, for each $Z_i^\text{\textcolor{ForestGreen}{Child}}$ and $\tilde Z_i^\text{\textcolor{red}{Random}}$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
+    Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
 \end{figure}
+
+
+\begin{table}[!htbp]
+    \singlespacing
+    \centering
+    \caption{Different Specifications for Estimates of Average Genetic Effects.}
+    \small
+    %\centerline{
+    \begin{tabular}{l c c c c c c}
+        \\[-1.8ex]\hline \hline \\[-1.8ex] 
+        & \multicolumn{3}{c}{Education Outcomes}
+            & \multicolumn{3}{c}{Labour Market Outcomes} \\ \\
+        Outcome:
+        & Education & Age left & University & Occupation  & Occupation    & Household \\
+        & years     & school & completion & hourly wage & annual income & income    \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+        & (1) & (2) & (3) & (4) & (5) & (6) \\
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \multicolumn{7}{l}{\textbf{Panel A:}
+            Raw Correlation} \\
+        \input{sections/tables/genetic-ols.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \multicolumn{7}{l}{\textbf{Panel B:}
+            Including Parental Ed PGI with no Control Variables} \\
+        \input{sections/tables/genetic-nocontrol.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \multicolumn{7}{l}{\textbf{Panel C:}
+            Including Family Fixed Effects} \\
+        \input{sections/tables/genetic-fam.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+    \end{tabular}
+    \label{tab:genetic-robust}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    This table shows estimates of the average causal effect of the Ed PGI on education variables (average first-stage) and labour market outcomes (average partial effect) --- specification in \autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}.
+    The coefficient on the Ed PGI represents the average causal effect, and coefficient on the parental Ed PGI is a control parameter.
+    Specification s vary for each Panel, as described.
+\end{table}
