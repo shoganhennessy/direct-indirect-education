@@ -121,11 +121,14 @@ Potential labour market outcomes $Y_i(z', D_i(z'))$ are a function of both the E
 This distinction is not important for measuring average genetic effects in this section, but will become the main focus in \autoref{sec:direct}.
 
 \paragraph{Target Parameters.}
-This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following average effects:
-\[ \text{Average first-stage } \partialdiff{z'} \E{D_i(z')}, \;\;\;\; 
-    \text{Average partial effect } 
+This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following marginal average effects:\footnote{
+    Throughout, we assume that $D_i(z')$ is differentiable in $z'$ and 
+    $Y_i(z', D_i(z'))$ is differentiable in both arguments, together with standard regularity conditions permitting differentiation under the expectation.
+}
+\[ \text{Average education effect } \partialdiff{z'} \E{D_i(z')}, \;\;\;\; 
+    \text{Average total effect } 
     \partialdiff{z'} \E{Y_i(z', D_i(z'))}. \]
-The average first-stage effect represents the average effect of a one standard deviation increase in the Ed PGI on education, and the average partial effect on labour market wages or income, \textit{ceteris paribus}.
+The average education effect effect represents the average effect of a one standard deviation increase in the Ed PGI on education, and the average total effect on labour market wages or income, \textit{ceteris paribus}.
 
 \begin{figure}[h!]
     \centering
@@ -145,8 +148,8 @@ The average first-stage effect represents the average effect of a one standard d
         %\path[->, thick] (mediator) edge (outcome);
         \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
         % Label the effects
-        \node[color=orange] [below=1.2cm of mediator] {Average partial effect};
-        \node[color=orange] [left=0.4cm of mediator, align=center] {Average \\first-stage};
+        \node[color=orange] [below=1.2cm of mediator] {Average total effect};
+        \node[color=orange] [left=-0.1cm of mediator, align=center] {Average \\education effect};
         % Add in the controlled variable confounding
         \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
     \end{tikzpicture}
@@ -189,16 +192,19 @@ I estimate the average effects of Ed PGI values on education and labour market o
         + \vec \varphi_2' \vec X_i
         + \varepsilon_i,
 \end{align}
-where $\pi$ is the effect of the Ed PGI on education variables (average first-stage effect), $\theta$ the effect on later labour market outcomes (average partial effect).
+where $\pi$ is the effect of the Ed PGI on education variables (average education effect), $\theta$ the effect on later labour market outcomes (average total effect).
 Inclusion of parental imputed Ed PGI values yields causal inference, and $\vec X_i$ includes a birth set of control variables including gender, sibling count, in city indicator, birth year and UKB data collection year fixed effects, and inclusion of other PGI values as controls.\footnote{
     The other PGI variables are shown in Summary \autoref{tab:ukb-summary}, including estimated PGIs for ADHD, asthma, bipolar disorder, body mass index, diabetes (type 2), height, and schizophrenia.
 }
 Including these other PGI controls isolates the effects of the Ed PGI minus contribution from SNPs highly associated with other outcomes.
 
+Using standard linear models, the marginal effects are assumed constant across the Ed PGI distribution, so that OLS consistently estimates a single parameter coinciding with the average total effect.
+Without linearity, OLS recovers a variance-weighted average of marginal effects, placing disproportionate weight on individuals whose Ed PGI deviates most from its conditional mean; the linearity assumption is therefore what gives the estimates their interpretation as population averages.
+
 \paragraph{Limitations.}
 Several limitations apply to the estimates presented here.
-First, the OLS estimates of average first-stage and average partial effects (\autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}) are not simple averages across individuals, but rather convex weighted averages of individual-level causal effects, with weights determined by the OLS projection.\footnote{See \cite{angrist1999} and \cite[Section~3.5]{angrist2009mostly}}
-Without assuming homogeneity of effects across the Ed PGI distribution, these estimates need not coincide with the population average partial effect, and may place disproportionate weight on individuals whose Ed PGI deviates most from its conditional mean.
+First, the OLS estimates of average education effect and average total effects (\autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}) are not simple averages across individuals, but rather convex weighted averages of individual-level causal effects, with weights determined by the OLS projection.\footnote{See \cite{angrist1999} and \cite[Section~3.5]{angrist2009mostly}}
+Without assuming homogeneity of effects across the Ed PGI distribution, these estimates need not coincide with the population average total effect, and may place disproportionate weight on individuals whose Ed PGI deviates most from its conditional mean.
 
 Second, the analysis sample is restricted to UKB participants of European ancestry who have at least one observed sibling, as described in \autoref{sec:data}.
 Internal validity is sound within this sample, although the estimated average effects may not generalise to the broader British population, whose observed and unobserved structure may systematically differ from this selected group.

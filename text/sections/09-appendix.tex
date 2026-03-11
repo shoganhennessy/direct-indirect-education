@@ -39,20 +39,22 @@ Describe here.
 
 \subsection{Genetic Effects}
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
     \singlespacing
     \caption{Correlation for Ed PGI, and Ed PGI Minus Parental Mean, with Demographic Variables.}
     \label{fig:demographic-correlates}
-    \includegraphics[width=0.85\textwidth]{sections/figures/demographic-correlates.png}
+    \includegraphics[width=0.85\textwidth]{
+        sections/figures/demographic-correlates.png}
     \justify
     \footnotesize
     \textbf{Note}:
     Multivariate regression estimates for the linear model $Z_i = \vec \phi\,' \, \vec X_i + \eta_i$, where $\vec X_i$ is the vector demographic variables described by the labels on the $y$-axis.
+    The dots are the point estimates, and bars are the 95\% confidence intervals.
 \end{figure}
 
 
-\begin{table}[!htbp]
+\begin{table}[H]
     \singlespacing
     \centering
     \caption{Different Specifications for Estimates of Average Genetic Effects.}
@@ -88,4 +90,226 @@ Describe here.
     This table shows estimates of the average causal effect of the Ed PGI on education variables (average first-stage) and labour market outcomes (average partial effect) --- specification in \autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}.
     The coefficient on the Ed PGI represents the average causal effect, and coefficient on the parental Ed PGI is a control parameter.
     Specification s vary for each Panel, as described.
+\end{table}
+
+\subsection{Causal Mediation (CM) Decomposition}
+\label{appendix:cm}
+The decomposition of the average partial effect into direct and indirect components 
+follows from a straightforward application of the multivariate chain rule.
+Define:
+\[ g(a, b) = \E{Y_i(a, D_i(b))}. \]
+The average partial effect, direct effect, and indirect effect can then be written as:
+\begin{align*}
+    \text{Average partial effect} &= \frac{d}{dz'} g(z', z'), \\
+    \text{Direct effect} &= \frac{\partial}{\partial a} g(a, Z_i) \Big|_{a = z'}, \\
+    \text{Indirect effect} &= \frac{\partial}{\partial b} g(Z_i, b) \Big|_{b = z'}.
+\end{align*}
+The average partial effect moves both arguments of $g$ simultaneously with $z'$, 
+whereas the direct and indirect effects move only the first and second arguments 
+respectively, holding the other fixed.
+By the multivariate chain rule:
+\[ \frac{d}{dz'} g(z', z') 
+    = \frac{\partial g}{\partial a}(z', z') 
+    + \frac{\partial g}{\partial b}(z', z'), \]
+which establishes that the average partial effect is exactly the sum of the direct 
+and indirect effects, evaluated at $z' = Z_i^\text{\textcolor{ForestGreen}{Child}}$.
+This result is exact under the smoothness and regularity conditions assumed in 
+\autoref{sec:genetics}, with no further approximation required.
+
+\subsection{Returns to Education by the MLSA Rise}
+\label{appendix:mlsa}
+The UK Biobank includes a total of 500,000 members of the British public, with a roughly even distribution of birth years over 1945--1965.
+In 1972, the British government increased the Minimum School Leaving Age (MSLA) by one year, from age 15 to 16.
+The change took effect at the start of the 1972-73 school year, and applied to those born on or after 1 September 1957.
+The reform therefore induced extra school years for individuals born around date 1 September 1957.
+British school children sit exams for the GCSE qualification at age 16, so the reform pushed a larger share of the UK Biobank cohorts to remain in school to 16 and to complete these qualifications.
+
+The 1972 MLSA change has been previously used for labour market education returns \citep{oreopoulos2006estimating}, and (null) mortality effects of compulsory education \citep{clark2013effect}.
+The UK Biobank population overlaps well with the birth date cutoff, and so has been used in a series of papers for estimating education returns in the UK Biobank, for health outcomes \citep{barcellos2023distributional,barcellos2025education,davies2018causal} and occupation imputed income \citep{barcellos2021effect,carvalho2024genetics}.
+
+Birth month is the running variable in a fuzzy Regression Discontinuity Design (RDD), using the indicator for being born September 1957 and after as an instrument.
+Because not all those eligible necessarily stayed beyond 15, the post-cutoff indicator instruments education variables, where mentioned.
+I estimate the following RDD estimands, estimating the effect of the MSLA change on education variables --- represented by $D_i$.
+\[ \lim_{v' \to^- 1957.75} \Egiven{D_i}{V_i = v'}, \;\;\;\;
+    \lim_{v' \to^+ 1957.75} \Egiven{D_i}{V_i = v'} \]
+where $V_i$ represents individual $i$'s birth year plus birth month divided by 12 (so that 1957.75 represents born in September 1957), and $\to^-$ refers to the limit from below, $\to^+$ above.
+The goal is to identify is the average compliance rate of the MLSA rise,
+\[ \E{D_i(1) - D_i(0)}
+    = \lim_{v' \to^+ 1957.75} \Egiven{D_i}{V_i = v'}
+        - \lim_{v' \to^- 1957.75} \Egiven{D_i}{V_i = v'}. \]
+
+\begin{figure}[H]
+    \centering
+    \singlespacing
+    \caption{Mean Effects of the MSLA Rise.}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        %\caption{GCSE Completion Rate.}
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-gcses-nl.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        %\caption{Mean Education years.}
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-edyears-nl.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        %\caption{Rate of leaving school aged 16 or older.}
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-edage16-nl.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        %\caption{Mean age of leaving school.}
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-agefinishededuc-nl.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        %\caption{Occupation Hourly Wage.}
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-wages-nl.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        %\caption{Occupation Annual Income.}
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-income-nl.png}
+    \end{subfigure}
+    \label{fig:mlsa-nl}
+    \vspace{-0.5cm}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    These figures show the effects of the 1972 MSLA rise on multiple outcomes, where individuals born after September 1957 (the dashed line) were legally compelled to stay in school until age 16, whereas before only until age 15.
+    Each dot is the mean for UK Biobank respondents with non-missing education data born in that month-year, and the lines are local polynomials either side of September 1957.
+\end{figure}
+
+The MLSA rise significantly increases education years, completing of age 16 secondary school qualifications (GCSEs) --- these are measured of education coded by qualifications, as used by \cite{okbay2022polygenic} in calculating the Ed PGI.
+It had an even larger effect on age at leaving school, which are the education variables that \cite{barcellos2025education,carvalho2024genetics} focus on.
+These raw means are shown in \autoref{fig:mlsa-nl}.
+Note that the follow-up null estimates for education returns are argued to be a result of the MLSA rise inducing a low-quality margin of education \cite{clark2013effect}, so while age leaving education variables are more significant for this IV they may be economically relevant.
+
+I also use the RDD design to measure changes in later labour market outcomes.
+The UK Biobank asks questions of the sector people work in, giving high detail occupation codes (i.e., SOC codes)
+Using this value, and other demographic details, I impute occupation coded income for the UK Biobank respondents using data from the British Annual Survey of Hours and Earnings.\footnote{
+    Thanks to \cite{kweon2025associations} for sharing code on this imputation.
+}
+This gives occupation coded hourly income, and annual wage calculated from hours worked as outcome measures in the MLSA rise,
+\[ \E{Y_i(1) - Y_i(0)}
+    = \lim_{z' \to^+ 1957.75} \Egiven{Y_i}{Z_i = z'}
+        - \lim_{z' \to^- 1957.75} \Egiven{Y_i}{Z_i = z'}. \]
+The final panels of \autoref{fig:mlsa-nl} show these outcomes, and this reduced-form effect of the MLSA is not significantly different from zero.
+\cite{barcellos2021effect} analyse this RDD with UKB data, and a hard coded RDD specification; this subsection returns to this RDD and finds that returns to education estimates among the UKB population (or any subsample) are not robust to RDD best practices.
+
+\begin{table}[H]
+    \singlespacing
+    \small
+    \centering
+    \caption{Estimates of the MSLA Change Effects.}
+    \centerline{
+    \begin{tabular}{l c c c c c c c c}
+        \\[-1.8ex]\hline \hline \\[-1.8ex]
+        \textbf{Panel A: First-stage.}
+        & \multicolumn{4}{c}{First-stage.}
+            & \multicolumn{4}{c}{Reduced form.}\\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        %\multicolumn{1}{r}{Outcome:}
+        Outcome:
+        & \multicolumn{2}{c}{GCSE}       & \multicolumn{2}{c}{Education} & \multicolumn{2}{c}{Hourly} & \multicolumn{2}{c}{Annual} \\
+        & \multicolumn{2}{c}{completion} & \multicolumn{2}{c}{years}     & \multicolumn{2}{c}{wage}   & \multicolumn{2}{c}{income} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \input{sections/tables/mlsa-firststage-nl.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \textbf{Panel B: Second-stage.}
+            & \multicolumn{4}{c}{OLS.}
+                & \multicolumn{4}{c}{MLSA IV.} \\
+        \cmidrule(lr){2-5} \cmidrule(lr){6-9}
+        & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \multicolumn{8}{l}{Outcome: Log Occupation Hourly Wage} \\
+        \input{sections/tables/mlsa-secondstage-wage-nl.tex}
+        \\[-1.8ex]\hline \\[-1.8ex]
+        \multicolumn{8}{l}{Outcome: Log Occupation Annual Income} \\
+        \input{sections/tables/mlsa-secondstage-income-nl.tex}
+        \\[-1.8ex]\hline \hline \\[-1.8ex]
+    \end{tabular}
+    }
+    \vspace{-0.25cm}
+    \label{tab:msla-iv}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    These point estimates are calculated among all UK Biobank participants born within a bandwidth of the MLSA rise cutoff (not just the sibling subsample).
+    The odd columns use a definition of education attainment (age 16 schooling) based on reported education qualifications; even columns report based on school leaving age.
+    The Panel B OLS results show estimates of an OLS specification for the correlation between education and wages/income with local polynomial trends each side of 1957.75 birthdate, attempting to mimic an RD set-up with a hard-coded bandwidth of 10 years for comparison.
+\end{table}
+
+I estimate this RDD equation with triangular kernel weights (weighting closer to the cutoff), an optimal bandwidth \citep{calonico2014robust,calonico2015rdrobust}, and non-parametric controls on either side of the cutoff \citep{gelman2019high}.
+These estimates are collected in \autoref{tab:msla-iv}.
+
+\begin{figure}[H]
+    \centering
+    \singlespacing
+    \caption{Fuzzy RDD Estimates, Sensitivity to Bandwidth Choice.}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-edyears-bw.png}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.495\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{sections/figures/mlsa-edage-bw.png}
+    \end{subfigure}
+    \label{fig:mlsa-bw}
+    \vspace{-0.5cm}
+    \justify
+    \footnotesize
+    \textbf{Note}:
+    These figures show the sensitivity of fuzzy RD estimates using the MLSA discontinuity as an IV for education years (qualification measure) or age leaving school, using a different bandwidth choice for each.
+    The shaded regions are the 95\% confidence interval.
+    The dotted line with CTT refers to the \cite{calonico2014robust} optimal bandwidth choice, calculated using \textit{rdrobust} in \textit{R} \citep{calonico2015rdrobust}.
+\end{figure}
+
+The MLSA rise increased years of education, as measured in both qualification definitions and school leaving age definition.
+However, the outcome of occupation coded wages and annual income are not strong; correspondingly, the IV estimates using the MLSA rise for education returns are not distinguishable from zero.
+This holds true for a range of bandwidth choices, shown in \autoref{fig:mlsa-bw}.
+
+These results contrast with those in \citep{barcellos2021effect,carvalho2024genetics}, who do not use these best practices for the 1957 cohort MLSA rise with UK Biobank data.
+Instead, use of a hard-coded bandwidth of 10 years and a hardcoded polynomial order 1 or 2.
+RDD specifications using this specification show highly efficient estimates of the education returns in the UKB sibling sample --- results which do not survive RDD best practices.
+
+\subsection{Returns to Education Literature}
+
+\begin{table}[H]
+    \vskip-0.5cm
+    \small
+    \singlespacing
+    \centering
+    \caption{Returns to Education, British Estimates from the Literature.}
+    \begin{tabular}{c c c p{12.75cm}}
+        \toprule
+        OLS & IV   & Year & Reference \\ \midrule
+        29.2 & 5.7 &  2010 & Dickson, M. and Smith, S., 2011. What determines the return to education: an extra year or a hurdle cleared?. Economics of education review, 30(6), pp.1167-1176. \\
+        12.2 & 6.6 &  2009 & Devereux, P.J. and Fan, W., 2011. Earnings returns to the British education expansion. Economics of Education Review, 30(6), pp.1153-1166. \\
+        9.6 & 5.3 &   2009 & Devereux, P.J. and Fan, W., 2011. Earnings returns to the British education expansion. Economics of Education Review, 30(6), pp.1153-1166. \\
+        9.5 & 6.9 &   2006 & Grenet, J. 2013. Is it enough to increase compulsory education to raise earnings? Evidence from French and British compulsory schooling laws. Scandinavian Journal of Economics 115: 176-210. \\
+        7.8 & 6.2 &   2009 & Devereux, P.J. and Fan, W., 2011. Earnings returns to the British education expansion. Economics of Education Review, 30(6), pp.1153-1166. \\
+        6.0 & 4.4 &   1999 & Blanchflower, D. and Elias, P., 1999. Ability, schooling and earnings: Are twins different?. Unpublished manuscript, Warwick University. \\
+        6.9 & 6.6 &   2009 & Devereux, P.J. and Fan, W., 2011. Earnings returns to the British education expansion. Economics of Education Review, 30(6), pp.1153-1166. \\
+        7.0 & 7.0 &   2001 & Devereux, P.J. and R.A. Hart. 2010. Forced to be Rich? Returns to Compulsory Schooling in Britain. Economic Journal 120(549): 1345-64. \\
+        7.3 & 7.7 &   1999 & Bonjour, D., Cherkas, L.F., Haskel, J.E., Hawkes, D.D. and Spector, T.D., 2003. Returns to education: Evidence from UK twins. American Economic Review, 93(5), pp.1799-1812. \\
+        4.8 & 5.5 &   1991 & Dearden, Lorraine. 1999. Qualifications and earnings in Britain: how reliable are conventional OLS estimates of the returns to education? IFS Working Papers W99/07, Institute for Fiscal Studies. \\
+        4.8 & 5.5 &   1981 & Dearden, L. (1998), ``Ability, Families, Education and Earnings in Britain,'' Institute for Fiscal Studies Working Paper No. W98/14. \\
+        0.0 & 1.2 &   1947 & Chib, Siddhartha, and Liana Jacobi. 2016. “Bayesian Fuzzy Regression Discontinuity Analysis and Returns to Compulsory Schooling.” Journal of Applied Econometrics 31: 1026- 1047. \\
+        5.0 & 9.9 &   1970s & Harmon, C. and Walker, I. (2000), ``Returns to the Quantity and Quality of Education: Evidence for Men in England and Wales,'' Economica, 67: 19-35. \\
+        4.6 & 10.2 &  1972 & Dickson, Matt. 2013. “The Causal Effect of Education on Wages Revisited.” Oxford Bulletin of Economics and Statistics 75 (4): 477-498. \\
+        7.8 & 14.7 &  1947 & Oreopoulos, P. 2006. Estimating Average and Local Average Treatment Effects of Education when Compulsory Schooling Laws Really Matter American Economic Review96(1) 152-175 \\
+        4.9 & 14.0 &  1992 & Harmon, C. and Walker, I. (1999), ``The Marginal and Average Return to Schooling in the UK,'' European Economic Review, 43(4-6), pp.879-887. \\
+        6.1 & 15.3 &  1947 & Harmon, C. and I. Walker. 1995. Estimates of the economic return to schooling for the United Kingdom. American Economic Review 85: 1278-86. \\
+    \bottomrule
+    \end{tabular}
+    \label{tab:uk-meta}
+    \justify
+    \footnotesize
+    \textbf{Note:}
+    This table shows the education returns estimates on later-life labour market earnings in the economics literature, using an IV to causally estimate the effect of a year of education.
+    Literature review kindly provided by \cite{patrinos2025causal}.
 \end{table}

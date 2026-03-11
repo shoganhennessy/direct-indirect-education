@@ -1,0 +1,200 @@
+% ---- IBD0 ----
+% Code for the TikZ picture showing how the Young et al (2022) imputation procedure works.
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state,dashed,gray] (mother) at (-1, 3) {?};
+        \node[state,dashed,gray] (father) at (1, 3)  {?};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        % Draw individual, and their sibling, nodes.
+        \node[state] (individual) [below=1cm of mother] {1};
+        \node[state] (sibling)    [below=1cm of father] {1};
+        \node [below=0.25cm of individual] {\textcolor{ForestGreen}{Child}};
+        \node [below=0.25cm of sibling]    {\textcolor{purple}{Sibling}};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        \path[-] (aboveindividual) edge (abovesibling);
+        \path[-] (aboveindividual) edge (individual);
+        \path[-] (abovesibling) edge (sibling);
+        % Bridge to the others
+        \node[scale=2] [right=1cm of abovesibling]{$\Rightarrow$};
+        \node [left=3.5cm of abovesibling]{IB0:};
+    \end{tikzpicture}
+\end{subfigure}
+\hskip3cm
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state] (mother) at (-1, 3) {1};
+        \node[state] (father) at (1, 3)  {1};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        \node [color=white,below=0.25cm of individual] {Child};
+        \node [color=white,below=0.25cm of sibling]    {Sibling};
+        % Draw individual, and their sibling, nodes.
+        \node[color=white,state] (individual) [below=1cm of mother] {1};
+        \node[color=white,state] (sibling)    [below=1cm of father] {0};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        %\path[-] (aboveindividual) edge (abovesibling);
+        %\path[-] (aboveindividual) edge (individual);
+        %\path[-] (abovesibling) edge (sibling);
+        \node [below=0.5cm of aboveboth] {Mean parent SNP $= 1$};
+    \end{tikzpicture}
+\end{subfigure}
+
+% ---- IBD1 ----
+% Code for the TikZ picture showing how the Young et al (2022) imputation procedure works.
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state,dashed,gray] (mother) at (-1, 3) {?};
+        \node[state,dashed,gray] (father) at (1, 3)  {?};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        % Draw individual, and their sibling, nodes.
+        \node[state] (individual) [below=1cm of mother] {2};
+        \node[state] (sibling)    [below=1cm of father] {1};
+        \node [below=0.25cm of individual] {\textcolor{ForestGreen}{Child}};
+        \node [below=0.25cm of sibling]    {\textcolor{purple}{Sibling}};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        \path[-] (aboveindividual) edge (abovesibling);
+        \path[-] (aboveindividual) edge (individual);
+        \path[-] (abovesibling) edge (sibling);
+        % Bridge to the others
+        \node[scale=2] [right=1cm of abovesibling]{$\Rightarrow$};
+        \node [left=3.5cm of abovesibling]{IB1:};
+    \end{tikzpicture}
+\end{subfigure}
+\hskip3cm
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state] (mother) at (-1, 3) {1};
+        \node[state,dashed,gray] (father) at (1, 3)  {?};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        \node [color=white,below=0.25cm of individual] {Child};
+        \node [color=white,below=0.25cm of sibling]    {Sibling};
+        % Draw individual, and their sibling, nodes.
+        \node[color=white,state] (individual) [below=1cm of mother] {2};
+        \node[color=white,state] (sibling)    [below=1cm of father] {1};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        %\path[-] (aboveindividual) edge (abovesibling);
+        %\path[-] (aboveindividual) edge (individual);
+        %\path[-] (abovesibling) edge (sibling);
+        \node [right=0.4cm of father] {or};
+        \node [below=0.5cm of aboveboth] {Mean = $\frac{1 + f}{2}$};
+    \end{tikzpicture}
+\end{subfigure}
+\begin{subfigure}[b]{0.2\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state] (mother) at (-1, 3) {2};
+        \node[state,dashed,gray] (father) at (1, 3)  {?};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        \node [color=white,below=0.25cm of individual] {Child};
+        \node [color=white,below=0.25cm of sibling]    {Sibling};
+        % Draw individual, and their sibling, nodes.
+        \node[color=white,state] (individual) [below=1cm of mother] {1};
+        \node[color=white,state] (sibling)    [below=1cm of father] {0};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        %\path[-] (aboveindividual) edge (abovesibling);
+        %\path[-] (aboveindividual) edge (individual);
+        %\path[-] (abovesibling) edge (sibling);
+        \node [below=0.5cm of aboveboth] {Mean = $\frac{2 + f}{2}$};
+    \end{tikzpicture}
+\end{subfigure}
+
+% ---- IBD0 ----
+% Code for the TikZ picture showing how the Young et al (2022) imputation procedure works.
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state,dashed,gray] (mother) at (-1, 3) {?};
+        \node[state,dashed,gray] (father) at (1, 3)  {?};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        % Draw individual, and their sibling, nodes.
+        \node[state] (individual) [below=1cm of mother] {1};
+        \node[state] (sibling)    [below=1cm of father] {1};
+        \node [below=0.25cm of individual] {\textcolor{ForestGreen}{Child}};
+        \node [below=0.25cm of sibling]    {\textcolor{purple}{Sibling}};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        \path[-] (aboveindividual) edge (abovesibling);
+        \path[-] (aboveindividual) edge (individual);
+        \path[-] (abovesibling) edge (sibling);
+        % Bridge to the others
+        \node[scale=2] [right=1cm of abovesibling]{$\Rightarrow$};
+        \node [left=3.5cm of abovesibling]{IB0:};
+    \end{tikzpicture}
+\end{subfigure}
+\hskip3cm
+\begin{subfigure}[b]{0.25\textwidth}
+    \centering
+    \begin{tikzpicture}
+        % Draw parental nodes
+        \node[state,dashed,gray] (mother) at (-1, 3) {?};
+        \node[state,dashed,gray] (father) at (1, 3)  {?};
+        \node [above=0.25cm of mother] {\textcolor{orange}{Mother}};
+        \node [above=0.25cm of father] {\textcolor{blue}{Father}};
+        \node [color=white,below=0.25cm of individual] {Child};
+        \node [color=white,below=0.25cm of sibling]    {Sibling};
+        % Draw individual, and their sibling, nodes.
+        \node[color=white,state] (individual) [below=1cm of mother] {1};
+        \node[color=white,state] (sibling)    [below=1cm of father] {0};
+        % Draw the family connections
+        \coordinate (betweenparents) at ($(mother)!0.5!(father)$);
+        \coordinate (aboveindividual) at ($(mother)!0.5!(individual)$);
+        \coordinate (abovesibling) at ($(father)!0.5!(sibling)$);
+        \coordinate (aboveboth) at ($(aboveindividual)!0.5!(abovesibling)$);
+        \path[-,dashed,gray] (mother) edge (father);
+        \path[-,dashed,gray] (betweenparents) edge (aboveboth);
+        %\path[-] (aboveindividual) edge (abovesibling);
+        %\path[-] (aboveindividual) edge (individual);
+        %\path[-] (abovesibling) edge (sibling);
+        \node [below=0.5cm of aboveboth] {Mean parent SNP $= \frac{1 + 2 f}{2}$};
+    \end{tikzpicture}
+\end{subfigure}

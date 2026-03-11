@@ -17,23 +17,6 @@ bash prs-pipeline.sh "EA4_additive_p1e-5_clumped.csv" "raw-ed-pgi-okbay-2022"
 bash prs-impute.sh "EA4_additive_p1e-5_clumped.csv" "imputed-ed-pgi-okbay-2022"
 cd ..
 
-# Calculate the Okbay+ (2022) PGI, weights from the excluded subsample.
-cd pgi-okbay-excluded-2022
-R CMD BATCH --no-save tsv-convert.R
-bash prs-pipeline.sh "EA4_additive_excl_23andMe.csv" "raw-ed-pgi-okbay-exclude-2022"
-bash prs-impute.sh "EA4_additive_excl_23andMe.csv" "imputed-raw-ed-pgi-okbay-exclude-2022"
-cd ..
-
-# Calculate the separate Ed PGI, using Tan+ (2024) weights and prs-pipeline.
-mkdir pgi-tan-2024
-cd pgi-tan-2024
-dx download data-input/tan_2024_educational_attainment.tsv
-R CMD BATCH --no-save tsv-convert.R
-dx download data-input/tan_2024_educational_attainment.csv
-bash prs-pipeline.sh "tan_2024_educational_attainment.csv" "raw-ed-pgi-tan-2024"
-bash prs-impute.sh "tan_2024_educational_attainment.csv" "imputed-ed-pgi-tan-2024"
-cd ..
-
 
 ################################################################################
 ## Build data sets of relevance
@@ -52,25 +35,19 @@ R CMD BATCH --no-save ukb-summarise.R
 R CMD BATCH --no-save ukb-genetic-firststage.R
 # Total genetic effect estimates.
 R CMD BATCH --no-save ukb-genetic-effects.R
-# Returns to Education, including MSLA effects.
+# Returns to Education, correlational measures.
+R CMD BATCH --no-save ukb-ed-returns.R
+# Returns to Education, including MSLA effects (in appendix).
 R CMD BATCH --no-save ukb-msla.R
+# Returns to Education, literature review.
+R CMD BATCH --no-save external-ed-returns.R
 # Mediation analysis, direct + indirect effects of Ed PGI.
 R CMD BATCH --no-save ukb-direct-indirect.R
 # Go back to base folder.
 cd ../..
 
-## Statistical analysis, HRS
-cd hrs/data-analyse
-
-# Summarise HRS data.
-R CMD BATCH --no-save hrs-summarise.R
-# Analsyse HRS data, with the invalid instrument educ score.
-R CMD BATCH --no-save hrs-educ-iv.R
-# Go back to base folder.
-cd ..
-
 # Compile paper, with outputs from R scripts above as inputs for TeX files
 cd ../text
 latexmk -pdf paper.tex
 latexmk -c
-cp paper.pdf ../shoganhennessy-jmp-2025.pdf
+cp paper.pdf ../direct-indirect-education-2026.pdf

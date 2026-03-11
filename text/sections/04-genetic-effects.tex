@@ -1,4 +1,4 @@
-\section{Average Genetic Effects}
+\section{Education and Total Genetic Effects}
 \label{sec:genetic-effects}
 The Ed PGI has substantial causal effects on both educational attainment and labour market outcomes.
 \autoref{tab:genetic-effects} reports estimates of the average causal effects, identified by the quasi-random variation in genetic inheritance described in \autoref{sec:genetics}.
@@ -8,29 +8,31 @@ The parental Ed PGI enters as a control throughout: it is correlated with both t
 \begin{table}[!htbp]
     \singlespacing
     \centering
-    \caption{Estimates of Average Genetic Effects.}
+    \caption{Estimates of Education and Total Genetic Effects.}
     \small
-    %\centerline{
+    \centerline{
     \begin{tabular}{l c c c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
         & \multicolumn{3}{c}{Education Outcomes}
             & \multicolumn{3}{c}{Labour Market Outcomes} \\ \\
         Outcome:
         & Education & Age left & University & Occupation  & Occupation    & Household \\
-        & years     & school & completion & hourly wage & annual income & income    \\
+        & years     & school & completion & hourly wage & annual income & income (binned)   \\
         \cmidrule(lr){2-4} \cmidrule(lr){5-7}
         & (1) & (2) & (3) & (4) & (5) & (6) \\
         \\[-1.8ex]\hline \\[-1.8ex]
         \input{sections/tables/genetic-effects.tex}
         \\[-1.8ex]\hline \\[-1.8ex]
     \end{tabular}
+    }
     \label{tab:genetic-effects}
     \justify
     \footnotesize
     \textbf{Note:}
-    This table shows estimates of the average causal effect of the Ed PGI on education variables (average first-stage) and labour market outcomes (average partial effect) --- specification in \autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}.
+    This table shows estimates of the average causal effect of the Ed PGI on education variables (average education effect) and labour market outcomes (average partial effect) --- specification in \autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}.
     The coefficient on the Ed PGI represents the average causal effect, and coefficient on the parental Ed PGI is a control parameter.
     Specification for estimates in this table including gender, sibling count, in city indicator, birth year and UKB data collection year fixed effects, and inclusion of other PGI values as controls.
+    Appendix~\autoref{tab:genetic-robust} shows estimates varying the control sets, and with sibling fixed effects.
 \end{table}
 
 \paragraph{Effects on Education Variables.}
@@ -43,7 +45,7 @@ The Ed PGI has a consistent and precisely estimated causal effect on earnings ac
 A one standard deviation increase in the Ed PGI raises hourly wages by approximately 5 per cent (column 4) and annual occupation income by 5 per cent (column 5), with a slightly larger effect of 6 per cent on household income (column 6).
 These estimates capture the total average causal effect of the Ed PGI on labour market outcomes --- combining any direct biological pathway with effects mediated through the additional education documented above.
 
-\begin{figure}[!htbp]
+\begin{figure}[!h]
     \centering
     \singlespacing
     \caption{Effect of Ed PGI on Education and Wages.}
@@ -68,20 +70,11 @@ These estimates capture the total average causal effect of the Ed PGI on labour 
     The shifted lines are the estimates of the causal effect, estimated by controlling for parental imputed Ed PGI values.
 \end{figure}
 
-The main estimates are robust to alternative specifications, with confounding from 
-family environment explaining roughly half of the raw correlation between the Ed PGI 
-and outcomes.
+The main estimates are robust to alternative specifications, and the main causal estimates are half as large as  raw correlation between the Ed PGI for all outcomes under study.
 \autoref{tab:genetic-robust} reports estimates under alternative 
-specifications.
+specifications, and this raw correlation.
 Panel A shows the raw correlations between the Ed PGI and outcomes, without 
-conditioning on parental PGI or any controls; these are roughly twice the size of 
-the causal estimates, illustrating the extent of confounding from family environment 
-when parental genetics are not accounted for.
-Panel B re-estimates the main specification without the additional control variables, 
-and finds estimates nearly identical to those in \autoref{tab:genetic-effects}, 
-confirming that the causal identification rests on the parental PGI rather than the 
-auxiliary controls.
-Panel C replaces the parental PGI with sibling fixed effects, which partial out all 
-shared family characteristics directly; the resulting estimates are again very close 
-to the main results across education and labour market outcomes, lending further 
-support to the identifying assumption that within-family variation in the Ed PGI is quasi-randomly assigned.
+conditioning on parental PGI or any controls; these are roughly twice the size of the causal estimates, illustrating the extent of confounding when parental genetics are not accounted for.
+Panel B re-estimates the main specification without the additional control variables, and finds estimates nearly identical to those in \autoref{tab:genetic-effects}, confirming that the causal identification rests on the parental PGI rather than the auxiliary controls.
+Including the other PGI for other outcomes as controls make little difference to the causal estimates, which aligns with specifications reporting correlations with the Ed PGI that do attenuate with inclusion of other PGIs (e.g., \citealt{bolyard2025understanding}).
+Panel C replaces the parental PGI with sibling fixed effects, which partial out all shared family characteristics directly; the resulting estimates are again very close to the main results across education and labour market outcomes, lending further support to the identifying assumption that within-family variation in the Ed PGI is quasi-randomly assigned.

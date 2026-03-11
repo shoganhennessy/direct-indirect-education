@@ -144,7 +144,7 @@ combined.plot <- list(
 ggsave(file.path(figures.folder, "demographic-correlates.png"),
     plot = combined.plot,
     dpi = 300, units = "cm",
-    width = fig.width, height = fig.height)
+    width = fig.width * 1.25, height = fig.height* 1.25)
 
 
 ################################################################################
@@ -224,6 +224,7 @@ parental_random.plot <- analysis.data %>%
 ggsave(file.path(figures.folder, "edpgi-random-dist.png"),
     plot = parental_random.plot,
     units = "cm", width = fig.width, height = fig.height)
+
 
 ################################################################################
 # Ensure this does not vary across the parental distribution.
