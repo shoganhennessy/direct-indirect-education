@@ -171,9 +171,9 @@ The goal is to identify is the average compliance rate of the MLSA rise,
 \end{figure}
 
 The MLSA rise significantly increases education years, completing of age 16 secondary school qualifications (GCSEs) --- these are measured of education coded by qualifications, as used by \cite{okbay2022polygenic} in calculating the Ed PGI.
-It had an even larger effect on age at leaving school, which are the education variables that \cite{barcellos2025education,carvalho2024genetics} focus on.
-These raw means are shown in \autoref{fig:mlsa-nl}.
-Note that the follow-up null estimates for education returns are argued to be a result of the MLSA rise inducing a low-quality margin of education \cite{clark2013effect}, so while age leaving education variables are more significant for this IV they may be economically relevant.
+It had an even larger effect on age at leaving school, which are the education variables that \cite{barcellos2021effect,carvalho2024genetics} focus on.
+The mean of these variables by birth month are shown in \autoref{fig:mlsa-nl}.
+Note that the economics literature has argued that null estimates for education returns in the MLSA design are a result of the MLSA rise inducing a low-quality margin of education \cite{clark2013effect}, so while age leaving education variables are more significant for this instrument they may be economically relevant.
 
 I also use the RDD design to measure changes in later labour market outcomes.
 The UK Biobank asks questions of the sector people work in, giving high detail occupation codes (i.e., SOC codes)
@@ -185,7 +185,7 @@ This gives occupation coded hourly income, and annual wage calculated from hours
     = \lim_{z' \to^+ 1957.75} \Egiven{Y_i}{Z_i = z'}
         - \lim_{z' \to^- 1957.75} \Egiven{Y_i}{Z_i = z'}. \]
 The final panels of \autoref{fig:mlsa-nl} show these outcomes, and this reduced-form effect of the MLSA is not significantly different from zero.
-\cite{barcellos2021effect} analyse this RDD with UKB data, and a hard coded RDD specification; this subsection returns to this RDD and finds that returns to education estimates among the UKB population (or any subsample) are not robust to RDD best practices.
+\cite{barcellos2021effect} analyse this same RDD with UKB data, and a hard coded RDD specification; this Appendix subsection returns to this RDD and finds that returns to education estimates among the UKB population (or any subsample) are not robust to RDD best practices.
 
 \begin{table}[H]
     \singlespacing
@@ -263,7 +263,7 @@ This holds true for a range of bandwidth choices, shown in \autoref{fig:mlsa-bw}
 
 These results contrast with those in \citep{barcellos2021effect,carvalho2024genetics}, who do not use these best practices for the 1957 cohort MLSA rise with UK Biobank data.
 Instead, use of a hard-coded bandwidth of 10 years and a hardcoded polynomial order 1 or 2.
-RDD specifications using this specification show highly efficient estimates of the education returns in the UKB sibling sample --- results which do not survive RDD best practices.
+RDD estimates using this specification show highly efficient estimates of the education returns in the UKB sibling sample --- results which do not survive RDD best practices.
 
 \subsection{Returns to Education Literature}
 
