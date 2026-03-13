@@ -114,7 +114,7 @@ The reform therefore induced extra school years for individuals born around date
 British school children sit exams for the GCSE qualification at age 16, so the reform pushed a larger share of the UK Biobank cohorts to remain in school to 16 and to complete these qualifications.
 
 The 1972 MLSA change has been previously used for labour market education returns \citep{oreopoulos2006estimating}, and (null) mortality effects of compulsory education \citep{clark2013effect}.
-The UK Biobank population overlaps well with the birth date cutoff, and so has been used in a series of papers for estimating education returns in the UK Biobank, for health outcomes \citep{barcellos2023distributional,barcellos2025education,davies2018causal} and occupation imputed income \citep{barcellos2021effect,carvalho2024genetics}.
+The UK Biobank population overlaps well with the birth date cutoff, and so has been used in a series of papers for estimating education returns in the UK Biobank, for health outcomes \citep{barcellos2023distributional,barcellos2025education,davies2018causal} and occupation imputed income \citep{barcellos2021effect}.
 
 Birth month is the running variable in a fuzzy Regression Discontinuity Design (RDD), using the indicator for being born September 1957 and after as an instrument.
 Because not all those eligible necessarily stayed beyond 15, the post-cutoff indicator instruments education variables, where mentioned.
@@ -171,7 +171,7 @@ The goal is to identify is the average compliance rate of the MLSA rise,
 \end{figure}
 
 The MLSA rise significantly increases education years, completing of age 16 secondary school qualifications (GCSEs) --- these are measured of education coded by qualifications, as used by \cite{okbay2022polygenic} in calculating the Ed PGI.
-It had an even larger effect on age at leaving school, which are the education variables that \cite{barcellos2021effect,carvalho2024genetics} focus on.
+It had an even larger effect on age at leaving school, which is the basis of the education variables that \cite{barcellos2021effect} focuses on.
 The mean of these variables by birth month are shown in \autoref{fig:mlsa-nl}.
 Note that the economics literature has argued that null estimates for education returns in the MLSA design are a result of the MLSA rise inducing a low-quality margin of education \cite{clark2013effect}, so while age leaving education variables are more significant for this instrument they may be economically relevant.
 
@@ -261,7 +261,7 @@ The MLSA rise increased years of education, as measured in both qualification de
 However, the outcome of occupation coded wages and annual income are not strong; correspondingly, the IV estimates using the MLSA rise for education returns are not distinguishable from zero.
 This holds true for a range of bandwidth choices, shown in \autoref{fig:mlsa-bw}.
 
-These results contrast with those in \citep{barcellos2021effect,carvalho2024genetics}, who do not use these best practices for the 1957 cohort MLSA rise with UK Biobank data.
+These results contrast with those in \citep{barcellos2021effect}, which does not use these RDD best practices for the 1957 cohort MLSA rise with UK Biobank data.
 Instead, use of a hard-coded bandwidth of 10 years and a hardcoded polynomial order 1 or 2.
 RDD estimates using this specification show highly efficient estimates of the education returns in the UKB sibling sample --- results which do not survive RDD best practices.
 
