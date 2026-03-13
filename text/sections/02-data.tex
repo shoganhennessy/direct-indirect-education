@@ -54,10 +54,11 @@ I convert these qualifications into education years based on each participant's 
     As noted by \cite{okbay2022polygenic}, British vocational degrees are inconsistently coded by the International Standard Classification of Education.
     I follow the literature by assigning education years as the age they reported leaving full-time education minus five, among those with a vocational degree as their highest qualification.
 }
-While the UKB collected household income data, this information was recorded only in categorical bins, limiting its utility for continuous analysis.
+While the UKB collected household income data, this information was recorded only in categorical bins; I assign midpoint imputed values and update to 2024 GBP for a coarse measure of household income.
+To accompany these measures with a finer measure of income, I also calculate occupation income.
 Following \cite{kweon2025associations}, I construct an individual-level income measure using participants' 4-digit Standard Occupational Classification (SOC) codes.
 Specifically, I impute occupation-based wages by estimating hourly earnings for each SOC category using data from the British Annual Survey of Hours and Earnings, conditional on age, gender, and year.
-This approach provides a more granular and continuous measure of economic status than the categorical household income variable (see \appendixref{appendix:wage-impute} for details on the imputation procedure).
+This approach provides a more granular and continuous measure of economic status than the categorical household income variable.
 I create the annual occupation income by multiplying this by the number of hours they reported working, times 52 weeks in the year.
 For example, this procedure would give a female participant, age 58 in 2010 with SOC 2314 (i.e., a secondary education teacher by profession), an occupation hourly wage of $\pounds 29.20$ and an annual income of $\pounds 68,476$ for her 45 hours worked each week (adjusted to 2024 \pounds GBP by CPI-H).
 
@@ -89,7 +90,7 @@ For the purposes of this study, the primary analysis sample is restricted to tho
 The UKB does not personally identify participants, nor their family members, so I follow the genetic literature by identifying family clusters by measures of genetic similarity.\footnote{
     The design of the UKB allows for a larger number of family clusters than would be expected from a random sample of the British population.
     This is because study enrolment letters were sent to households, and the household head (or to whomever the letter was addressed) could optionally enrol their family members in addition to themselves.
-    \appendixref{appendix:identifying-families} describes the family cluster identification procedure in detail, which has been used in previous social science genetic studies (see e.g., \citealt{muslimova2025environment}). 
+    This family clustering follows the definitions in \cite{muslimova2025environment}. 
 }
 The presence of multiple family members within the dataset provides a unique opportunity to control for shared genetic factors that might otherwise bias estimates in standard cross-sectional analyses.
 

@@ -382,7 +382,12 @@ ukb_soc.data <- ukb_soc.data %>%
         soc_median_hourly_all = cpi.factor * soc_median_hourly_all,
         soc_2d_hourly         = cpi.factor * exp(log_y_hourly))
 
-
+# Do the same for the household mid-point variable, updated to 2024 CPI-H.
+cleaned_pheno.data <- cleaned_pheno.data %>%
+    left_join(cpi.data, by = c("visityear" = "year")) %>%
+    mutate(householdincome_midpoint = cpi.factor * (
+        householdincome_midpoint / (cpi2015 / 100))) %>%
+    select(-cpi2015)
 ################################################################################
 ## Merge data files.
 

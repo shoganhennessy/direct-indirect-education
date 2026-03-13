@@ -9,28 +9,65 @@
 }{\textit{--- \citet{smith1937wealth},
     %An Inquiry into the Nature and Causes of the
     The Wealth of Nations, Volume~1 p.~16.}}}
-\vspace{-1cm}
-\subsection{Writing Plan}
 
-\textbf{The introduction formula \url{https://blogs.ubc.ca/khead/research/research-advice/formula}.}
+\noindent
+Genes associated with educational attainment causally improve labour market outcomes, but the mechanism behind this relationship remains poorly understood.
+Individuals with more education-associated genes have higher incomes and more years of education, yet it is unclear how much of their income advantage reflects the additional education years their genes induce, and how much operates through direct biological pathways that bypass education entirely.
+The weight of each channel: if the education years channel dominates, then the institutions governing access to education are the primary mechanism through which genetic endowment shapes income inequality, and the primary lever through which that inequality could be addressed.
 
-Note: a major concern for the Ed PGI previous papers is that they have little economic insight.
-This paper is framed as changing that, investigating the economic mechanisms underlying the Ed PGI causal effects, giving economic credence where before there was merely concern.
+The magnitude of this genetic income effect is economically meaningful, yet the literature has not delivered a credible account of the mechanism.
+The Education PolyGenic Index (Ed PGI) is a weighted sum of thousands of genetic variants that together explain around 12 to 15 per cent of the variation in educational attainment \citep{okbay2022polygenic}; individuals with a higher Ed PGI value have more years of  completed education, and higher occupation measured incomes --- and this relationship is causal.
+Whether these effects reflect the same underlying channel, or the result of a direct genetic effect, remains an open question.
+Separating the education years pathway from any residual direct genetic effect requires not just a valid research design for the total genetic effect, but also a framework that can credibly distinguish these channels.
 
-\cite{papageorge2020genes} document how the Ed PGI predicts earnings, even when controlling for education, and posit that the index contains genes that affect skills related to financial literacy.
+I use the UK Biobank to estimate the causal effect of the Ed PGI on education and labour market income, following the design of \cite{carvalho2024genetics}.
+The Ed PGI also varies quasi-randomly across individuals: while parents transmit their genetic variants to their children, which copy of each variant a child inherits is determined by random biological draws at conception.
+I control for imputed parental Ed PGI values, constructed from the genetic data of siblings also enrolled in the UK Biobank \citep{young2022mendelian}, to isolate this random inheritance component.
+A one standard deviation increase in the Ed PGI increases years of education completed by 0.5 years and raises later life income by around 5 per cent, replicating main findings in \cite{carvalho2024genetics}.
 
-Quote for the Mendelian independent first-stage, ``Cannot choose who your parents are, and you also cannot choose how much you inherit from them.''
+Based on these estimates, I apply a causal mediation framework to quantify how much of the Ed PGI's causal effect on income operates through the education years channel.
+I combine correlational estimates of the returns to education with a sensitivity analysis benchmarked against the distribution of plausible causal returns for Britain from the UK economics literature \citep{patrinos2025causal}.
+This approach requires no structural model; it makes the one key dimension of uncertainty --- the exact value of the returns to education --- fully transparent, and shows directly how the mediation conclusions depend on it.
 
+The Ed PGI raises labour market income primarily through education years.
+At correlational returns to education of around 6 per cent, roughly 65 to 75 per cent of the total genetic income effect is mediated through the education years channel, with a corresponding residual direct effect of 35 to 25 percent.
+Under plausible returns to education for Britain from the economics literature, the education channel rises further and the direct genetic effect closes towards zero when education returns are 10 percent --- which is value squarely in the range of plausible returns to education estimates.
+This means education-linked genes earn their labour market return primarily by inducing more education years, not through direct biological pathways that bypass education.
+The institutions governing access to education are therefore the primary mechanism through which genetic endowment shapes income inequality, and the primary policy lever through which that inequality could be addressed.
 
-\section{Introduction}
-\label{sec:intro}
+Economics has been slow to incorporate genetic data into empirical research, in part because the policy implications of genetic evidence are unclear \citep{manski2011genes}.
+In recent years, however, the field has seen a rapid expansion of research using the Ed PGI --- a summary measure of genetic predisposition toward educational attainment constructed from millions of genetic variants \citep{okbay2022polygenic}.
+\cite{papageorge2020genes,bryson2025gender} establish that the Ed PGI is correlated with labour market outcomes, though \cite{schork2022indirect} raises the concern that these associations reflect parental genetic channels rather than causal effects of the individual's own genes.
+\cite{carvalho2024genetics} addresses this directly, using the \cite{young2022mendelian} sibling-imputation procedure to control for parental PGI values and estimate causal effects; \cite{muslimova2025environment,sanz2025sibling} exploit the same within-family variation for related questions.
+An alternative approach grounds the analysis in a structural model of individual economic choices; \cite{barth2022genetic,houmark2024nurture,bolt2025genetic} use this modelling strategy to decompose Ed PGI correlations (or effects) into corresponding channels, at the cost of relying on assumptions that are difficult to verify in the real world.
+
+This paper's causal mediation analysis does not rely on a structural model.
+Instead, it decomposes the total causal effect of the Ed PGI into an education years channel and a residual direct effect, first using correlational estimates of the returns to education and then with a sensitivity analysis that makes the dependence on this one dimension of uncertainty fully transparent.
+Causal mediation decomposes an average treatment effect into an observed mechanism and a remaining direct effect, where point identification requires random variation in the mediating channel \citep{imai2010identification} ---see \cite{huber2019review} for an overview of the causal mediation literature.
+When the mediating channel is not randomly assigned, as education years plainly are not, standard mediation analyses are subject to selection bias if they do not account for this \citep{mediation-natural-experiment}.
+Correlational estimates of the returns to an additional year of education are, however, well-accepted in the economics literature as a credible approximation of the causal return, and are the natural basis for the mediation analysis; the sensitivity analysis then shows how the mediation conclusions vary across the full distribution of plausible return values from the economics literature for Britain.
+
+This paper makes two contributions.
+First, it moves beyond suggestive evidence on the mechanisms underlying the Ed PGI's labour market effects, providing an explicit quantitative decomposition of how much of the total genetic income effect plausibly operates through education years.
+Previous work has noted that high-PGI individuals acquire more education and sort into better-paying occupations, but has stopped short of a mediation analysis that assigns quantitative shares to each channel;\footnote{
+    Analyses of mechanisms in economics typically relies on suggestive evidence instead, which does not identify or quantify the role of a mechanism.
+    See \cite{mediation-natural-experiment,blackwell2024assumption,green2010enough}.
+} this paper does so directly.
+Second, it does this without relying on untestable assumptions.
+The one genuine dimension of uncertainty in the mediation analysis is the exact values for the average causal return to an additional year of education; this uncertainty is handled transparently through a sensitivity analysis benchmarked against the empirical distribution of quasi-experimental estimates from the economics literature.
+Rather than tackling this uncertainty with modelling assumptions, the analysis puts it front and centre, showing precisely how the mediation conclusions depend on it and demonstrating that they are robust across the range of return values the literature considers credible.
+
+\cite{manski2011genes} argues that knowing that genes predict outcomes tells us nothing about which levers could change them, so that
+correlational genetic evidence is fundamentally uninformative for policy.
+The causal mediation analysis in this paper aims to add economic importance to the casual effects of the Ed PGI.
+By showing that the majority of the Ed PGI's income effect operates through education years, it connects genetic endowment to a mechanism that is both well-understood and amenable to policy intervention. 
+Genetic inheritance shapes income inequality primarily through its influence on years of completed education, so that education institutions are therefore where that influence can be most directly addressed.
 
 This paper proceeds as follows.
 \autoref{sec:data} summarises the UKB data, and explains how the Ed PGI is constructed.
 \autoref{sec:genetics} shows a causal research design, based on Mendelian independent inheritance, for estimating the causal effects of the Ed PGI; 
 \autoref{sec:genetic-effects} shows estimates of the causal effects of the Ed PGI, on education and labour market outcomes.
 \autoref{sec:direct} gives a conceptual framework for estimating the direct and indirect effects of genetics and education, in this observational setting;
-\autoref{sec:direct-effects} gives the empirical results.
-%\autoref{sec:discussion} discusses the approach, and its applicability to other topics;
+\autoref{sec:direct-effects} gives the empirical results, and a brief discussion.
 \autoref{sec:conclusion} concludes.
 

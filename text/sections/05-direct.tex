@@ -131,7 +131,7 @@ What remains, therefore, is to provide credible estimates of the causal returns 
 \subsection{Returns to Education}
 Correlational estimates of education returns are the most natural starting point. A large literature finds that OLS estimates of the return to an additional year of schooling are remarkably stable — typically in the range of 5--10 per cent in log earnings — and, perhaps surprisingly, close to estimates from quasi-experimental designs exploiting compulsory schooling reforms \citep{angrist1991does, harmon1995estimates, oreopoulos2006estimating}. Two forces likely explain this convergence: ability bias pushes OLS upward, while measurement error in reported schooling pushes it downward, and the two roughly cancel. Quasi-experimental designs, meanwhile, often identify effects among specific groups of marginal compliers — those induced into extra schooling by a particular reform — whose returns need not equal the population average \citep{buscha2015wage}. That OLS and quasi-experimental estimates land in a similar range is therefore informative, not coincidental.
 
-\begin{table}[!htb]
+\begin{table}[!h]
     \small
     \singlespacing
     \centering
@@ -205,16 +205,18 @@ In addition, this range is defined not arbitrarily, but based on the previous la
 \end{figure}
 
 The return to an extra year of education in the UK has been estimated many times in the economics literature, giving a rich empirical base for calibrating the sensitivity analysis.
-Figure~\ref{fig:edreturns} shows the distribution of 17 quasi-experimental UK estimates collected by \cite{patrinos2025causal}, listed in full in Appendix~\autoref{tab:uk-meta}.
+\autoref{fig:edreturns} shows the distribution of 17 quasi-experimental UK estimates collected by \cite{patrinos2025causal}, listed in full in Appendix~\autoref{tab:uk-meta}.
 The distribution is right-skewed: most estimates fall between 4 and 8 per cent, consistent with the correlational estimates in \autoref{tab:ukb-ed-returns}, but a tail of larger estimates reaches to around 15 per cent.
 These higher values tend to come from studies exploiting the 1947 compulsory schooling reform, which identifies returns among a different and older complier population than the UKB cohort.
 The worldwide distribution from 182 estimates across 144 studies, shown alongside, is broadly consistent with the UK evidence.
 
-The first step of the sensitivity analysis asks a deliberately agnostic question: how do the mediation estimates change as the assumed education return varies across the full span of values that appear in the literature, from -5 to 20 percent?
+The first step of the sensitivity analysis asks a deliberately agnostic question: how do the mediation estimates change as the assumed education return varies across the full span of values that appear in the literature, from 0 to 20 percent?
 For each value in this range, the indirect effect follows directly as the product of the estimated genetic first-stage and the assumed return, with the direct effect as the remainder.
 This step takes no stand on which return value is correct, and shows whether the mediation conclusions are stable or fragile across the plausible range.
 
-The second step uses the empirical UK distribution more directly. I bootstrap across the 17 IV estimates in \autoref{tab:uk-meta}, drawing a return value at each replication and computing the implied mediation decomposition. Repeating this across many draws produces a distribution of indirect and direct effect estimates that reflects both sampling uncertainty in the effect of the Ed PGI on education years and the genuine disagreement in the literature about the magnitude of education returns.
-Reporting quantiles of this distribution gives a meta-analytic sensitivity bound anchored in what the literature actually finds, rather than treating all values across the plausible range as equally likely.
+The second step uses the empirical UK distribution more directly.
+I bootstrap across the 17 IV estimates in the economic literature (shown in Appendix~\autoref{tab:uk-meta}), drawing a return value at each replication and computing the implied mediation decomposition.
+Repeating this across many draws produces a distribution of indirect and direct effect estimates that reflects both sampling uncertainty in the effect of the Ed PGI on education years and the genuine disagreement in the literature about the magnitude of education returns.
+Reporting the point estimate, and boostrapped standard errors of this distribution gives a meta-analytic sensitivity bound anchored in what the literature actually finds, rather than treating all values across the plausible range as equally likely.
 
 Together, the two steps answer different questions. The first shows the full range of possible conclusions. The second shows where the weight of evidence places them.
