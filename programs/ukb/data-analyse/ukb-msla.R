@@ -116,6 +116,23 @@ summary(rdrobust(x = full.data$birthyearmonth,
     fuzzy = full.data$edyears,
     y = log(full.data$soc_median_hourly),
     c = cutoff, all = TRUE))
+# Outcome binned income
+summary(rdrobust(x = full.data$birthyearmonth,
+    fuzzy = full.data$edyears,
+    y = log(full.data$householdincome_midpoint),
+    c = cutoff, all = TRUE))
+summary(rdrobust(x = full.data$birthyearmonth,
+    fuzzy = full.data$edqual_gcses,
+    y = log(full.data$householdincome_midpoint),
+    c = cutoff, all = TRUE))
+summary(rdrobust(x = full.data$birthyearmonth,
+    fuzzy = full.data$agefinishededuc,
+    y = log(full.data$householdincome_midpoint),
+    c = cutoff, all = TRUE))
+summary(rdrobust(x = full.data$birthyearmonth,
+    fuzzy = full.data$edage16,
+    y = log(full.data$householdincome_midpoint),
+    c = cutoff, all = TRUE))
 
 #! Test -> age finished school
 summary(rdrobust(x = full.data$birthyearmonth,
