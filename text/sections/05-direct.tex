@@ -11,7 +11,7 @@ additional education generates a labour market return.
 
 The size and robustness of the labour market effects documented in 
 \autoref{sec:genetic-effects} has led to a common interpretation in the literature that at least part of the Ed PGI's influence must operate through the direct channel.
-This view is often motivated by the fact that the Ed PGI predicts fluid intelligence scores and by results showing earnings associations that persist even after conditioning on education \citep{carvalho2024genetics}; it appears, for example, in work arguing that the Ed PGI captures skills related to financial literacy and other non-educational attributes \citep{barth2020genetic}.
+This view is often motivated by the fact that the Ed PGI predicts scores on tests aiming to measure fluid intelligence \citep{carvalho2024genetics}, by results showing earnings associations that persist even after conditioning on education \citep{papageorge2020genes}, and in work arguing that the Ed PGI captures skills related to financial literacy and other non-educational attributes \citep{barth2020genetic}.
 Separating these channels matters both for understanding the biological and social mechanisms behind genetic effects on earnings, and for policy: if the indirect channel dominates, then policies that expand access to education can, in principle, replicate much of the labour market advantage associated with a higher Ed PGI; if the direct channel dominates, the policy implications are considerably more complex.
 
 This section uses a Causal Mediation (CM) framework to decompose the average total effect of the Ed PGI into its direct and indirect components, where education years serves as the mediating variable.
@@ -68,7 +68,7 @@ evaluated at $z'$  --- again, a linearity assumption is assuming the average eff
         \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
         % Label the effects
         \node[color=orange] [below=1.2cm of mediator] {Direct effect};
-        \node[color=orange] [above left= -0.4cm and 0.5cm of mediator, align=right] {First-stage};
+        \node[color=orange] [align=center] at ($(treatment)!0.5!(mediator)$) {Average \\education effect};
         \node[color=orange] [right= 0.5cm of mediator, align=center] {Education \\ returns};
         % Add in the unobserved confounding
         \path[<->,dashed,thick,color=RoyalBlue] (mediator) edge[bend right=-45] (outcome);

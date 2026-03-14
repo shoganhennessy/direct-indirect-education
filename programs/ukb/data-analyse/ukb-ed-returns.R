@@ -181,3 +181,26 @@ edreturns.table %>%
         hline.after = NULL,
         format.args = list(big.mark = ","),
         file = file.path(tables.folder, "ukb-ed-returns.tex"))
+
+#! Test: if direct effects low, then its use as an IV would work.
+iv.reg <- feols(log_soc_median_hourly
+    ~ 1 + edpgi_all_imputed_parental
+    + adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi
+    | visityear + sex_male + birthyear + urban + sibling_count + mother_present + father_present
+    | edyears ~ edpgi_all_imputed_self,
+    data = analysis.data)
+print(summary(iv.reg))
+iv.reg <- feols(log_soc_median_annual
+    ~ 1 + edpgi_all_imputed_parental
+    + adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi
+    | visityear + sex_male + birthyear + urban + sibling_count + mother_present + father_present
+    | edyears ~ edpgi_all_imputed_self,
+    data = analysis.data)
+print(summary(iv.reg))
+iv.reg <- feols(log_householdincome_midpoint
+    ~ 1 + edpgi_all_imputed_parental
+    + adhd_pgi + asthma_pgi + bipolar_pgi + bmi_pgi + height_pgi + schizophrenia_pgi + t2diabetes_pgi
+    | visityear + sex_male + birthyear + urban + sibling_count + mother_present + father_present
+    | edyears ~ edpgi_all_imputed_self,
+    data = analysis.data)
+print(summary(iv.reg))

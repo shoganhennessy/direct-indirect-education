@@ -33,4 +33,5 @@ Folder "programs/" contains all analysis scripts in the R language.
 - "analysis/" contains R scripts that produce all tables and figures presented in the paper.
 
 ### Text
+
 Folder "text/" contains all files for the final paper, including the LaTeX source and compiled output.
