@@ -1,82 +1,39 @@
-@comment{# Data to cite}
+@comment{%% Datasets to cite
+% UK Biobank}
 
-@comment{# Papers to cite:
+@comment{% Methods for imputing parental PGIs (for the random component).}
 
-% Angrist Imbens (1994) first proof of the LATE}
+@comment{% Note for lack of cross racial PGI info.}
 
-@comment{% Angrist Imbens Rubin (1996) overview of the IV approach in causal terms}
+@comment{% Data on income imputing using SOC in the UK Biobank.}
 
-@comment{% Rubin Holland PO framework}
+@comment{% Data on the location of every college + uni in UK.}
 
-@comment{% Generalised forests}
+@comment{%% General other papers.
 
-@comment{}
+% RDD optimal bandwidth}
 
-% Abadie compliance weighting}
+@comment{% Muslminova gene environ complementarity (sibling classification thing).}
 
-@comment{% Angrist famous IV paper (effect of army enrolment on earnings, by lottery)}
+@comment{% Manski paper on gene irrelavence for policy}
 
-@comment{% Angrist Kruger famous IV paper (effect of extra schooling years)}
+@comment{% Bryson paper on gender wage gap with some Ed PGI analysis (correlational)}
+
+@comment{% Genetic concern about PGI correlations}
+
+@comment{% sibling updating}
+
+@comment{% HRS PGI structural model}
+
+@comment{% Latent variables structural model}
+
+@comment{% Same.}
 
 @comment{% Imai Kelle Yamamoto approach to causal mediation (2010)}
 
-@comment{# Robins approach to causl med.}
-
-@comment{# Pearl approach to causal med}
-
-@comment{% Vytlacil equivalence of IV + latent indix models}
-
-@comment{# Heckman Vycatil (2005) MTE}
-
-@comment{# MTE general framework for extrapolating to policy relevant parameters}
-
-@comment{% MTE general framework for extrapolating LATE}
-
-@comment{% Conley+ 2012, plauibly exogenous instruments}
-
-@comment{% Ashley sensitivity analysis when instrument is included in the second stage}
-
-@comment{# Extension of plausibly exogenous framework.}
-
-@comment{% Generalising misspecification}
-
-@comment{% Misspecification in DiD}
-
-@comment{% Angrist Fernadez-Val (2010, 2013) conditions for LATE extrapolation}
-
-@comment{% Singh Sun complier scores + test for complier characteristics}
-
 @comment{% Roy Model for selection into treatment based on treatment gains}
 
-@comment{% Heckman book review about selectiton into treament, and selection models}
-
-@comment{% Sanchez-Becerra test for TE heterogeneity as a result of characteristics}
-
-@comment{% Test for selection to treatment, Black Joo LaLonde Smith Taylor (2022)}
-
-@comment{% Huber Mellace moment tests for instrument validity}
-
-@comment{% Lee (2009) bounds on TE effects}
-
-@comment{% Conditional trimmed bounds on TEs}
-
-@comment{% APplied theory on exclusion}
-
-@comment{% invalidating Catholic school isntrument.}
-
-@comment{% invalidating instrument in poli sci}
-
-@comment{% Testing instruments in labour econ.}
-
-@comment{% Kitagawa (2015) test for instrument validity}
-
-@comment{% Mourifie Yuanyuan (2017) test for instrument validity}
-
-@comment{% Flores Flores-Lagunes (2009) work on causal mediation}
-
-@comment{% Flores Flores-Lagunes (2009) work on causal mediation + IV methods}
-
-@comment{% Frolich (2007) setting for conditional effects when identification is conditional}
+@comment{% Equivalence of Heckman selection modelling and IV LATE}
 
 @comment{% Influential medicine work describing Mendelian randomisation.}
 
@@ -102,13 +59,23 @@
 
 @comment{% Previous economic research using education gene scores in the HRS.}
 
-@comment{% Reference for the UK Biobank data}
+@comment{# Formula instrument}
+
+@comment{% ORIV}
+
+@comment{% Genetics for ORIV}
+
+@comment{% Limitations on 2SLS interpretation.}
 
 @comment{% Article explaining GWASs}
 
-@comment{% MR randomisation correctly specified.}
+@comment{% Mendel's pioneering work.}
+
+@comment{% Summary of evidence for an additive PGI for complex social stuff.}
 
 @comment{% MR in labour economics with violation of the exclusion restriction}
+
+@comment{# Adam SMith quote}
 
 @comment{# Software:
 
@@ -117,41 +84,11 @@
 
 @comment{% R Tidyverse: Rscript -e 'toBibtex(citation("tidyverse"))'}
 
+@comment{% Double ML package}
+
+@comment{% Generalised random forest package.}
+
 @comment{% Stargazer (TeX tables)}
-
-@article{abadie2003semiparametric,
- author = {Abadie, Alberto},
- journal = {Journal of econometrics},
- note = {\url{https://doi.org/10.1016/s0304-4076(02)00201-4}},
- number = {2},
- pages = {231--263},
- publisher = {Elsevier},
- title = {Semiparametric instrumental variable estimation of treatment response models},
- volume = {113},
- year = {2003}
-}
-
-@article{altonji2005evaluation,
- author = {Altonji, Joseph G and Elder, Todd E and Taber, Christopher R},
- journal = {Journal of Human resources},
- note = {\url{https://doi.org/10.3386/w9358}},
- number = {4},
- pages = {791--821},
- publisher = {University of Wisconsin Press},
- title = {An evaluation of instrumental variable strategies for estimating the effects of catholic schooling},
- volume = {40},
- year = {2005}
-}
-
-@article{angrist1990lifetime,
- author = {Angrist, Joshua D},
- journal = {The american economic review},
- note = {\url{https://doi.org/10.3386/w3514}},
- pages = {313--336},
- publisher = {JSTOR},
- title = {Lifetime earnings and the Vietnam era draft lottery: evidence from social security administrative records},
- year = {1990}
-}
 
 @article{angrist1991does,
  author = {Angrist, Joshua D and Krueger, Alan B},
@@ -165,37 +102,37 @@
  year = {1991}
 }
 
-@article{angrist1996identification,
- author = {Angrist, Joshua D and Imbens, Guido W and Rubin, Donald B},
- journal = {Journal of the American statistical Association},
- note = {\url{https://doi.org/10.2307/2291634}},
- number = {434},
- pages = {444--455},
- publisher = {Taylor \& Francis},
- title = {Identification of causal effects using instrumental variables},
- volume = {91},
- year = {1996}
+@article{angrist1998estimating,
+ author = {Angrist, Joshua D},
+ journal = {Econometrica},
+ note = {\url{https://doi.org/10.2307/2998558}},
+ number = {2},
+ pages = {249--288},
+ publisher = {Blackwell Publishing Inc.},
+ title = {Estimating the labor market impact of voluntary military service using social security data on military applicants},
+ volume = {66},
+ year = {1998}
 }
 
-@article{angrist2010extrapolate,
- author = {Angrist, Joshua D and Fernandez-Val, Ivan},
- booktitle = {Advances in Economics and Econometrics: Volume 3, Econometrics: Tenth World Congress},
- journal = {Advances in Economics and Econometrics: Volume 3, Econometrics: Tenth World Congress},
- note = {\url{https://doi.org/10.1017/cbo9781139060035.012}},
- organization = {Cambridge University Press},
- pages = {401},
- title = {ExtrapoLATE-ing: External Validity and Overidentification in the LATE Framework},
- volume = {51},
- year = {2013}
+@incollection{angrist1999,
+ author = {Joshua D. Angrist and Alan B. Krueger},
+ doi = {https://doi.org/10.1016/S1573-4463(99)03004-7},
+ editor = {Orley C. Ashenfelter and David Card},
+ issn = {1573-4463},
+ note = {\url{https://doi.org/10.1016/S1573-4463(99)03004-7}},
+ pages = {1277-1366},
+ publisher = {Elsevier},
+ series = {Handbook of Labor Economics},
+ title = {Chapter 23 -- Empirical Strategies in Labor Economics},
+ volume = {3},
+ year = {1999}
 }
 
-@misc{armstrong2023adapting,
- archiveprefix = {arXiv},
- author = {Timothy B. Armstrong and Patrick Kline and Liyang Sun},
- eprint = {2305.14265},
- primaryclass = {econ.EM},
- title = {Adapting to Misspecification},
- year = {2023}
+@book{angrist2009mostly,
+ author = {Angrist, Joshua D and Pischke, J{\"o}rn-Steffen},
+ publisher = {Princeton university press},
+ title = {Mostly harmless econometrics: An empiricist's companion},
+ year = {2009}
 }
 
 @article{ashenfelter1994estimates,
@@ -208,39 +145,16 @@
  year = {1994}
 }
 
-@article{ashley2009assessing,
- author = {Ashley, Richard},
- journal = {Journal of Applied Econometrics},
- note = {\url{https://doi.org/10.1002/jae.1044}},
- number = {2},
- pages = {325--337},
- publisher = {Wiley Online Library},
- title = {Assessing the credibility of instrumental variables inference with imperfect instruments via sensitivity analysis},
- volume = {24},
- year = {2009}
-}
-
-@article{athey2016recursive,
- author = {Athey, Susan and Imbens, Guido},
- journal = {Proceedings of the National Academy of Sciences},
- note = {\url{https://doi.org/10.1073/pnas.1510489113}},
- number = {27},
- pages = {7353--7360},
- publisher = {National Acad Sciences},
- title = {Recursive partitioning for heterogeneous causal effects},
- volume = {113},
- year = {2016}
-}
-
-@article{athey2019generalized,
- author = {Athey, Susan and Tibshirani, Julie and Wager, Stefan},
- journal = {The Annals of Statistics},
- note = {\url{https://doi.org/10.1214/18-aos1709}},
- number = {2},
- pages = {1148--1178},
- title = {Generalized random forests},
- volume = {47},
- year = {2019}
+@article{ashenfelter1997estimates,
+ author = {Ashenfelter, Orley and Zimmerman, David J},
+ journal = {Review of Economics and Statistics},
+ note = {\url{https://doi.org/10.1162/003465397556421}},
+ number = {1},
+ pages = {1--9},
+ publisher = {MIT Press 238 Main St., Suite 500, Cambridge, MA 02142-1046, USA journals~…},
+ title = {Estimates of the returns to schooling from sibling data: Fathers, sons, and brothers},
+ volume = {79},
+ year = {1997}
 }
 
 @article{barban2021effect,
@@ -252,6 +166,32 @@
  title = {The effect of education on spousal education: a genetic approach},
  volume = {71},
  year = {2021}
+}
+
+@techreport{barcellos2021effect,
+ author = {Barcellos, Silvia H and Carvalho, Leandro and Turley, Patrick},
+ institution = {National Bureau of Economic Research},
+ title = {The effect of education on the relationship between genetics, early-life disadvantages, and later-life SES},
+ year = {2021}
+}
+
+@article{barcellos2023distributional,
+ author = {Barcellos, Silvia H and Carvalho, Leandro S and Turley, Patrick},
+ journal = {Journal of Human Resources},
+ note = {\url{https://doi.org/10.3368/jhr.59.2.0720-11064r1}},
+ number = {4},
+ pages = {1273--1306},
+ publisher = {University of Wisconsin Press},
+ title = {Distributional effects of education on health},
+ volume = {58},
+ year = {2023}
+}
+
+@techreport{barcellos2025education,
+ author = {Barcellos, Silvia H and Carvalho, Leandro and Langa, Kenneth and Nimmagadda, Sneha and Turley, Patrick},
+ institution = {National Bureau of Economic Research},
+ title = {Education and Dementia Risk},
+ year = {2025}
 }
 
 @article{barth2020genetic,
@@ -266,14 +206,25 @@
  year = {2020}
 }
 
-@article{black2022simple,
- author = {Black, Dan A and Joo, Joonhwi and LaLonde, Robert and Smith, Jeffrey A and Taylor, Evan J},
- journal = {Labour Economics},
- note = {\url{https://doi.org/10.1016/j.labeco.2022.102237}},
- pages = {102237},
- publisher = {Elsevier},
- title = {Simple tests for selection: Learning more from instrumental variables},
- volume = {79},
+@techreport{barth2022genetic,
+ author = {Barth, Daniel and Papageorge, Nicholas W and Thom, Kevin and Vel{\'a}squez-Giraldo, Mateo},
+ institution = {National Bureau of Economic Research},
+ title = {Genetic Endowments, Income Dynamics, and Wealth Accumulation Over the Lifecycle},
+ year = {2022}
+}
+
+@article{blackwell2024assumption,
+ author = {Blackwell, Matthew and Ma, Ruofan and Opacic, Aleksei},
+ journal = {arXiv preprint arXiv:2407.07072},
+ note = {\url{https://doi.org/10.20944/preprints202411.2377.v1}},
+ title = {Assumption Smuggling in Intermediate Outcome Tests of Causal Mechanisms},
+ year = {2024}
+}
+
+@techreport{blandhol2022tsls,
+ author = {Blandhol, Christine and Bonney, John and Mogstad, Magne and Torgovitsky, Alexander},
+ institution = {National Bureau of Economic Research Cambridge, MA},
+ title = {When is TSLS actually late?},
  year = {2022}
 }
 
@@ -288,6 +239,48 @@
  year = {2017}
 }
 
+@article{bolt2025genetic,
+ author = {Bolt, Uta and French, Eric and Warrier, Varun and Yang, Qianyu and Zhang, Weilong},
+ journal = {Faculty of Economics, University of Cambridge},
+ note = {\url{https://doi.org/10.1920/wp.ifs.2021.721}},
+ publisher = {Faculty of Economics, University of Cambridge},
+ title = {Genetic Endowments and Lifetime Earnings: Understanding the Mechanisms},
+ year = {2025}
+}
+
+@article{bolyard2025understanding,
+ author = {Bolyard, Atticus and Savelyev, Peter A},
+ journal = {Journal of Human Resources},
+ note = {\url{https://doi.org/10.3368/jhr.0521-11685r3}},
+ publisher = {University of Wisconsin Press},
+ title = {Understanding the Educational Attainment Polygenic Index and its Interactions with SES in Determining Health in Young Adulthood},
+ year = {2025}
+}
+
+@article{bonjour2003returns,
+ author = {Bonjour, Dorothe and Cherkas, Lynn F and Haskel, Jonathan E and Hawkes, Denise D and Spector, Tim D},
+ journal = {American Economic Review},
+ note = {\url{https://doi.org/10.1257/000282803322655554}},
+ number = {5},
+ pages = {1799--1812},
+ publisher = {American Economic Association},
+ title = {Returns to education: Evidence from UK twins},
+ volume = {93},
+ year = {2003}
+}
+
+@article{borusyak2023nonrandom,
+ author = {Borusyak, Kirill and Hull, Peter},
+ journal = {Econometrica},
+ note = {\url{https://doi.org/10.3982/ecta19367}},
+ number = {6},
+ pages = {2155--2185},
+ publisher = {Wiley Online Library},
+ title = {Nonrandom exposure to exogenous shocks},
+ volume = {91},
+ year = {2023}
+}
+
 @article{bowden2015mendelian,
  author = {Bowden, Jack and Davey Smith, George and Burgess, Stephen},
  journal = {International journal of epidemiology},
@@ -300,8 +293,52 @@
  year = {2015}
 }
 
+@article{bryson2025gender,
+ author = {Bryson, Alex and Morris, Tim and Bann, David and Wilkinson, David},
+ journal = {Economics \& Human Biology},
+ note = {\url{https://doi.org/10.2139/ssrn.4944964}},
+ pages = {101471},
+ publisher = {Elsevier},
+ title = {The gender wage gap across life: Effects of genetic predisposition towards higher educational attainment},
+ volume = {56},
+ year = {2025}
+}
+
+@techreport{buscha2015wage,
+ author = {Buscha, Franz and Dickson, Matt},
+ institution = {IZA Discussion Papers},
+ title = {The wage returns to education over the life-cycle: heterogeneity and the role of experience},
+ year = {2015}
+}
+
+@article{calonico2014robust,
+ author = {Calonico, Sebastian and Cattaneo, Matias D and Titiunik, Rocio},
+ journal = {Econometrica},
+ note = {\url{https://doi.org/10.3982/ecta11757}},
+ number = {6},
+ pages = {2295--2326},
+ publisher = {Wiley Online Library},
+ title = {Robust nonparametric confidence intervals for regression-discontinuity designs},
+ volume = {82},
+ year = {2014}
+}
+
+@article{calonico2015rdrobust,
+ author = {Calonico, Sebastian and Cattaneo, Matias D. and Titiunik, Rocío},
+ issn = {2073-4859},
+ issue = {1},
+ journal = {The R Journal},
+ note = {\url{https://doi.org/10.32614/RJ-2015-004}},
+ pages = {38-51},
+ title = {rdrobust: An R Package for Robust Nonparametric Inference in Regression-Discontinuity Designs},
+ volume = {7},
+ year = {2015}
+}
+
 @misc{card1993using,
  author = {Card, David},
+ journal = {National Bureau of Economic Research Cambridge, Mass., USA},
+ note = {\url{https://doi.org/10.3386/w4483}},
  publisher = {National Bureau of Economic Research Cambridge, Mass., USA},
  title = {Using geographic variation in college proximity to estimate the return to schooling},
  year = {1993}
@@ -318,28 +355,51 @@
  year = {1999}
 }
 
-@article{chen2008alcohol,
- author = {Chen, Lina and Davey Smith, George and Harbord, Roger M and Lewis, Sarah J},
- journal = {PLoS medicine},
- note = {\url{https://doi.org/10.1371/journal.pmed.0050052}},
+@article{carvalho2024genetics,
+ author = {Carvalho, Leandro S},
+ journal = {Journal of Political Economy Microeconomics},
+ note = {\url{https://doi.org/10.1086/732835}},
  number = {3},
- pages = {e52},
- publisher = {Public Library of Science San Francisco, USA},
- title = {Alcohol intake and blood pressure: a systematic review implementing a Mendelian randomization approach},
- volume = {5},
- year = {2008}
+ pages = {000--000},
+ publisher = {The University of Chicago Press Chicago, IL},
+ title = {Genetics and Socioeconomic Status: Some Preliminary Evidence on Mechanisms},
+ volume = {3},
+ year = {2025}
 }
 
-@article{conley2012plausibly,
- author = {Conley, Timothy G and Hansen, Christian B and Rossi, Peter E},
- journal = {Review of Economics and Statistics},
- note = {\url{https://doi.org/10.1162/REST_a_00139}},
- number = {1},
- pages = {260--272},
- publisher = {The MIT Press},
- title = {Plausibly exogenous},
- volume = {94},
- year = {2012}
+@article{clark2013effect,
+ author = {Clark, Damon and Royer, Heather},
+ journal = {American Economic Review},
+ note = {\url{https://doi.org/10.1257/aer.103.6.2087}},
+ number = {6},
+ pages = {2087--2120},
+ publisher = {American Economic Association},
+ title = {The effect of education on adult mortality and health: Evidence from Britain},
+ volume = {103},
+ year = {2013}
+}
+
+@article{davies2018causal,
+ author = {Davies, Neil M and Dickson, Matt and Davey Smith, George and Van Den Berg, Gerard J and Windmeijer, Frank},
+ journal = {Nature human behaviour},
+ note = {\url{https://doi.org/10.1038/s41562-017-0279-y}},
+ number = {2},
+ pages = {117--125},
+ publisher = {Nature Publishing Group UK London},
+ title = {The causal effects of education on health outcomes in the UK Biobank},
+ volume = {2},
+ year = {2018}
+}
+
+@misc{DoubleML2020,
+ author = {P. Bach and V. Chernozhukov and M. S. Kurz and M. Spindler and Sven Klaassen},
+ journal = {Journal of Statistical Software},
+ note = {\url{https://doi.org/10.18637/jss.v108.i03}},
+ number = {3},
+ pages = {1-56},
+ title = {{DoubleML} --- {A}n Object-Oriented Implementation of Double Machine Learning in {R}},
+ volume = {108},
+ year = {2024}
 }
 
 @article{ference2017low,
@@ -366,37 +426,40 @@
  year = {2011}
 }
 
-@article{flores2009identification,
- author = {Flores, Carlos A and Flores-Lagunes, Alfonso},
- journal = {IZA Discussion paper},
- note = {\url{https://doi.org/10.2139/ssrn.1423353}},
- publisher = {IZA Discussion paper},
- title = {Identification and estimation of causal mechanisms and net effects of a treatment under unconfoundedness},
- year = {2009}
-}
-
-@article{flores2013partial,
- author = {Flores, Carlos A and Flores-Lagunes, Alfonso},
+@article{gelman2019high,
+ author = {Gelman, Andrew and Imbens, Guido},
  journal = {Journal of Business \& Economic Statistics},
- note = {\url{https://doi.org/10.1080/07350015.2013.822760}},
- number = {4},
- pages = {534--545},
+ note = {\url{https://doi.org/10.3386/w20405}},
+ number = {3},
+ pages = {447--456},
  publisher = {Taylor \& Francis},
- title = {Partial identification of local average treatment effects with an invalid instrument},
- volume = {31},
- year = {2013}
+ title = {Why high-order polynomials should not be used in regression discontinuity designs},
+ volume = {37},
+ year = {2019}
 }
 
-@article{frolich2007nonparametric,
- author = {Fr{\"o}lich, Markus},
- journal = {Journal of Econometrics},
- note = {\url{https://doi.org/10.1016/j.jeconom.2006.06.004}},
+@article{gillen2019experimenting,
+ author = {Gillen, Ben and Snowberg, Erik and Yariv, Leeat},
+ journal = {Journal of Political Economy},
+ note = {\url{https://doi.org/10.1086/701681}},
+ number = {4},
+ pages = {1826--1863},
+ publisher = {The University of Chicago Press Chicago, IL},
+ title = {Experimenting with measurement error: Techniques with applications to the caltech cohort study},
+ volume = {127},
+ year = {2019}
+}
+
+@article{green2010enough,
+ author = {Green, Donald P and Ha, Shang E and Bullock, John G},
+ journal = {The Annals of the American Academy of Political and Social Science},
+ note = {\url{https://doi.org/10.1177/0002716209351526}},
  number = {1},
- pages = {35--75},
- publisher = {Elsevier},
- title = {Nonparametric IV estimation of local average treatment effects with covariates},
- volume = {139},
- year = {2007}
+ pages = {200--208},
+ publisher = {Sage Publications Sage CA: Los Angeles, CA},
+ title = {Enough already about “black box” experiments: Studying mediation is more difficult than most scholars suppose},
+ volume = {628},
+ year = {2010}
 }
 
 @manual{grf,
@@ -406,47 +469,58 @@
  year = {2023}
 }
 
-@book{heckman1991randomisation,
- author = {Heckman, James Joseph},
- publisher = {National Bureau of Economic Research Cambridge, MA},
- title = {Randomization and social policy evaluation},
- year = {1991}
+@article{harmon1995estimates,
+ author = {Harmon, Colm and Walker, Ian},
+ journal = {The American Economic Review},
+ note = {\url{https://doi.org/10.1920/wp.ifs.1995.9512}},
+ number = {5},
+ pages = {1278--1286},
+ publisher = {JSTOR},
+ title = {Estimates of the economic return to schooling for the United Kingdom},
+ volume = {85},
+ year = {1995}
 }
 
-@article{heckman2005structural,
- author = {Heckman, James J and Vytlacil, Edward},
- journal = {Econometrica},
- note = {\url{https://doi.org/10.1111/j.1468-0262.2005.00594.x}},
- number = {3},
- pages = {669--738},
- publisher = {Wiley Online Library},
- title = {Structural equations, treatment effects, and econometric policy evaluation 1},
- volume = {73},
- year = {2005}
-}
-
-@misc{hrs2020,
- note = {Produced and distributed by the University of Michigan with funding from the National Institute on Aging (grant number NIA U01AG009740). Ann Arbor, MI, (2020).},
- title = {Health and Retirement Study Core Public Use Dataset},
- year = {2020}
-}
-
-@misc{hrs2020genes,
- note = {Produced and distributed by the University of Michigan with funding from the National Institute on Aging (grant number NIA U01AG009740). Ann Arbor, MI, (2020).},
- title = {Health and Retirement Study Polygenic Scores -- Release 4.3},
- year = {2023}
-}
-
-@article{huber2015testing,
- author = {Huber, Martin and Mellace, Giovanni},
- journal = {Review of Economics and Statistics},
- note = {\url{https://doi.org/10.1162/rest_a_00450}},
+@article{hill2008data,
+ author = {Hill, William G and Goddard, Michael E and Visscher, Peter M},
+ journal = {PLoS genetics},
+ note = {\url{https://doi.org/10.1371/journal.pgen.1000008}},
  number = {2},
- pages = {398--411},
- publisher = {The MIT Press},
- title = {Testing instrument validity for LATE identification based on inequality moment constraints},
- volume = {97},
- year = {2015}
+ pages = {e1000008},
+ publisher = {Public Library of Science San Francisco, USA},
+ title = {Data and theory point to mainly additive genetic variance for complex traits},
+ volume = {4},
+ year = {2008}
+}
+
+@techreport{houmark2022genetic,
+ author = {Houmark, Mikkel Aagaard and Ronda, Victor and Agerbo, Esben and Mortensen, Preben Bo and Rosholm, Michael},
+ institution = {Institute of Labor Economics (IZA)},
+ note = {\url{https://doi.org/10.2139/ssrn.4158731}},
+ title = {Genetic and Socioeconomic Achievement Gaps in Elementary School},
+ year = {2022}
+}
+
+@article{houmark2024nurture,
+ author = {Houmark, Mikkel Aagaard and Ronda, Victor and Rosholm, Michael},
+ journal = {American Economic Review},
+ note = {\url{https://doi.org/10.1257/aer.20220456}},
+ number = {2},
+ pages = {385--425},
+ publisher = {American Economic Association 2014 Broadway, Suite 305, Nashville, TN 37203},
+ title = {The nurture of nature and the nature of nurture: How genes and investments interact in the formation of skills},
+ volume = {114},
+ year = {2024}
+}
+
+@article{huber2019review,
+ author = {Huber, Martin},
+ journal = {Handbook of labor, human resources and population economics},
+ note = {\url{https://doi.org/10.1007/978-3-319-57365-6_162-1}},
+ pages = {1--38},
+ publisher = {Springer},
+ title = {Mediation analysis},
+ year = {2020}
 }
 
 @article{imai2010identification,
@@ -457,18 +531,6 @@
  publisher = {JSTOR},
  title = {Identification, Inference and Sensitivity Analysis for Causal Mediation Effects},
  year = {2010}
-}
-
-@article{imbens1994identification,
- author = {Imbens, Gw and Angrist, Jd},
- journal = {Econometrica},
- note = {\url{https://doi.org/10.2307/2951620}},
- number = {2},
- pages = {467--475},
- publisher = {John Wiley and Sons},
- title = {Identification and Estimation of Local Average Treatment Effects},
- volume = {62},
- year = {1994}
 }
 
 @article{international2011genetic,
@@ -483,13 +545,6 @@
  year = {2011}
 }
 
-@techreport{jones2015economics,
- author = {Jones, Damon},
- institution = {National Bureau of Economic Research},
- title = {The economics of exclusion restrictions in iv models},
- year = {2015}
-}
-
 @article{kari2020education,
  author = {Kari, Jaana T and Viinikainen, Jutta and B{\"o}ckerman, Petri and Tammelin, Tuija H and Pitk{\"a}nen, Niina and Lehtim{\"a}ki, Terho and Pahkala, Katja and Hirvensalo, Mirja and Raitakari, Olli T and Pehkonen, Jaakko},
  journal = {Scandinavian Journal of Medicine \& Science in Sports},
@@ -502,24 +557,26 @@
  year = {2020}
 }
 
-@article{kitagawa2015test,
- author = {Kitagawa, Toru},
+@article{kline2019heckits,
+ author = {Kline, Patrick and Walters, Christopher R},
  journal = {Econometrica},
- note = {\url{https://doi.org/10.3982/ecta11974}},
- number = {5},
- pages = {2043--2063},
+ note = {\url{https://doi.org/10.3982/ecta15444}},
+ number = {2},
+ pages = {677--696},
  publisher = {Wiley Online Library},
- title = {A test for instrument validity},
- volume = {83},
- year = {2015}
+ title = {On Heckits, LATE, and numerical equivalence},
+ volume = {87},
+ year = {2019}
 }
 
-@article{lal2023much,
- author = {Lal, Apoorva and Lockhart, Mac and Xu, Yiqing and Zu, Ziwen},
- journal = {arXiv preprint arXiv:2303.11399},
- note = {\url{https://doi.org/10.2139/ssrn.3905329}},
- title = {How much should we trust instrumental variable estimates in political science? Practical advice based on over 60 replicated studies},
- year = {2023}
+@article{kweon2025associations,
+ author = {Kweon, Hyeokmoon and Burik, Casper AP and Ning, Yuchen and Ahlskog, Rafael and Xia, Charley and Abner, Erik and Bao, Yanchun and Bhatta, Laxmi and Faquih, Tariq O and de Feijter, Maud and others},
+ journal = {Nature human behaviour},
+ note = {\url{https://doi.org/10.62891/aac85602}},
+ pages = {1--12},
+ publisher = {Nature Publishing Group UK London},
+ title = {Associations between common genetic variants and income provide insights about the socio-economic health gradient},
+ year = {2025}
 }
 
 @article{lawlor2008mendelian,
@@ -534,18 +591,6 @@
  year = {2008}
 }
 
-@article{lee2009training,
- author = {Lee, David S},
- journal = {Review of Economic Studies},
- note = {\url{https://doi.org/10.1111/j.1467-937x.2009.00536.x}},
- number = {3},
- pages = {1071--1102},
- publisher = {Oxford University Press},
- title = {Training, wages, and sample selection: Estimating sharp bounds on treatment effects},
- volume = {76},
- year = {2009}
-}
-
 @article{lee2018gene,
  author = {Lee, James J and Wedow, Robbee and Okbay, Aysu and Kong, Edward and Maghzian, Omeed and Zacher, Meghan and Nguyen-Viet, Tuan Anh and Bowers, Peter and Sidorenko, Julia and Karlsson Linn{\'e}r, Richard and others},
  journal = {Nature genetics},
@@ -558,39 +603,84 @@
  year = {2018}
 }
 
-@article{mogstad2018identification,
- author = {Mogstad, Magne and Torgovitsky, Alexander},
- journal = {Annual Review of Economics},
- note = {\url{https://doi.org/10.1146/annurev-economics-101617-041813}},
- pages = {577--613},
- publisher = {Annual Reviews},
- title = {Identification and extrapolation of causal effects with instrumental variables},
- volume = {10},
- year = {2018}
+@article{manski2011genes,
+ author = {Manski, Charles F},
+ journal = {Journal of Economic Perspectives},
+ note = {\url{https://doi.org/10.1257/jep.25.4.83}},
+ number = {4},
+ pages = {83--94},
+ publisher = {American Economic Association},
+ title = {Genes, eyeglasses, and social policy},
+ volume = {25},
+ year = {2011}
 }
 
-@article{mogstad2018using,
- author = {Mogstad, Magne and Santos, Andres and Torgovitsky, Alexander},
- journal = {Econometrica},
- note = {\url{https://doi.org/10.3982/ecta15463}},
- number = {5},
- pages = {1589--1619},
- publisher = {Wiley Online Library},
- title = {Using instrumental variables for inference about policy relevant treatment parameters},
- volume = {86},
- year = {2018}
+@article{marioni2016genetic,
+ author = {Marioni, Riccardo E and Ritchie, Stuart J and Joshi, Peter K and Hagenaars, Saskia P and Okbay, Aysu and Fischer, Krista and Adams, Mark J and Hill, W David and Davies, Gail and Social Science Genetic Association Consortium and others},
+ journal = {Proceedings of the National Academy of Sciences},
+ note = {\url{https://doi.org/10.1073/pnas.1605334113}},
+ number = {47},
+ pages = {13366--13371},
+ publisher = {National Acad Sciences},
+ title = {Genetic variants linked to education predict longevity},
+ volume = {113},
+ year = {2016}
 }
 
-@article{mourifie2017testing,
- author = {Mourifi{\'e}, Ismael and Wan, Yuanyuan},
- journal = {Review of Economics and Statistics},
- note = {\url{https://doi.org/10.1162/rest.88.3.578}},
- number = {2},
- pages = {305--313},
- publisher = {MIT Press One Rogers Street, Cambridge, MA 02142-1209, USA journals-info~…},
- title = {Testing local average treatment effect assumptions},
- volume = {99},
+@article{martin2017human,
+ author = {Martin, Alicia R and Gignoux, Christopher R and Walters, Raymond K and Wojcik, Genevieve L and Neale, Benjamin M and Gravel, Simon and Daly, Mark J and Bustamante, Carlos D and Kenny, Eimear E},
+ journal = {The American Journal of Human Genetics},
+ note = {\url{https://doi.org/10.1016/j.ajhg.2017.03.004}},
+ number = {4},
+ pages = {635--649},
+ publisher = {Elsevier},
+ title = {Human demographic history impacts genetic risk prediction across diverse populations},
+ volume = {100},
  year = {2017}
+}
+
+@article{mediation-natural-experiment,
+ author = {Senan Hogan-Hennessy},
+ note = {\url{https://doi.org/10.48550/arXiv.2508.05449}},
+ title = {{Causal Mediation in Natural Experiments.}},
+ year = {2025}
+}
+
+@article{mendel1865versuche,
+ author = {Mendel, Gregor},
+ journal = {Vorgelegt in den Sitzungen},
+ note = {\url{https://doi.org/10.5962/bhl.title.61004}},
+ title = {Versuche uber pflanzen-hybriden},
+ year = {1865}
+}
+
+@article{millwood2023alcohol,
+ author = {Millwood, Iona Y and Im, Pek Kei and Bennett, Derrick and Hariri, Parisa and Yang, Ling and Du, Huaidong and Kartsonaki, Christiana and Lin, Kuang and Yu, Canqing and Chen, Yiping and others},
+ journal = {The Lancet Public Health},
+ note = {\url{https://doi.org/10.1016/s2468-2667(23)00217-7}},
+ number = {12},
+ pages = {e956--e967},
+ publisher = {Elsevier},
+ title = {Alcohol intake and cause-specific mortality: conventional and genetic evidence in a prospective cohort study of 512 000 adults in China},
+ volume = {8},
+ year = {2023}
+}
+
+@article{mincer1974schooling,
+ author = {Mincer, Jacob A},
+ journal = {NBER Books},
+ note = {\url{https://doi.org/10.1007/0-387-29175-x_11}},
+ publisher = {National Bureau of Economic Research, Inc},
+ title = {Schooling, Experience, and Earnings},
+ year = {1974}
+}
+
+@article{muslimova2025environment,
+ author = {Muslimova, Dilnoza and Van Kippersluis, Hans and Rietveld, Cornelius  A. and Von Hinke, Stephanie and Meddens, S. Fleur  W.},
+ journal = {Journal of Labor Economics (Forthcoming)},
+ note = {\url{https://doi.org/10.1086/734087}},
+ title = {Gene-Environment Complementarity in Educational Attainment},
+ year = {2025}
 }
 
 @article{okbay2016genome,
@@ -605,6 +695,30 @@
  year = {2016}
 }
 
+@article{okbay2022polygenic,
+ author = {Okbay, Aysu and Wu, Yeda and Wang, Nancy and Jayashankar, Hariharan and Bennett, Michael and Nehzati, Seyed Moeen and Sidorenko, Julia and Kweon, Hyeokmoon and Goldman, Grant and Gjorgjieva, Tamara and others},
+ journal = {Nature genetics},
+ note = {\url{https://doi.org/10.3410/f.733675894.793549439}},
+ number = {4},
+ pages = {437--449},
+ publisher = {Nature Publishing Group US New York},
+ title = {Polygenic prediction of educational attainment within and between families from genome-wide association analyses in 3 million individuals},
+ volume = {54},
+ year = {2022}
+}
+
+@article{oreopoulos2006estimating,
+ author = {Oreopoulos, Philip},
+ journal = {American Economic Review},
+ note = {\url{https://doi.org/10.1257/000282806776157641}},
+ number = {1},
+ pages = {152--175},
+ publisher = {American Economic Association},
+ title = {Estimating average and local average treatment effects of education when compulsory schooling laws really matter},
+ volume = {96},
+ year = {2006}
+}
+
 @article{papageorge2020genes,
  author = {Papageorge, Nicholas W and Thom, Kevin},
  journal = {Journal of the European Economic Association},
@@ -617,12 +731,11 @@
  year = {2020}
 }
 
-@article{pearl2003direct,
- author = {Judea Pearl},
- journal = {Proceedings of the Seventeenth Conference on Uncertainty in Artifical Intelligence},
- note = {\url{https://doi.org/10.1145/3501714.3501736}},
- title = {Direct and Indirect Effects},
- year = {2001}
+@techreport{patrinos2025causal,
+ author = {Patrinos, Harry Anthony and Psacharopoulos, George},
+ institution = {GLO Discussion Paper},
+ title = {Causal Returns to Education},
+ year = {2025}
 }
 
 @manual{R2023,
@@ -632,25 +745,6 @@
  title = {R: A Language and Environment for Statistical Computing},
  url = {https://www.R-project.org/},
  year = {2023}
-}
-
-@article{rambachan2023more,
- author = {Rambachan, Ashesh and Roth, Jonathan},
- journal = {Review of Economic Studies},
- note = {\url{https://doi.org/10.1093/restud/rdad018}},
- publisher = {Oxford University Press US},
- title = {A more credible approach to parallel trends},
- year = {2023}
-}
-
-@article{robins2003semantics,
- author = {Robins, James M},
- journal = {Oxford Statistical Science Series},
- note = {\url{https://doi.org/10.1093/oso/9780198510550.003.0007}},
- pages = {70--82},
- publisher = {OXFORD UNIV PRESS},
- title = {Semantics of causal DAG models and the identification of direct and indirect effects},
- year = {2003}
 }
 
 @article{roy1951some,
@@ -665,52 +759,47 @@
  year = {1951}
 }
 
-@article{rubin1990comment,
- author = {Rubin, Donald B},
- journal = {Statistical Science},
- note = {\url{https://doi.org/10.1214/ss/1177012032}},
+@article{sanz2025sibling,
+ author = {Sanz-de-Galdeano, Anna and Terskaya, Anastasia},
+ journal = {Review of Economics and Statistics},
+ note = {\url{https://doi.org/10.1162/rest_a_01326}},
+ number = {5},
+ pages = {1356--1370},
+ publisher = {MIT Press 255 Main Street, 9th Floor, Cambridge, Massachusetts 02142, USA~…},
+ title = {Sibling differences in genetic propensity for education: How do parents react?},
+ volume = {107},
+ year = {2025}
+}
+
+@article{schork2022indirect,
+ author = {Schork, Andrew J and Peterson, Roseann E and Dahl, Andrew and Cai, Na and Kendler, Kenneth S},
+ journal = {Nature genetics},
+ note = {\url{https://doi.org/10.1038/s41588-021-00999-5}},
  number = {4},
- pages = {472--480},
- publisher = {Citeseer},
- title = {Comment: Neyman (1923) and causal inference in experiments and observational studies},
- volume = {5},
- year = {1990}
-}
-
-@misc{sanchezbecerra2023robust,
- archiveprefix = {arXiv},
- author = {Alejandro Sanchez-Becerra},
- eprint = {2306.03363},
- primaryclass = {econ.EM},
- title = {Robust inference for the treatment effect variance in experiments using machine learning},
- year = {2023}
-}
-
-@misc{semenova2023generalized,
- archiveprefix = {arXiv},
- author = {Vira Semenova},
- eprint = {2008.12720},
- primaryclass = {econ.EM},
- title = {Generalized Lee Bounds},
- year = {2023}
-}
-
-@misc{singh2022double,
- archiveprefix = {arXiv},
- author = {Rahul Singh and Liyang Sun},
- eprint = {1909.05244},
- note = {\url{https://doi.org/10.48550/arXiv.1909.05244}},
- primaryclass = {stat.ML},
- title = {Double Robustness for Complier Parameters and a Semiparametric Test for Complier Characteristics},
+ pages = {372--373},
+ publisher = {Nature Publishing Group US New York},
+ title = {Indirect paths from genetics to education},
+ volume = {54},
  year = {2022}
 }
 
-@article{slichter2014testing,
- author = {Slichter, David},
- journal = {Rochester: University of Rochester},
- note = {\url{https://www.sole-jole.org/assets/docs/14436.pdf}},
- title = {Testing instrument validity and identification with invalid instruments},
- year = {2014}
+@book{smith1937wealth,
+ author = {Adam Smith},
+ title = {{The Wealth of Nations}},
+ volume = {1},
+ year = {1776}
+}
+
+@article{spiller2019detecting,
+ author = {Spiller, Wes and Slichter, David and Bowden, Jack and Davey Smith, George},
+ journal = {International journal of epidemiology},
+ note = {\url{https://doi.org/10.1093/ije/dyy204}},
+ number = {3},
+ pages = {702--712},
+ publisher = {Oxford University Press},
+ title = {Detecting and correcting for bias in Mendelian randomization analyses using gene-by-environment interactions},
+ volume = {48},
+ year = {2019}
 }
 
 @manual{stargazer,
@@ -756,18 +845,6 @@
  year = {2021}
 }
 
-@article{van2018beyond,
- author = {Van Kippersluis, Hans and Rietveld, Cornelius A},
- journal = {The Econometrics Journal},
- note = {\url{https://doi.org/10.1111/ectj.12113}},
- number = {3},
- pages = {316--331},
- publisher = {Wiley Online Library},
- title = {Beyond plausibly exogenous},
- volume = {21},
- year = {2018}
-}
-
 @article{van2018pleiotropy,
  author = {Van Kippersluis, Hans and Rietveld, Cornelius A},
  journal = {International journal of epidemiology},
@@ -778,6 +855,18 @@
  title = {Pleiotropy-robust Mendelian randomization},
  volume = {47},
  year = {2018}
+}
+
+@article{van2023overcoming,
+ author = {van Kippersluis, Hans and Biroli, Pietro and Dias Pereira, Rita and Galama, Titus J and von Hinke, Stephanie and Meddens, S Fleur W and Muslimova, Dilnoza and Slob, Eric AW and de Vlaming, Ronald and Rietveld, Cornelius A},
+ journal = {Nature communications},
+ note = {\url{https://doi.org/10.1101/2021.04.09.439157}},
+ number = {1},
+ pages = {4473},
+ publisher = {Nature Publishing Group UK London},
+ title = {Overcoming attenuation bias in regressions using polygenic indices},
+ volume = {14},
+ year = {2023}
 }
 
 @article{viinikainen2022does,
@@ -800,30 +889,6 @@
  title = {Genetic markers as instrumental variables},
  volume = {45},
  year = {2016}
-}
-
-@article{vytlacil2002independence,
- author = {Vytlacil, Edward},
- journal = {Econometrica},
- note = {\url{https://doi.org/10.1111/1468-0262.00277}},
- number = {1},
- pages = {331--341},
- publisher = {JSTOR},
- title = {Independence, monotonicity, and latent index models: An equivalence result},
- volume = {70},
- year = {2002}
-}
-
-@article{wager2018estimation,
- author = {Wager, Stefan and Athey, Susan},
- journal = {Journal of the American Statistical Association},
- note = {\url{https://doi.org/10.1080/01621459.2017.1319839}},
- number = {523},
- pages = {1228--1242},
- publisher = {Taylor \& Francis},
- title = {Estimation and inference of heterogeneous treatment effects using random forests},
- volume = {113},
- year = {2018}
 }
 
 @article{young2022mendelian,

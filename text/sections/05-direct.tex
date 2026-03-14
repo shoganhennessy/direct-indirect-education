@@ -56,20 +56,20 @@ evaluated at $z'$  --- again, a linearity assumption is assuming the average eff
     \label{fig:scm-cm}
     \begin{tikzpicture}
         \node[state,thick,ForestGreen] (mediator) at (0,0) {$D_i$};
-        \node[state,thick,blue] (treatment) [left=3cm of mediator] {$Z_i$};
-        \node[state,thick,red] (outcome) [right=3cm of mediator] {$Y_i$};
+        \node[state,thick,blue] (treatment) [left=4cm of mediator] {$Z_i$};
+        \node[state,thick,red] (outcome) [right=4cm of mediator] {$Y_i$};
         % Label Z_i, D, Y_i
         \node[color=ForestGreen, align=center] [above=0.25cm of mediator] {Education \\ years};
         \node[color=blue] [left=0.1cm of treatment, align=right] {Ed PGI};
-        \node[color=red] [right=-0.01cm of outcome, align=left] {Occupation \\ Wages};
+        \node[color=red] [right=-0.01cm of outcome, align=left] {Occupation \\ income \\$+$ wages};
         % Draw the causal arrows
         \path[->, thick] (treatment) edge (mediator);
         \path[->, thick] (mediator) edge (outcome);
         \path[->, thick] (treatment) edge[bend right=37.5] (outcome);
         % Label the effects
-        \node[color=orange] [below=1.2cm of mediator] {Direct effect};
+        \node[color=orange] [below=1.5cm of mediator] {Direct effect};
         \node[color=orange] [align=center] at ($(treatment)!0.5!(mediator)$) {Average \\education effect};
-        \node[color=orange] [right= 0.5cm of mediator, align=center] {Education \\ returns};
+        \node[color=orange] [align=center] at ($(mediator)!0.5!(outcome)$) {Education \\ returns};
         % Add in the unobserved confounding
         \path[<->,dashed,thick,color=RoyalBlue] (mediator) edge[bend right=-45] (outcome);
     \end{tikzpicture}

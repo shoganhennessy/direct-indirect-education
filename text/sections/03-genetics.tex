@@ -29,8 +29,8 @@ The child then receives their other copy from their father, by the same process,
 
 After conception, the child has inherited genetic variants from both parents --- one of the 4 possible discrete realisations, not the expected value.
 This result came about purely from random chance, conditional on at least one of parent having exactly one copy of the SNP, $x_{m(i),j}^\text{\textcolor{orange}{Mother}} = 1$ and/or $x_{f(i),j}^\text{\textcolor{blue}{Father}} = 1$.\footnote{
-    Note both parents having 0 or 2 copies of variant $j'$ leaves $x_{i',j'}^\text{\textcolor{red}{Random}} = \frac 12 \big( x_{m(i'),j'}^\text{\textcolor{orange}{Mother}}
-        + x_{f(i'),j'}^\text{\textcolor{blue}{Father}} \big)$, so that individual $i'$ inherited no random variation in variant $j'$.
+    Note both parents having 0 or 2 copies of variant $j'$ leaves $x_{i',j'}^\text{\textcolor{ForestGreen}{Child}} = \frac 12 \big( x_{m(i'),j'}^\text{\textcolor{orange}{Mother}}
+        + x_{f(i'),j'}^\text{\textcolor{blue}{Father}} \big)$, so that individual $i'$ inherited no random variation at variant $j'$.
 }
 
 \subsection{Mendelian Independent Inheritance in the Ed PGI}
@@ -61,8 +61,8 @@ The expected Ed PGI inheritance, therefore, is calculated using the same within-
 An individual's Ed PGI is drawn from the same distribution as their sibling, because they had the same parents; in absence of observing both parents directly, this approach uses the sibling to infer this distribution.
 
 This approach is equivalent to using observed parents because of the simple fact that children and parents are two independent draws from the parental genetic distribution.
-Write $Z_{s(i)}^\text{\textcolor{purple}{Sibling}}$ for child $i$'s observed sibling Ed PGI value, and $Z_{i, s(i)}^\text{\textcolor{purple}{Parental}} = \frac 12 \left( Z_i^\text{\textcolor{ForestGreen}{Child}} 
-        + Z_{s(i)}^\text{\textcolor{purple}{Sibling}} \right)$
+Write $Z_{s(i)}^\text{\textcolor{purple}{Sibling}}$ for child $i$'s observed sibling Ed PGI value, and $Z_{i, s(i)}^\text{\textcolor{purple}{Parental}} = \frac 12 \big( Z_i^\text{\textcolor{ForestGreen}{Child}} 
+    + Z_{s(i)}^\text{\textcolor{purple}{Sibling}} \big)$
 the imputed parental value.
 In expectation, a child and their observed sibling's Ed PGI together proxy for their unobserved parental PGI values.
 \[ \E{Z_{i, s(i)}^\text{\textcolor{purple}{Parental}}}
@@ -168,12 +168,11 @@ I rely on controlling for parental (imputed) Ed PGI values, for causal inference
 This yields estimates of causal effects if a child's Ed PGI is quasi-randomly assigned, conditional on their parents' Ed PGI mean --- the child's expected inheritance.
 \begin{equation}
     Z_i^\text{\textcolor{ForestGreen}{Child}}
-    \indep D_i(z'), Y_i(z', D_i(z'))
+    \indep \; D_i(z'), \; Y_i(z', D_i(z'))
     \;\;\;\; \Big | \;\;\;\; 
     Z_{i, s(i)}^\text{\textcolor{purple}{Parental}}
 \end{equation}
 
-A child's Ed PGI is quasi-randomly assigned conditional on parental PGI values.
 This identifying assumption is credible precisely because of the biology described above.
 The deviation away from expected inheritance represents the difference between a child's realised Ed PGI and the Ed PGI they were expected to inherit given their imputed parents' PGI values.
 This deviation arises solely from the random segregation of chromosomes during meiosis: at each of the thousands of SNPs entering the Ed PGI, whether a parent with one copy passes it on is determined by an independent coin flip, with no connection to the family environment, the child's later circumstances, or any other factor that might influence education or labour market outcomes.
@@ -204,7 +203,7 @@ Without linearity, OLS recovers a variance-weighted average of marginal effects,
 
 \paragraph{Limitations.}
 Several limitations apply to the estimates presented here.
-First, the OLS estimates of average education effect and average total effects (\autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}) are not simple averages across individuals, but rather convex weighted averages of individual-level causal effects, with weights determined by the OLS projection.\footnote{See \cite{angrist1999} and \cite[Section~3.5]{angrist2009mostly}}
+First, the OLS estimates of average education effect and average total effects (\autoref{eqn:parametric-firststage} and \eqref{eqn:parametric-secondstage}) are not simple averages across individuals, but rather convex weighted averages of individual-level causal effects, with weights determined by the OLS projection.\footnote{See \cite{angrist1999} and \citealt[Section~3.5]{angrist2009mostly}}
 Without assuming homogeneity of effects across the Ed PGI distribution, these estimates need not coincide with the population average total effect, and may place disproportionate weight on individuals whose Ed PGI deviates most from its conditional mean.
 
 Second, the analysis sample is restricted to UKB participants of European ancestry who have at least one observed sibling, as described in \autoref{sec:data}.
