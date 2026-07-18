@@ -2,12 +2,15 @@
 \label{sec:genetics}
 Genetic variants are not randomly assigned, which means that simple correlations between the Ed PGI and observed outcomes cannot straightforwardly be interpreted as causal.
 Genetic variation arises from inheritance: at conception, individuals inherit 23 chromosomes from each parent, obtaining half of their genetic variants from their mother and half from their father.
-Because parents transmit genetic material to their children, those who inherit a higher Ed PGI typically also inherit familial environments shaped by parents who themselves possess a higher Ed PGI.
-Consequently, correlations between an individual's Ed PGI and outcomes may reflect not only direct genetic effects but also indirect effects mediated through family environment, making these correlations confounded.
+Those who inherit a higher Ed PGI therefore typically also inherit familial environments shaped by parents who themselves possess a higher Ed PGI.
+Consequently, correlations between an individual's Ed PGI and outcomes may reflect effects operating through the family environment.
+However, inheritance also contains a random component: conditional on parental genetics, Mendelian inheritance generates random variation in the genetic variants a child receives.
+I use this variation to estimate the causal effects of the Ed PGI.
 
-However, while genetic inheritance generates systematic associations between genes and environments, it also includes a random component.
-Specifically, Mendelian inheritance ensures that there is random variation in the genetic variants a child inherits --- conditional on parental genetics.
-I use this random variation to estimate causal effects of the Ed PGI.
+This research design establishes the two causal effects used in the later mediation analysis: the Ed PGI's effect on education and its total effect on labour-market income.
+The design and resulting estimates build on existing work rather than constituting the paper's main new contribution.
+Nevertheless, establishing them correctly is essential because they provide the empirical inputs to the design-based decomposition that follows.
+The causal mediation analysis uses these causal estimates to separate the total income effect into the component operating through completed education years and the component remaining outside that channel.
 
 \subsection{Mendelian Independent Inheritance}
 I use variation away from parental values to estimate causal effects of having a higher versus lower Ed PGI.
@@ -60,7 +63,7 @@ Thus, I follow \cite{young2022mendelian} and leverage siblings' genetic data to 
 The expected Ed PGI inheritance, therefore, is calculated using the same within-family variation that early genetic studies did by examining within family differences.
 An individual's Ed PGI is drawn from the same distribution as their sibling, because they had the same parents; in absence of observing both parents directly, this approach uses the sibling to infer this distribution.
 
-This approach is equivalent to using observed parents because of the simple fact that children and parents are two independent draws from the parental genetic distribution.
+This approach is an acceptable substitute to the ideal case of using observed parents' data, because of the simple fact that children and parents are two independent draws from the same parental genetic distribution.
 Write $Z_{s(i)}^\text{\textcolor{parentColour}{Sibling}}$ for $i$'s sibling's Ed PGI value, and $Z_{i, s(i)}^\text{\textcolor{parentColour}{Parental}}$ for the imputed parental value, calculated using genetic data from the individual and their observed sibling.
 In expectation, a child and their observed sibling's Ed PGI together proxy for their unobserved parental PGI values.
 \[ \E{Z_{i, s(i)}^\text{\textcolor{parentColour}{Parental}}}
@@ -73,8 +76,8 @@ In expectation, a child and their observed sibling's Ed PGI together proxy for t
 
 However, because siblings collectively reveal approximately 75\% of the parental genetic variation, the resulting imputed values contain measurement error compared to the ideal (but unobserved) parental mean.
 The sibling-imputed parental mean PGI can be viewed as a proxy for the true parental mean PGI, inflating the variance in error term $u_i$ in \autoref{eqn:pgi-child}.
-This error reduces precision of using the imputed proxy measure, compared true parental values.
-Also, parental Ed PGI is included as a control variable with an estimated coefficient (instead of explicitly subtracting the expected value) as the coefficient between a child's Ed PGI and their expected inheritance will suffer from attenuation bias from using sibling imputed data.
+This error reduces precision of using the imputed proxy measure, compared to true parental PGI values.
+% Also, parental Ed PGI is included as a control variable with an estimated coefficient (instead of explicitly subtracting the expected value) as the coefficient between a child's Ed PGI and their expected inheritance will suffer from attenuation bias from using sibling imputed data.
 
 \begin{figure}[h!]
     \centering
@@ -105,18 +108,18 @@ Also, parental Ed PGI is included as a control variable with an estimated coeffi
 
 Children with a higher Ed PGI value inherit this from their parents, and so had parents with higher Ed PGI values.
 \autoref{fig:edpgi-dist} shows this tendency, where children with parents in the top decile of the imputed Ed PGI distribution have a mean Ed PGI 1.5 standard deviations above the mean --- and similarly for those at the bottom.\footnote{
-    Panel A of \autoref{fig:edpgi-dist} replicates the tendency shown in \citet[Figure~1]{houmark2024nurture}, with a different data source.
+    Panel A of \autoref{fig:edpgi-dist} replicates the tendency shown in \citet[Figure~1]{houmark2024nurture}, with a new data source.
 }
 This means parental Ed PGI values, with their effects on the children and the environment they are raised in, are a meaningful confounder for the effects of the child's own Ed PGI on education and labour market outcomes.
-But, after conditioning for parental imputed values, there is no correlation across the distribution; this reflects the fact that Mendelian independent assortment induces random quasi-random variation in the child's realised Ed PGI.
+Panel B shows that, after conditioning for parental imputed values, there is no correlation across the distribution; this reflects the fact that Mendelian independent assortment induces random quasi-random variation in the child's realised Ed PGI.
 
 \subsection{Causal Identification Strategy}
 Let $D_i(z)$ denote the potential education level and $Y_i(z, D_i(z))$ labour market outcome for individual $i$, under the hypothetical alternative realisation that $i$ had Ed PGI value $z$.
-Observed education and wages/income data are a sum of their respective potential outcomes.
-\[ D_i = \sum_{z} \indicator{
-    Z_i^\text{\textcolor{childColour}{Child}} = z} D_i(z), \;\;\;\;
-    Y_i = \sum_{z} \indicator{
-    Z_i^\text{\textcolor{childColour}{Child}} = z} Y_i(z, D_i(z)).
+Observed education and wages/income data are equal to the potential outcomes for their realised Ed PGI value, $Z_i^\text{\textcolor{childColour}{Child}}$.
+\[ D_i = D_i \left( Z_i^\text{\textcolor{childColour}{Child}} \right), \;\;\;\;
+    Y_i = 
+    Y_i \left( Z_i^\text{\textcolor{childColour}{Child}},
+        D_i \left( Z_i^\text{\textcolor{childColour}{Child}} \right) \right).
 \]
 Potential labour market outcomes $Y_i(z, D_i(z))$ are a function of both the Ed PGI value, and resulting education $D_i(z)$.
 This distinction is not important for measuring average genetic effects in this section, but will become the main focus in \autoref{sec:direct}.
@@ -125,10 +128,14 @@ This distinction is not important for measuring average genetic effects in this 
 This study aims to estimate the average causal effect of having a higher Ed PGI, which is summarised by the following marginal average effects --- averaged across the distibution of $Z_i^\text{\textcolor{childColour}{Child}}$:\footnote{
     Throughout, I assume that both $D_i(z)$ and $Y_i(z, D_i(z))$ are differentiable for any $z$ across the distribution of $Z_i^\text{\textcolor{childColour}{Child}}$, together with standard regularity conditions permitting differentiation under the expectation.
 }
-\[ \text{Average education effect } \partialdiff{z} \E{D_i(z)}, \;\;\;\; 
-    \text{Average total effect } 
-    \partialdiff{z} \E{Y_i(z, D_i(z))}. \]
-The average education effect represents the average effect of a one standard deviation increase in the Ed PGI on education, and the average total effect on labour market wages or income, \textit{ceteris paribus}.
+\[ \text{Average education effect} \coloneq \E{\partialdiff{z} D_i(z)}, \;\;\;\; 
+    \text{Average total effect} \coloneq
+    \E{ \partialdiff{z} Y_i(z, D_i(z))}. \]
+The average education effect is the average marginal change in education induced by a marginal increase in the Ed PGI;
+The average total effect is the corresponding marginal change in labour-market income, allowing education to respond to the Ed PGI, \textit{ceteris paribus}.\footnote{
+    Under the linear specification used below, these marginal effects are constant.
+    Because the Ed PGI is standardised, the regression coefficients can therefore be interpreted as the effects of a one-standard-deviation increase in the Ed PGI.
+}
 
 \begin{figure}[h!]
     \centering
@@ -173,7 +180,7 @@ For any $z$ in the range of the Ed PGI distribution,
     Z_{i, s(i)}^\text{\textcolor{parentColour}{Parental}}.
 \end{equation}
 
-This identifying assumption is credible precisely because of the biology described above.
+This identifying assumption is credible precisely because of the Mendelian independent variation described above.
 The deviation away from expected inheritance represents the difference between a child's realised Ed PGI and the Ed PGI they were expected to inherit given their imputed parents' PGI values.
 This deviation arises solely from the random segregation of chromosomes during meiosis: at each of the thousands of SNPs entering the Ed PGI, whether a parent with one copy passes it on is determined by an independent coin flip, with no connection to the family environment, the child's later circumstances, or any other factor that might influence education or labour market outcomes.
 A child who drew a higher Ed PGI than their expected inheritance is therefore not systematically different in family background, parental environment, or any other confounding factor from one who drew a lower value; the only difference is the outcome of independent biological coin flips at conception.

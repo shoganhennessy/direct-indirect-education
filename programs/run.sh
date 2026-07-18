@@ -52,3 +52,4 @@ cd ../text
 latexmk -pdf paper.tex
 latexmk -c
 cp paper.pdf ../direct-indirect-education-2026.pdf
+cp ../direct-indirect-education-2026.pdf ../../shoganhennessy.github.io/files/research/direct-indirect-education-2026.pdf

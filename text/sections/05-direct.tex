@@ -7,7 +7,8 @@ The second is an indirect channel: a higher Ed PGI induces more education, and t
 The size and robustness of the labour market effects documented in 
 \autoref{sec:genetic-effects} has led to a common interpretation in the literature that at least part of the Ed PGI's influence must operate through the direct channel.
 This view is often motivated by the fact that the Ed PGI predicts scores on tests aiming to measure fluid intelligence \citep{carvalho2024genetics}, by results showing earnings associations that persist even after conditioning on education \citep{papageorge2020genes,bryson2025gender}, and in work arguing that the Ed PGI captures skills related to financial literacy and other non-educational attributes \citep{barth2020genetic}.
-Separating these channels matters both for understanding the biological and social mechanisms behind genetic effects on earnings, and for policy: if the indirect channel dominates, then policies that expand access to education can, in principle, replicate much of the labour market advantage associated with a higher Ed PGI; if the direct channel dominates, the policy implications are considerably more complex.
+Separating these channels matters both for understanding the biological and social mechanisms behind genetic effects on earnings.
+%, and for policy: if the indirect channel dominates, then policies that expand access to education can, in principle, replicate much of the labour market advantage associated with a higher Ed PGI; if the direct channel dominates, the policy implications are considerably more complex.
 
 This section uses a Causal Mediation (CM) framework to decompose the average total effect of the Ed PGI into its direct and indirect components, where education years serves as the mediating variable.
 The key empirical challenge is that causal mediation analysis requires not only that the Ed PGI is quasi-randomly assigned (conditional on parental values), but also that the mediator is quasi-randomly assigned conditional on treatment, which is not credible for education in this setting.\footnote{
@@ -24,10 +25,11 @@ The total average total effect of the Ed PGI on labour market outcomes can be
 decomposed into a direct and indirect component.
 Formally, the direct and indirect effects are defined as:
 \begin{align*}
-    \text{Direct Effect} &= \partialdiff{z}
-        \E{Y_i(z, D_i(Z_i^\text{\textcolor{childColour}{Child}}))}, \\
-    \text{Indirect Effect} &= \partialdiff{z}
-        \E{Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}.
+    \text{Direct Effect} &=
+        \E{\partialdiff{z} Y_i(z, D_i(Z_i^\text{\textcolor{childColour}{Child}}))}, \\
+    \text{Indirect Effect} &=
+        \E{\partialdiff{z}
+            Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}.
 \end{align*}
 The direct effect captures the effect of the Ed PGI on earnings holding the education channel fixed; the indirect effect captures the effect that operates exclusively through the induced change in education.
 These sum to the average total effect $\theta$ estimated in 
@@ -94,7 +96,7 @@ However, it is possible to parametrically identify the direct and indirect effec
 
 The indirect effect equals the average education effect $\pi$ --- credibly 
 identified by the Mendelian design --- multiplied by the returns to an additional year of education, $\beta$.
-With heterogeneous treatment effects, $\beta$ represents the average education returns for people pushed into (i.e., $D_i(Z_i^\text{\textcolor{childColour}{Child}})$ compliers).\footnote{
+With heterogeneous treatment effects, $\beta$ represents the average education returns for people pushed into more years of education.\footnote{
     Note that this is a parametrically identified model, because the correlational measure (and accompanying senstivity analysis) is meant to inform the local average effect for $D_i(Z_i^\text{\textcolor{childColour}{Child}})$ compliers --- but does not non-parametrically identify it.
 }
 The direct effect then follows as average total effect minus the indirect effect,

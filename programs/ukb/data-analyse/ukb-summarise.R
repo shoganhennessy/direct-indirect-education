@@ -182,7 +182,7 @@ summary.table <- function(given.data){
     table.data <- given.data %>%
         transmute(
             # Basic demographics.
-            "\\\\[-1.8ex] \\textit{Demographics:}" = NA,
+            "\\\\[-1.8ex] \\textit{\\textbf{Demographics:}}" = NA,
             "Male" = sex_male,
             "Age"  = recruitedage,
             "Lives in city" = urban,
@@ -190,7 +190,7 @@ summary.table <- function(given.data){
             "Any siblings also in UKB?"     = sibling_present,
             "Count of siblings in UKB" = sibling_count,
             # Genetic variables.
-            "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{Genetic Measures:}" = NA,
+            "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{\\textbf{Genetic Measures:}}" = NA,
             "Ed PGI"                        = edpgi_all_imputed_self,
             "Ed PGI, imputed parental mean" = edpgi_all_imputed_parental,
             "Other PGI: ADHD"               = adhd_pgi,
@@ -201,7 +201,7 @@ summary.table <- function(given.data){
             "Other PGI: Height"             = height_pgi,
             "Other PGI: Schizophrenia"      = schizophrenia_pgi,
             # Education variables
-            "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{Education:}" = NA,
+            "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{\\textbf{Education:}}" = NA,
             "Education years" = edyears,
             "Age left education" = agefinishededuc,
             "Qualification, University degree" = edqual_highered,
@@ -211,7 +211,7 @@ summary.table <- function(given.data){
             "Qualification, Vocational degree" = edqual_vocational,
             "Qualification, No official qualifications" = edqual_minimum,
             # Income variables
-            "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{Labour Market Outcomes:}" = NA,
+            "\\\\[-1.8ex]\\hline \\\\[-1.8ex] \\textit{\\textbf{Labour Market Outcomes:}}" = NA,
             "Occupation hourly wage, \\pounds"             = soc_median_hourly,
             "Occupation annual income, thousands \\pounds" = soc_median_annual,
             "Average hours worked, per week"               = hours_workweek,
