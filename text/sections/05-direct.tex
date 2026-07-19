@@ -7,7 +7,7 @@ The second is an indirect channel: a higher Ed PGI induces more education, and t
 The size and robustness of the labour market effects documented in 
 \autoref{sec:genetic-effects} has led to a common interpretation in the literature that at least part of the Ed PGI's influence must operate through the direct channel.
 This view is often motivated by the fact that the Ed PGI predicts scores on tests aiming to measure fluid intelligence \citep{carvalho2024genetics}, by results showing earnings associations that persist even after conditioning on education \citep{papageorge2020genes,bryson2025gender}, and in work arguing that the Ed PGI captures skills related to financial literacy and other non-educational attributes \citep{barth2020genetic}.
-Separating these channels matters both for understanding the biological and social mechanisms behind genetic effects on earnings.
+Separating these channels matters for understanding the biological and social mechanisms behind genetic effects on earnings.
 %, and for policy: if the indirect channel dominates, then policies that expand access to education can, in principle, replicate much of the labour market advantage associated with a higher Ed PGI; if the direct channel dominates, the policy implications are considerably more complex.
 
 This section uses a Causal Mediation (CM) framework to decompose the average total effect of the Ed PGI into its direct and indirect components, where education years serves as the mediating variable.
@@ -43,7 +43,7 @@ These sum to the average total effect $\theta$ estimated in
     + \underbrace{\partialdiff{z} 
         \E{Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}}_{\text{Indirect effect}},
 \end{equation*}
-evaluated at $z$ --- again, a linearity assumption is assuming the average effect does not vary across the $Z_i^\text{\textcolor{childColour}{Child}}$ distribution.
+evaluated at $z$ --- again, the linear specification is assuming the average effect does not vary across the $Z_i^\text{\textcolor{childColour}{Child}}$ distribution.
 \autoref{fig:scm-cm} illustrates this decomposition in the structural causal model: the direct effect corresponds to the Ed PGI arrow bypassing education, and the indirect effect to the path running through education years and its labour market return.
 
 \begin{figure}[!h]
@@ -97,7 +97,7 @@ However, it is possible to parametrically identify the direct and indirect effec
 The indirect effect equals the average education effect $\pi$ --- credibly 
 identified by the Mendelian design --- multiplied by the returns to an additional year of education, $\beta$.
 With heterogeneous treatment effects, $\beta$ represents the average education returns for people pushed into more years of education.\footnote{
-    Note that this is a parametrically identified model, because the correlational measure (and accompanying senstivity analysis) is meant to inform the local average effect for $D_i(Z_i^\text{\textcolor{childColour}{Child}})$ compliers --- but does not non-parametrically identify it.
+    Note that this is a parametrically identified model, because the correlational measure (and accompanying sensitivity analysis) is meant to inform the local average effect for $D_i(Z_i^\text{\textcolor{childColour}{Child}})$ compliers --- but does not non-parametrically identify it.
 }
 The direct effect then follows as average total effect minus the indirect effect,
 \begin{equation*}
@@ -117,17 +117,17 @@ I estimate the mediation second-stage from the following specification:
         + \zeta Z_{i, s(i)}^\text{\textcolor{parentColour}{Parental}}
         + \vec\varphi' \vec X_i + \varepsilon_i,
 \end{equation}
-where $\beta$ captures average returns to education, $\gamma$ the residual direct effect of the Ed PGI on earnings conditional on education, and $\delta$ the interaction between the Ed PGI and education years.
-Since $Z_i^\text{\textcolor{childColour}{Child}}$ is normalised to have mean zero, the interaction term $\delta Z_i D_i$ has mean zero across the sample, so that $\beta$ recovers the average returns to education evaluated at the population mean of the Ed PGI.
-%\footnote{
-%    \cite{mediation-natural-experiment} shows that the interaction term $\delta$ does not suffer from selection bias even when the mediator is not randomly assigned, provided the treatment is quasi-randomly assigned --- a condition satisfied here by the Mendelian design.
-%}
+where $\beta$ captures average returns to education, $\gamma$ the residual direct effect of the Ed PGI on earnings conditional on education, and $\delta$ the interaction between the Ed PGI and education years.\footnote{
+    \cite{mediation-natural-experiment} shows that the interaction term $\delta$ does not suffer from selection bias even when the mediator is not randomly assigned, provided the treatment is quasi-randomly assigned --- a condition satisfied here by the Mendelian design.
+    So that near-zero estimates of the interaction term in \autoref{tab:ukb-ed-returns} mean the interaction term is irrelevant.
+}
 
-Standard errors for the mediation estimates are obtained via a cluster bootstrap, resampling family units rather than individual observations. This preserves the within-family correlation in the residuals arising from the UKB sampling design, while also accommodating the non-linearity of the indirect effect estimator --- which, as the product of two estimated quantities, does not have a closed-form standard error under heteroscedasticity.
+SEs for the mediation estimates are obtained via a cluster bootstrap, resampling family units rather than individual observations.
+This preserves the within-family correlation in the residuals arising from the UKB sampling design, while also accommodating the non-linearity of the indirect effect estimator --- the product of two estimated quantities.
 %\footnote{
 %    Although the delta method offers an analytical alternative for products of estimates, accounting for the covariance between the first- and second-stage mediation estimates complicates the variance formulae; the cluster bootstrap sidesteps this issue with computational brute force.
 %}
-Each bootstrap draw resamples family units with replacement, estimates the mediation first- and second-stage parameters, and computes the implied direct and indirect effects; standard errors are the standard deviations of the resulting bootstrap distributions.
+Each bootstrap draw resamples family units with replacement, estimates the mediation first- and second-stage parameters, and computes the implied direct and indirect effects; SEs are the standard deviations of the resulting bootstrap distributions.
 
 \paragraph{Limitations.}
 Several limitations apply to the CM estimates presented in this section.
@@ -174,33 +174,33 @@ The fact that OLS and quasi-experimental estimates land in a similar range is in
     \footnotesize
     \textbf{Note:}
     This table shows simple OLS estimates for returns to education in the UK Biobank sibling sample --- the relevant sample for causal genetic effects.
-    All outcomes are in a log specification, and each column is a regression including the controls previous mentioned, with specification in \autoref{eqn:ed-returns}, varying inclusion of the Ed PGI and parental Ed PGI as indicated.
+    All outcomes are in a log specification, and each column is a regression including the controls previously mentioned, with specification in \autoref{eqn:ed-returns}, the inclusion of the Ed PGI and parental Ed PGI as indicated.
     Standard errors are clustered at the family level.
     Observation counts vary because each outcome has a different number of observations which are non-missing.
     The final row for education returns collects the partial effect of education years, including the interaction terms between education years and the Ed PGI.
-    Point estimates are relatively similar to those using the MLSA rise as an instrument (see \appendixref{appendix:mlsa}), with much more precision.
+    Point estimates are relatively similar to those using the MSLA rise as an instrument (see \appendixref{appendix:MSLA}), with much more precision.
 \end{table}
 
 The correlational estimate for the labour market return to an additional year of education in the UKB analysis sample sits consistently at around 6 percent in log earnings across all three income measures (shown in \autoref{tab:ukb-ed-returns}).
 This estimate is stable across specifications: adding controls for the Ed PGI and its interaction with education years barely moves the point estimates, and including the parental Ed PGI changes nothing.
 The UKB correlational estimates are, in short, consistent with the broader literature.
 
-Canonical labour economics work was concerned that the correlation between years of completed education and later life income would be confounded by unobserved ability \citep{griliches1977}.
+Canonical labour economics work was concerned that the correlation between years of completed education and later-life income would be confounded by unobserved ability \citep{griliches1977}.
 One may expect that genetic variants, contained in the Ed PGI, would be correlated with unobserved ability, and thus controlling for the Ed PGI may lead to lower correlational estimates for the returns to education.
-This is not the case in UKB data, and is consistent with follow-up research that uses casual methods such as instrumental variables and finds estimates for returns to education similar as the correlational evidence (see \citealt{card1999causal} for an overview).
+This is not the case in UKB data, and is consistent with follow-up research that uses causal methods such as instrumental variables and finds estimates for returns to education similar to the correlational evidence (see \citealt{card1999causal} for an overview).
 The stability of the return to education after conditioning on the Ed PGI and parental Ed PGI therefore suggests that ability bias, at least insofar as it operates through genetic endowment, is not a material source of upward distortion in the correlational estimate.
 
-Nonetheless, it would still not be credible to assume education years are randomly assigned, so that no correlational estimate is entirely credible on its own.
-The UKB does contain a plausible quasi-experiment: the 1972 rise in the British Minimum School Leaving Age (MLSA), which compelled children born after September 1957 to stay in school until age 16.
+Nonetheless, it would still not be credible to assume years of education are randomly assigned, so that no correlational estimate is entirely credible on its own.
+The UKB does contain a plausible quasi-experiment: the 1972 rise in the British Minimum School Leaving Age (MSLA), which compelled children born after September 1957 to stay in school until age 16.
 While this sample lines up well with the UKB population, the resulting fuzzy RDD estimates of education returns (in the range of 4--6 percent in log earnings) carry standard errors too large to rule out either zero or substantially larger effects, and are therefore too imprecise for use in the mediation analysis.\footnote{
-    \appendixref{appendix:mlsa} details estimates for labour market education returns using the MLSA rise as a regression discontinuity, as previously considered by \cite{barcellos2021effect}.
+    \appendixref{appendix:MSLA} details estimates for labour market education returns using the MSLA rise as a regression discontinuity, as previously considered by \cite{barcellos2021effect}.
 }
 Given this, the correlational estimates anchored in the broader UK literature offer a more useful basis for the parametric mediation analysis, and the sensitivity analysis below makes the dependence on any particular return value transparent.
 
 \subsection{Sensitivity Analysis}
 The indirect effect is the product of two quantities: the effect on education years and the return to an additional year of education. Since these multiply together, any uncertainty in the education return translates directly and proportionally into uncertainty about the share of the total genetic effect that operates through education.
 Rather than conditioning the mediation analysis on a single return value, I vary it across its plausible range.
-In addition, this range is defined not arbitrarily, but based on the previous labour economics on education returns.
+In addition, this range is defined not arbitrarily, but based on the previous labour economics on returns to education.
 
 \begin{figure}[!h]
     \centering
@@ -224,7 +224,7 @@ In addition, this range is defined not arbitrarily, but based on the previous la
     These estimates were collected by \cite{patrinos2025causal}.
 \end{figure}
 
-The return to an extra year of education in the UK has been estimated many times in the economics literature, giving a rich empirical base for calibrating the sensitivity analysis.
+The returns to an extra year of education in the UK has been estimated many times in the economics literature, giving a rich empirical base for calibrating the sensitivity analysis.
 \autoref{fig:edreturns} shows the distribution of 17 quasi-experimental UK estimates collected by \cite{patrinos2025causal}, listed in full in Appendix~\autoref{tab:uk-meta}.
 The distribution is right-skewed: most estimates fall between 4 and 8 percent, consistent with the correlational estimates in \autoref{tab:ukb-ed-returns}, but a tail of larger estimates reaches to around 15 percent.
 These higher values tend to come from studies exploiting the 1947 compulsory schooling reform, which identifies returns among a different and older complier population than the UKB cohort.
@@ -237,6 +237,6 @@ This step takes no stand on which return value is correct, and shows whether the
 The second step uses the empirical UK distribution more directly.
 I bootstrap across the 17 IV estimates in the economic literature (shown in Appendix~\autoref{tab:uk-meta}), drawing a return value at each replication and computing the implied mediation decomposition.
 Repeating this across many draws produces a distribution of indirect and direct effect estimates that reflects both sampling uncertainty in the effect of the Ed PGI on education years and the genuine disagreement in the literature about the magnitude of education returns.
-Reporting the point estimate, and bootstrapped standard errors of this distribution gives a meta-analytic sensitivity bound anchored in what the literature actually finds, rather than treating all values across the plausible range as equally likely.
+Reporting the point estimate, and bootstrapped standard errors of this distribution gives an empirical sensitivity distribution based on the collected UK estimates, rather than treating all values across the plausible range as equally likely.
 
 Together, the two steps answer different questions. The first shows the full range of possible conclusions. The second shows where the weight of evidence places them.

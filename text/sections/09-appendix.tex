@@ -105,15 +105,15 @@ and indirect effects, evaluated at $z = Z_i^\text{\textcolor{childColour}{Child}
 This result is exact under the smoothness and regularity conditions assumed in 
 \autoref{sec:genetics}, with no further approximation required.
 
-\subsection{Returns to Education by the MLSA Rise}
-\label{appendix:mlsa}
+\subsection{Returns to Education by the MSLA Rise}
+\label{appendix:MSLA}
 The UK Biobank includes a total of 500,000 members of the British public, with a roughly even distribution of birth years over 1945--1965.
 In 1972, the British government increased the Minimum School Leaving Age (MSLA) by one year, from age 15 to 16.
 The change took effect at the start of the 1972-73 school year, and applied to those born on or after 1 September 1957.
 The reform therefore induced extra school years for individuals born around date 1 September 1957.
 British school children sit exams for the GCSE qualification at age 16, so the reform pushed a larger share of the UK Biobank cohorts to remain in school to 16 and to complete these qualifications.
 
-The 1972 MLSA change has been previously used for labour market education returns \citep{oreopoulos2006estimating}, and (null) mortality effects of compulsory education \citep{clark2013effect}.
+The 1972 MSLA change has been previously used for labour market education returns \citep{oreopoulos2006estimating}, and (null) mortality effects of compulsory education \citep{clark2013effect}.
 The UK Biobank population overlaps well with the birth date cutoff, and so has been used in a series of papers for estimating education returns in the UK Biobank, for health outcomes \citep{barcellos2023distributional,barcellos2025education,davies2018causal} and occupation imputed income \citep{barcellos2021effect}.
 
 \begin{figure}[H]
@@ -165,25 +165,25 @@ I estimate the following RDD estimands, estimating the effect of the MSLA change
 \[ \lim_{v \to^- 1957.75} \Egiven{D_i}{V_i = v}, \;\;\;\;
     \lim_{v \to^+ 1957.75} \Egiven{D_i}{V_i = v} \]
 where $V_i$ represents individual $i$'s birth year plus birth month divided by 12 (so that 1957.75 represents born in September 1957), and $\to^-$ refers to the limit from below, $\to^+$ above.
-The goal is to identify is the average compliance rate of the MLSA rise,
+The goal is to identify is the average compliance rate of the MSLA rise,
 \[ \E{D_i(1) - D_i(0)}
     = \lim_{v \to^+ 1957.75} \Egiven{D_i}{V_i = v}
         - \lim_{v \to^- 1957.75} \Egiven{D_i}{V_i = v}. \]
 
-The MLSA rise significantly increases education years, completing of age 16 secondary school qualifications (GCSEs) --- these are measured of education coded by qualifications, as used by \cite{okbay2022polygenic} in calculating the Ed PGI.
+The MSLA rise significantly increases education years, completing of age 16 secondary school qualifications (GCSEs) --- these are measured of education coded by qualifications, as used by \cite{okbay2022polygenic} in calculating the Ed PGI.
 It had an even larger effect on age at leaving school, which is the basis of the education variables that \cite{barcellos2021effect} focuses on.
 The mean of these variables by birth month are shown in \autoref{fig:mlsa-nl}.
-Note that the economics literature has argued that null estimates for education returns in the MLSA design are a result of the MLSA rise inducing a low-quality margin of education \citep{clark2013effect}, so while age leaving education variables are more significant for this instrument they may not be economically relevant.
+Note that the economics literature has argued that null estimates for education returns in the MSLA design are a result of the MSLA rise inducing a low-quality margin of education \citep{clark2013effect}, so while age leaving education variables are more significant for this instrument they may not be economically relevant.
 
 I also use the RDD design to measure changes in later labour market outcomes.
 The UK Biobank asks questions of the sector people work in, giving high detail occupation codes (i.e., SOC codes)
 Using this value, and other demographic details, I impute occupation coded income for the UK Biobank respondents using data from the British Annual Survey of Hours and Earnings.\footnote{
     Thanks to \cite{kweon2025associations} for sharing code on this imputation.
 }
-This gives occupation coded hourly income, and annual wage calculated from hours worked as outcome measures in the MLSA rise, affected by the MSLA rise
+This gives occupation coded hourly income, and annual wage calculated from hours worked as outcome measures in the MSLA rise, affected by the MSLA rise
 \[ \lim_{v \to^+ 1957.75} \Egiven{Y_i}{V_i = v}
     - \lim_{v \to^- 1957.75} \Egiven{Y_i}{V_i = v}. \]
-The final panels of \autoref{fig:mlsa-nl} show these outcomes, and this reduced-form effect of the MLSA is not significantly different from zero.
+The final panels of \autoref{fig:mlsa-nl} show these outcomes, and this reduced-form effect of the MSLA is not significantly different from zero.
 \cite{barcellos2021effect} analyse this same RDD with UKB data.
 
 \begin{table}[H]
@@ -209,7 +209,7 @@ The final panels of \autoref{fig:mlsa-nl} show these outcomes, and this reduced-
         \\[-1.8ex]\hline \\[-1.8ex]
         \textbf{Panel B: Second-stage.}
             & \multicolumn{4}{c}{OLS.}
-                & \multicolumn{4}{c}{MLSA IV.} \\
+                & \multicolumn{4}{c}{MSLA IV.} \\
         \cmidrule(lr){2-5} \cmidrule(lr){6-9}
         & (1) & (2) & (3) & (4) & (5) & (6) & (7) & (8) \\
         \\[-1.8ex]\hline \\[-1.8ex]
@@ -222,17 +222,17 @@ The final panels of \autoref{fig:mlsa-nl} show these outcomes, and this reduced-
     \end{tabular}
     }
     \vspace{-0.25cm}
-    \label{tab:msla-iv}
+    \label{tab:mlsa-iv}
     \justify
     \footnotesize
     \textbf{Note:}
-    These point estimates are calculated among all UK Biobank participants born within a bandwidth of the MLSA rise cutoff (not just the sibling subsample).
+    These point estimates are calculated among all UK Biobank participants born within a bandwidth of the MSLA rise cutoff (not just the sibling subsample).
     The odd columns use a definition of education attainment (age 16 schooling) based on reported education qualifications; even columns report based on school leaving age.
     The Panel B OLS results show estimates of an OLS specification for the correlation between education and wages/income with local polynomial trends each side of 1957.75 birthdate, attempting to mimic an RD set-up with a hard-coded bandwidth of 10 years for comparison.
 \end{table}
 
 I estimate this RDD equation with triangular kernel weights (weighting closer to the cutoff), an optimal bandwidth \citep{calonico2014robust,calonico2015rdrobust}, and non-parametric controls on either side of the cutoff \citep{gelman2019high}.
-These estimates are collected in \autoref{tab:msla-iv}.
+These estimates are collected in \autoref{tab:mlsa-iv}.
 
 \begin{figure}[H]
     \centering
@@ -251,13 +251,13 @@ These estimates are collected in \autoref{tab:msla-iv}.
     \justify
     \footnotesize
     \textbf{Note}:
-    These figures show the sensitivity of fuzzy RD estimates using the MLSA discontinuity as an IV for education years (qualification measure) or age leaving school, using a different bandwidth choice for each.
+    These figures show the sensitivity of fuzzy RD estimates using the MSLA discontinuity as an IV for education years (qualification measure) or age leaving school, using a different bandwidth choice for each.
     The shaded regions are the 95\% confidence interval.
-    The dotted line with CTT refers to the \cite{calonico2014robust} optimal bandwidth choice, calculated using \textit{rdrobust} in \textit{R} \citep{calonico2015rdrobust}.
+    The dotted line with CCT refers to the \cite{calonico2014robust} optimal bandwidth choice, calculated using \textit{rdrobust} in \textit{R} \citep{calonico2015rdrobust}.
 \end{figure}
 
-The MLSA rise increased years of education, as measured in both qualification definitions and school leaving age definition.
-However, the outcome of occupation coded wages and annual income are not strong; correspondingly, the IV estimates using the MLSA rise for education returns are not distinguishable from zero.
+The MSLA rise increased years of education, as measured in both qualification definitions and school leaving age definition.
+However, the outcome of occupation coded wages and annual income are not strong; correspondingly, the IV estimates using the MSLA rise for education returns are not distinguishable from zero.
 This holds true for a range of bandwidth choices, shown in \autoref{fig:mlsa-bw}.
 
 \subsection{Instrumental Variables Connection}
@@ -271,10 +271,10 @@ The CM approach instead estimates both the direct genetic effect and the indirec
 
 There is a literature for modelling such exclusion violations in economics \citep{conley2012plausibly,kolesar2015}, and in genetic settings using alternative assumptions tailored to MR \citep{bowden2015mendelian,spiller2019detecting}.
 These alternative approaches require structure on how invalid instruments violate exclusion; the most common adjustment for genetic settings, MR-egger \citep{bowden2015mendelian}, relies on the direct genetic effects being uncorrelated with instrument strength, paralleling the invalid instruments assumption in the econometrics literature \citep{kolesar2015}. 
-This is difficult to justify in the present setting, where the SNPs that most strongly predict education could have correspondingly larger with direct effects on earnings through cognitive skills, non-cognitive traits, health, field of study, occupational sorting, or other labour-market relevant channels.
+This is difficult to justify in the present setting, where the SNPs that most strongly predict education could have correspondingly larger direct effects on earnings through cognitive skills, non-cognitive traits, health, field of study, occupational sorting, or other labour-market relevant channels.
 
 \subsection{Returns to Education Literature}
-\begin{table}[H]
+\begin{table}[!htbp]
     \small
     \singlespacing
     \centering

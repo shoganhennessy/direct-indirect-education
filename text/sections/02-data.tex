@@ -35,8 +35,8 @@ See \cite{sudlow2015uk} for a full description of the UKB organisation and data.
         \input{sections/tables/ukb-summary.tex}
         \\[-1.8ex]\hline \\[-1.8ex]
         Observations
-            & \input{sections/tables/ukb-analysis-count.txt} &
-            & \input{sections/tables/ukb-total-count.txt} & \\
+            & \input{sections/tables/ukb-analysis-count.tex} &
+            & \input{sections/tables/ukb-total-count.tex} & \\
         \\[-1.8ex]\hline \\[-1.8ex]
     \end{tabular}
     \vspace{-0.25cm}
@@ -62,7 +62,7 @@ Specifically, I impute occupation-based wages by estimating hourly earnings for 
 }
 This approach provides a more granular and continuous measure of economic status than the categorical household income variable.
 I create the annual occupation income by multiplying this by the number of hours they reported working, times 52 weeks in the year.
-This gives \input{sections/tables/ukb-total-count.txt}individuals in the UKB, with non-missing data in relevant variables. 
+This gives \input{sections/tables/ukb-total-count.tex}individuals in the UKB, with non-missing data in relevant variables. 
 
 
 \begin{figure}[!h]
@@ -95,7 +95,7 @@ For the purposes of this study, the primary analysis sample is restricted to tho
     \appendixref{appendix:identifying-families} further describes the family definitions in the UKB. 
 }
 also enrolled in the UKB, and non-missing data in occupation code plus education qualifications.
-This gives \input{sections/tables/ukb-analysis-count.txt}individuals in the UKB. 
+This gives \input{sections/tables/ukb-analysis-count.tex}individuals in the UKB. 
 The presence of multiple family members within the dataset provides a unique opportunity to control for shared genetic factors that might otherwise bias estimates in standard cross-sectional analyses.
 
 The analysis sample is also restricted to individuals who report to have primarily European ancestry.
@@ -103,7 +103,7 @@ The genetic measures used in this paper have generally been constructed from pri
 It is an unfortunate fact that systematic genetic measures, such as those considered in this paper, have only been constructed from Biobank samples where the vast majority are white and/or European descended; see \cite{martin2017human} for a further discussion.
 A limitation of this study is that its results only apply to this subset of the UKB population.
 
-The only notable differences between the analysis subsample and the entire UKB participant sample is that the analysis sample has more siblings, and is entirely European descended; no other variables are significantly different for the analysis subsample.
+The only notable differences between the analysis subsample and the entire UKB participant sample are that the analysis sample has more siblings, and is entirely European descended; no other variables are significantly different for the analysis subsample.
 \autoref{tab:ukb-summary} summarises the UKB data, for the analysis sample and among the entire UKB sample.
 \autoref{fig:ukb-edyears-hist} summarises the correlation between education years and occupation coded income.
 
@@ -128,7 +128,7 @@ I use the weights calculated in the GWAS conducted by \cite{okbay2022polygenic},
 
 The Ed PGI is defined as the weighted sum of whether individual $i$ has the relevant SNP at each DNA location $j$,
 \[ Z_i = \sum_{j = 1}^{J} w_j x_{i,j} \]
-where $w_j$ are the Ed PGI weights (provided in the supplementary data to \citealt{okbay2022polygenic}), and $x_{i,j}$ is an indicator of whether individual $i$ has the relevant SNP at DNA location $j$.\footnote{
+where $w_j$ are the Ed PGI weights (provided in the supplementary data to \citealt{okbay2022polygenic}), and $x_{i,j}$ is an allele count --- whether individual $i$ has the relevant SNP at DNA location $j$.\footnote{
     Every person has two copies of each chromosome, so that $x_{i,j}$ takes values 0, 1, 2 corresponding to how many copies of the SNP individual $i$ has inherited.
     The genetics literature has generally accepted that complex social behaviours are explained by additive effects (see \citealt{hill2008data}), and \cite{okbay2022polygenic} found little evidence for dominance in the Ed PGI SNPs, so that the Ed PGI makes sense as a weighted sum.
 }
@@ -148,7 +148,7 @@ The Ed PGI captures approximately 12--15\% of the variation in educational attai
     \end{subfigure}
     \begin{subfigure}[b]{0.495\textwidth}
         \centering
-        \caption{Ed PGI $+$ Education Years, Binscatter.}
+        \caption{Ed PGI $+$ Education Years, Bin Scatter.}
         \includegraphics[width=\textwidth]{sections/figures/edpgi-edyears.png}
         \label{fig:edpgi-edyears}
     \end{subfigure}
@@ -159,18 +159,18 @@ The Ed PGI captures approximately 12--15\% of the variation in educational attai
     \textbf{Note}:
     The left plot shows a kernel density estimate for the distribution of the Ed PGI among the UKB analysis sample.
     Ed PGI is normalised to have mean 0 and standard deviation 1 among the entire UKB sample; it is roughly normally distributed regardless of this normalisation.
-    The right plot shows a bin scatter, visualisaling a (semi-parametric) correlation between the Ed PGI and education years.
+    The right plot shows a bin scatter, visualising a (semi-parametric) correlation between the Ed PGI and education years.
     The slope refers to the estimated coefficient from a linear regression between the Ed PGI and education years.
 \end{figure}
 
-If education had no relationship with SNP variants, then we would expect the correlation between the Ed PGI and education years was indistinguishable from zero; it is, however, highly correlated with education years in the UKB analysis sample.
+If education had no relationship with SNP variants, then we would expect the correlation between the Ed PGI and education years to be indistinguishable from zero; it is, however, highly correlated with education years in the UKB analysis sample.
 A one standard deviation increase in the Ed PGI is associated with 0.93 extra education years (standard error 0.02), with an $R^2$ value of 0.10 for the raw regression of education years on Ed PGI.
 It is roughly normally distributed, with standard deviation normalised to 1.
 This distribution is not surprising, as the Ed PGI is the weighted sum of a few thousand binary variables, so we should expect convergence towards a normal distribution among the population.
-The main take-away is that the correlation between a summary measure of genetic values is strong, and has meaningful predictive power for education years.
+The main takeaway is that the correlation between a summary measure of genetic values is strong, and has meaningful predictive power for education years.
 
 The Ed PGI is not the only PGI that can be constructed.
-Following the same methodology, I construct additional PGIs for six health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
+Following the same methodology, I construct additional PGIs for seven health-related traits that may confound the relationship between genetics and socioeconomic outcomes: asthma, bipolar disorder, Body Mass Index (BMI), height, schizophrenia, and type 2 diabetes.
 Each PGI is calculated using the same approach as the Ed PGI --- taking weights from a published GWAS, conducted on independent populations, and computing weighted sums of the relevant genetic variants in the UKB data.
 These other PGIs serve as control variables in my analysis for two reasons.
 First, genetic variants often exhibit pleiotropy, meaning a single variant can influence multiple traits simultaneously.
@@ -181,7 +181,7 @@ Second, systematic differences in gene frequencies across ancestry groups can cr
 \label{sec:pgi-impute}
 It would be ideal if the UKB contained genetic information for the parents of every UKB participant.
 While there are 6,239 participants with a parent also included in the UKB, there are only 72 with both parents.
-To overcome this missing data problem, I also use siblings' genetic data to impute the mean parental PGIs from the sample of \input{sections/tables/ukb-analysis-count.txt} participants with at least one family member (parent or sibling) also in the UKB --- the analysis sample described above.
+To overcome this missing data problem, I also use siblings' genetic data to impute the mean parental PGIs from the sample of \input{sections/tables/ukb-analysis-count.tex} participants with at least one family member (parent or sibling) also in the UKB --- the analysis sample described above.
 The majority of this analysis sample have genetic data on one sibling member, so I refer to this as sibling imputation.
 
 \begin{figure}[!h]
@@ -194,7 +194,8 @@ The majority of this analysis sample have genetic data on one sibling member, so
     \footnotesize
     \textbf{Note}:
     This figure illustrates the logic of imputing the sum of parental genotypes from sibling data at a single SNP, following \cite{young2022mendelian}.
-    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a reference allele inherited from their parents; this figure shows the case where both the child and their sibling have genotype 1, across the three possible identity-by-descent (IBD) states.
+    At each SNP, individuals have a genotype of 0, 1, or 2, representing the number of copies of a reference allele inherited from their parents.
+    This figure illustrates the imputation of the parental genotype sum under the three possible identity-by-descent (IBD) states, using informative sibling-genotype configurations for each state.
     In IBD0, the siblings share no alleles by descent, so all four parental alleles are directly observed and the parental sum is known exactly as 2.
     In IBD1, the siblings share one allele by descent, leaving one parental allele unobserved; the imputed parental sum is $1 + f$ or $2+f$, depending on whether the shared allele is the reference allele, where $f$ denotes the population frequency of the reference allele.
     In IBD2, the siblings share both alleles by descent, so only two parental alleles are observed and the imputed parental sum is $1 + 2f$.
@@ -210,7 +211,7 @@ Second, given the inferred IBD state, the procedure imputes the sum of the two p
 
 \autoref{fig:pgi-imputing} illustrates this logic for the case where both the child and their sibling have observed SNP value of 1 (one copy of the reference allele).
 In IBD0, the siblings share no alleles, so all four parental alleles are directly observed across the two children, and the parental sum is known exactly as 2.
-In IBD1, one allele is shared between the siblings, leaving one parental allele unobserved; depending on whether the shared allele is the reference allele or not, the imputed parental sum is either $1 + f$ or $2 + f$, depending on value of the inherited shared allele.
+In IBD1, one allele is shared between the siblings, leaving one parental allele unobserved; depending on whether the shared allele is the reference allele or not, the imputed parental sum is either $1 + f$ or $2 + f$, depending on value of the shared  inherited allele.
 %\footnote{
 %    Phased haplotype data from neighbouring SNPs used to resolve this ambiguity.
 %}
