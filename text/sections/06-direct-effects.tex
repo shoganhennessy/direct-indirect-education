@@ -5,7 +5,7 @@
 
 Education years account for the majority of the Ed PGI's effect on labour market earnings. At correlational returns to education of around 6 percent, roughly 65 to 75 percent of the total genetic effect on earnings operates through the education channel, with a modest residual direct effect.
 A sensitivity analysis varying the assumed return across a broad range shows that, at education returns above approximately 8--9 percent, the residual direct effect is no longer statistically distinguishable from zero.
-These values are well within the mass of UK quasi-experimental estimates, and at these values the direct genetic effect becomes indistinguishable from zero, with the education channel accounts for essentially the entire Ed PGI effect.
+These values are well within the mass of UK quasi-experimental estimates, and at these values the direct genetic effect becomes indistinguishable from zero, with the education channel accounting for the marjority of Ed PGI's effect on later-life labour market outcomes.
 
 \begin{table}[!h]
     \small
@@ -66,7 +66,7 @@ The conclusion that education years dominate is robust across the full range of 
 \autoref{fig:sens-hourly-wage} traces the decomposition for log occupational hourly wages as the assumed return varies from zero to 20 percent.\footnote{
     The average total effect is the same as that presented in \autoref{sec:genetic-effects}, and is not varied as part of this sensitivity analysis.
 }
-At returns above roughly 7 to 8 percent returns to education, the direct genetic effect becomes statistically indistinguishable from zero, and education years account for the entirety of the total genetic earnings effect. 
+At returns above roughly 8 to 9 percent returns to education, the direct genetic effect becomes statistically indistinguishable from zero, and education years account for the entirety of the total genetic earnings effect. 
 Above 10 percent the direct effect point estimate turns negative, which is difficult to reconcile with any plausible mechanism; average returns for the complier population induced by the Ed PGI are unlikely to reach that level.
 The lower bound is zero by construction, because if extra education years carry no labour market return, none of the genetic effect can operate through it.
 If average  returns to education were negative, then the Ed PGI channel through education would also be negative --- which is unlikely.
@@ -90,13 +90,13 @@ If average  returns to education were negative, then the Ed PGI channel through 
 \end{figure}
 
 The same pattern holds across all three income measures.
-\autoref{fig:sens-percent} plots the ratio of the indirect effect to the total genetic effect for each outcome as the assumed return varies, and the picture is consistent: for occupational hourly wages, annual income, and household income alike, education years account for the full total genetic effect at returns of around 7 to 8 percent. The three outcomes track closely together across the range, reinforcing that the dominance of the education years channel is not specific to one of the available measures of later-life labour market income in the UKB.
+\autoref{fig:sens-percent} plots the ratio of the indirect effect to the total genetic effect for each outcome as the assumed return varies, and the picture is consistent: for occupational hourly wages, annual income, and household income alike, education years account for the full total genetic effect at returns of around 8 to 9 percent. The three outcomes track closely together across the range, reinforcing that the dominance of the education years channel is not specific to one of the available measures of later-life labour market income in the UKB.
 
 \begin{table}[!h]
     \small
     \singlespacing
     \centering
-    \caption{Direct and Indirect Effect Estimates, using Bootstrap Distribution of Education Returns Estimates.}
+    \caption{Direct and Indirect Effect Estimates, using Empirical Distribution of Education Returns Estimates.}
     \centerline{
     \begin{tabular}{l c c c c c c c c c c c c}
         \\[-1.8ex]\hline \hline \\[-1.8ex] 
@@ -122,14 +122,16 @@ The same pattern holds across all three income measures.
     \footnotesize
     \textbf{Note:}
     This table shows the mediation point estimates, of the effect of the Ed PGI going through education years (indirect effect) and a direct genetic effect.
-    Data are resampled (at the family level) from the UKB analysis sample, from the distribution of causal income returns to education, provided by \cite{patrinos2025causal} and shown in Appendix~\autoref{tab:uk-meta}, to capture statistical uncertainty from both education returns distribution and the UKB genetic estimates.
-    Specification controls for parental Ed PGI and uses correlation returns to education, as mentioned in the previous section.
+    Data are resampled at the family level from the UKB analysis sample, while education returns are drawn from the distribution of causal estimates provided by \cite{patrinos2025causal} and shown in Appendix~\autoref{tab:uk-meta}.
+    The regression specifications control for parental Ed PGI, and draws estimates for education returns from the distribution of causal estimates described in the previous section.
     All outcomes are in a log specification, and standard error estimates are calculated by the bootstrap with 1,000 bootstrap samples.
     Observation counts vary because each outcome has a different number of observations which are non-missing.
 \end{table}
 
 Sampling directly from the empirical distribution of UK quasi-experimental returns to education shifts the central mediation share further toward the education years channel \autoref{tab:mediate-boot}.
-Only one of the 17 IV estimates in the literature falls below the OLS anchor of around 6 percent, so the bootstrapped average return of 7.6 percent exceeds the correlational baseline; at this return, the direct genetic effect is indistinguishable from zero across all three income measures, and education years account for around 85 to 89 percent of the total genetic earnings effect. The confidence intervals on the mediation shares are wide, but this uncertainty is inherited almost entirely from the dispersion of return estimates in the literature rather than from sampling noise in the genetic education effect.
+Although six of the 17 IV estimates fall below the OLS anchor of around 6 percent, the distribution is right-skewed by several larger estimates, yielding an empirical average return of 7.6 percent.
+At this return value, the estimated residual direct effect is statistically indistinguishable from zero across all three income measures, while education years account for approximately 72 to 89 percent of the total genetic effect.
+The confidence intervals on the mediation shares are wide, but this uncertainty is inherited almost entirely from the dispersion of return estimates in the literature rather than from sampling noise in the genetic education effect.
 The distribution places substantial mass around and above 7 percent, although the estimates are dispersed.
 
 The Ed PGI's effect on labour market earnings operates primarily through education years. At correlational returns to education of around 6 percent, roughly 65 to 75 percent of the total genetic effect is mediated through the education years channel, with a residual direct effect of 35 to 25 percent.
