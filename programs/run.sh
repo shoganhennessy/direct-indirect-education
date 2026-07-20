@@ -54,4 +54,3 @@ latexmk -c
 cp paper.pdf ../direct-indirect-education-2026.pdf
 cp ../direct-indirect-education-2026.pdf ../../shoganhennessy.github.io/files/research/direct-indirect-education-2026.pdf
 cp ../presentation/short-presentation.pdf ../../shoganhennessy.github.io/files/research/direct-indirect-education-presentation.pdf
-git commit -am "Added edited paper version to website." ; git push
