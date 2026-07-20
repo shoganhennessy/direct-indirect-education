@@ -272,11 +272,11 @@ summary.data %>%
 analysis.data %>%
     nrow() %>%
     prettyNum(big.mark = ",", scientific = FALSE) %>%
-    writeLines(file.path(tables.folder, "ukb-analysis-count.txt"))
+    writeLines(file.path(tables.folder, "ukb-analysis-count.tex"))
 ukb.data %>%
     nrow() %>%
     prettyNum(big.mark = ",", scientific = FALSE) %>%
-    writeLines(file.path(tables.folder, "ukb-total-count.txt"))
+    writeLines(file.path(tables.folder, "ukb-total-count.tex"))
 
 
 ################################################################################

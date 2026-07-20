@@ -81,30 +81,6 @@ I use the imputed hourly wage measure, and construct annual occupation income by
     The random component refers to the Ed PGI after residualing out parental values,
 \end{figure}
 
-\subsection{Causal Mediation (CM) Decomposition}
-\label{appendix:cm}
-The decomposition of the average partial effect into direct and indirect components 
-follows from a straightforward application of the multivariate chain rule.
-Define:
-\[ g(a, b) = \E{Y_i(a, D_i(b))}. \]
-The average partial effect, direct effect, and indirect effect can then be written as:
-\begin{align*}
-    \text{Average partial effect} &= \frac{d}{dz} g(z, z), \\
-    \text{Direct effect} &= \frac{\partial}{\partial a} g(a, Z_i) \Big|_{a = z}, \\
-    \text{Indirect effect} &= \frac{\partial}{\partial b} g(Z_i, b) \Big|_{b = z}.
-\end{align*}
-The average partial effect moves both arguments of $g$ simultaneously with $z$, 
-whereas the direct and indirect effects move only the first and second arguments 
-respectively, holding the other fixed.
-By the multivariate chain rule:
-\[ \frac{d}{dz} g(z, z) 
-    = \frac{\partial g}{\partial a}(z, z) 
-    + \frac{\partial g}{\partial b}(z, z), \]
-which establishes that the average partial effect is exactly the sum of the direct 
-and indirect effects, evaluated at $z = Z_i^\text{\textcolor{childColour}{Child}}$.
-This result is exact under the smoothness and regularity conditions assumed in 
-\autoref{sec:genetics}, with no further approximation required.
-
 \subsection{Returns to Education by the MSLA Rise}
 \label{appendix:MSLA}
 The UK Biobank includes a total of 500,000 members of the British public, with a roughly even distribution of birth years over 1945--1965.
@@ -176,7 +152,7 @@ The mean of these variables by birth month are shown in \autoref{fig:mlsa-nl}.
 Note that the economics literature has argued that null estimates for education returns in the MSLA design are a result of the MSLA rise inducing a low-quality margin of education \citep{clark2013effect}, so while age leaving education variables are more significant for this instrument they may not be economically relevant.
 
 I also use the RDD design to measure changes in later labour market outcomes.
-The UK Biobank asks questions of the sector people work in, giving high detail occupation codes (i.e., SOC codes)
+The UK Biobank asks questions of the sector people work in, giving high detail occupation codes (i.e., SOC codes).
 Using this value, and other demographic details, I impute occupation coded income for the UK Biobank respondents using data from the British Annual Survey of Hours and Earnings.\footnote{
     Thanks to \cite{kweon2025associations} for sharing code on this imputation.
 }
