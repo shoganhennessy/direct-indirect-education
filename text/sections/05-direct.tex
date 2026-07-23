@@ -82,15 +82,16 @@ Non-parametric CM identification requires that the mediator is quasi-randomly as
 This assumption is not credible here: education years are shaped by family background, ability, and a host of other factors that independently influence earnings, so that the education--earnings relationship might not represent the average causal effect for mediator compliers in the UKB sample (even after conditioning on the Ed PGI).
 However, it is possible to parametrically identify the direct and indirect effects with a valid estimate for the causal returns to education, by the chain rule.\footnote{
     This additionally requires the smoothness and regularity conditions assumed in \autoref{sec:genetics}.
+    I also assume that the return to education relevant for the education margin shifted by the Ed PGI can be represented as separable from the average education effect; \autoref{appendix:mediation-identification} discusses this assumption in detail.
 }
 \begin{equation*}
     \label{eqn:indirect-chain}
-    \underbrace{\partialdiff{z} 
-        \E{Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}}_{
+    \underbrace{
+        \E{\partialdiff{z} Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}}_{
             \text{Indirect Effect}}
-    = \underbrace{\partialdiff{z} \E{D_i(z)}}_{\text{Average education effect, } \pi}
+    = \underbrace{\E{ \partialdiff{z} D_i(z)}}_{\text{Average education effect, } \pi}
     \times \;\;\;\;
-    \underbrace{\partialdiff{d} \E{Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)}}_{\text{Returns to education, } 
+    \underbrace{\E{\partialdiff{d} Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)}}_{\text{Returns to education, } 
     \beta}.
 \end{equation*}
 

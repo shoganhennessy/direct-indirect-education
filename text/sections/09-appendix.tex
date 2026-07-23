@@ -64,7 +64,7 @@ Rather than including a full set of 4-digit occupation fixed effects, which woul
 This preserves detailed occupational wage information while avoiding failed or noisy imputations in small occupation-demographic cells.
 I use the imputed hourly wage measure, and construct annual occupation income by multiplying the imputed hourly wage by reported weekly hours and 52 weeks.
 
-\subsection{Genetic Effects}
+\subsection{Genetic Correlations}
 
 \begin{figure}[H]
     \centering
@@ -80,6 +80,179 @@ I use the imputed hourly wage measure, and construct annual occupation income by
     The dots are the point estimates, and bars are the 95\% confidence intervals.
     The random component refers to the Ed PGI after residualing out parental values,
 \end{figure}
+
+\subsection{Parametric Education--Mediation Identification}
+\label{appendix:mediation-identification}
+This appendix expands on the parametric identification argument used in \autoref{sec:direct}.
+The main text writes the indirect effect as the product of the average education effect and the returns to education.
+This representation is convenient, but it imposes structure: the unrestricted chain-rule object is an average of individual-level products, not mechanically the product of two averages.
+
+Recall the indirect effect,
+\[
+    \text{Indirect Effect}
+    =
+    \E{
+        \partialdiff{z}
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))
+    }.
+\]
+Holding the direct value of the Ed PGI fixed at the realised child value, the individual-level chain rule gives
+\[
+    \partialdiff{z}
+    Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))
+    =
+    \left.
+    \partialdiff{d}
+    Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+    \right|_{d = D_i(z)}
+    \times
+    \partialdiff{z}D_i(z).
+\]
+Therefore, the average indirect effect is
+\begin{equation}
+    \label{eqn:appendix-indirect-product}
+    \text{Indirect Effect}
+    =
+    \E{
+        \left.
+        \partialdiff{d}
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+        \right|_{d = D_i(z)}
+        \times
+        \partialdiff{z}D_i(z)
+    }.
+\end{equation}
+This is the most general parametric chain-rule object.
+It shows that the relevant return to education is not necessarily the population-average return to schooling.
+Instead, the relevant return is weighted by the individuals and education margins whose schooling is shifted by the Ed PGI.
+
+Define the average education effect as
+\[
+    \pi
+    =
+    \E{\partialdiff{z}D_i(z)}.
+\]
+Then \autoref{eqn:appendix-indirect-product} can always be written as
+\begin{equation}
+    \label{eqn:appendix-beta-mediated}
+    \text{Indirect Effect}
+    =
+    \pi \beta^M,
+\end{equation}
+where
+\begin{equation}
+    \label{eqn:appendix-beta-mediated-definition}
+    \beta^M
+    =
+    \frac{
+        \E{
+            \left.
+            \partialdiff{d}
+            Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+            \right|_{d = D_i(z)}
+            \times
+            \partialdiff{z}D_i(z)
+        }
+    }{
+        \E{\partialdiff{z}D_i(z)}
+    }.
+\end{equation}
+The parameter $\beta^M$ is the mediator-relevant return to education: the return to an additional year of education averaged over the education margins induced by the Ed PGI.
+If the Ed PGI shifts education more strongly for individuals with high returns to schooling, then $\beta^M$ exceeds the unweighted average return.
+If it shifts education more strongly for individuals with low returns, then $\beta^M$ is lower.
+
+The main-text expression,
+\[
+    \text{Indirect Effect}
+    =
+    \pi \beta,
+\]
+therefore requires an additional separability condition linking the mediator-relevant return $\beta^M$ to an externally supplied return-to-education parameter $\beta$.
+One sufficient condition is homogeneous returns to education,
+\[
+    \left.
+    \partialdiff{d}
+    Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+    \right|_{d = D_i(z)}
+    =
+    \beta
+    \qquad \text{for all } i.
+\]
+Under this condition,
+\[
+    \E{
+        \left.
+        \partialdiff{d}
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+        \right|_{d = D_i(z)}
+        \times
+        \partialdiff{z}D_i(z)
+    }
+    =
+    \beta
+    \E{\partialdiff{z}D_i(z)}
+    =
+    \pi\beta.
+\]
+A weaker condition is mean separability between the education return and the Ed-PGI-induced education response,
+\begin{equation}
+    \label{eqn:appendix-separability}
+    \E{
+        \left.
+        \partialdiff{d}
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+        \right|_{d = D_i(z)}
+        \times
+        \partialdiff{z}D_i(z)
+    }
+    =
+    \E{
+        \left.
+        \partialdiff{d}
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+        \right|_{d = D_i(z)}
+    }
+    \times
+    \E{\partialdiff{z}D_i(z)}.
+\end{equation}
+This condition permits heterogeneous returns and heterogeneous education responses, but rules out covariance between the two relevant components.
+Under \autoref{eqn:appendix-separability}, the indirect effect is again
+\[
+    \text{Indirect Effect}
+    =
+    \pi\beta,
+    \qquad
+    \beta
+    =
+    \E{
+        \left.
+        \partialdiff{d}
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, d)
+        \right|_{d = D_i(z)}
+    }.
+\]
+
+The interpretation of $\beta$ is therefore central.
+The Mendelian design identifies $\pi$, the average causal effect of the Ed PGI on education years.
+It also identifies $\theta$, the average total effect of the Ed PGI on labour-market outcomes.
+It does not, by itself, identify the return to education relevant for the education margins shifted by the Ed PGI.
+The mediation decomposition therefore treats $\beta$ as the remaining input.
+The empirical analysis first uses the correlational return in the UKB as a transparent benchmark, and then varies $\beta$ over values from quasi-experimental estimates in the returns-to-education literature.
+
+Given a value of $\beta$, the indirect and direct effects are
+\[
+    \text{Indirect Effect}
+    =
+    \pi\beta,
+    \qquad
+    \text{Direct Effect}
+    =
+    \theta - \pi\beta.
+\]
+Thus, the causal content of the mediation analysis rests on two pieces.
+First, $\pi$ and $\theta$ are identified by quasi-random Mendelian variation in the child Ed PGI, conditional on parental Ed PGI.
+Second, the chosen value of $\beta$ must be interpreted as the return to education relevant for the education years induced by the Ed PGI.
+The sensitivity analysis makes this second requirement explicit by showing how the direct and indirect effects change as $\beta$ varies across plausible causal returns to education.
 
 \subsection{Returns to Education by the MSLA Rise}
 \label{appendix:MSLA}
