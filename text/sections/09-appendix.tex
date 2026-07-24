@@ -132,7 +132,7 @@ Define the average education effect as
     =
     \E{\partialdiff{z}D_i(z)}.
 \]
-Then \autoref{eqn:appendix-indirect-product} can always be written as
+Provided that $\pi \neq 0$, \autoref{eqn:appendix-indirect-product} can be written as
 \begin{equation}
     \label{eqn:appendix-beta-mediated}
     \text{Indirect Effect}
@@ -157,9 +157,25 @@ where
         \E{\partialdiff{z}D_i(z)}
     }.
 \end{equation}
-The parameter $\beta^M$ is the mediator-relevant return to education: the return to an additional year of education averaged over the education margins induced by the Ed PGI.
+The parameter $\beta^M$ is the mediator-relevant return to education: the return to an additional year of education averaged over the education margins induced by the Ed PGI, with weights proportional to each individual's education response $\partial D_i(z)/\partial z$.
 If the Ed PGI shifts education more strongly for individuals with high returns to schooling, then $\beta^M$ exceeds the unweighted average return.
 If it shifts education more strongly for individuals with low returns, then $\beta^M$ is lower.
+
+The weights in this average are proportional to each individual's education response,
+$\partial D_i(z)/\partial z$.
+If a higher Ed PGI weakly increases education for every individual,
+\begin{equation}
+    \label{eqn:appendix-education-monotonicity}
+    \partialdiff{z}D_i(z) \geq 0
+    \qquad \text{for all } i,
+\end{equation}
+then $\beta^M$ is a positively weighted average of individual returns to education.
+This monotonicity condition is not required for the chain-rule identity in
+\autoref{eqn:appendix-indirect-product}.
+Without it, the decomposition remains valid, but individuals with
+$\partial D_i(z)/\partial z < 0$ receive negative weight in $\beta^M$, so that
+$\beta^M$ need not lie within the support of individual education returns
+\citep{blackwell2024assumption}.
 
 The main-text expression,
 \[
@@ -194,7 +210,7 @@ Under this condition,
     =
     \pi\beta.
 \]
-A weaker condition is mean separability between the education return and the Ed-PGI-induced education response,
+A weaker sufficient condition is that the education return and the Ed-PGI-induced education response have zero covariance,
 \begin{equation}
     \label{eqn:appendix-separability}
     \E{
@@ -215,7 +231,7 @@ A weaker condition is mean separability between the education return and the Ed-
     \times
     \E{\partialdiff{z}D_i(z)}.
 \end{equation}
-This condition permits heterogeneous returns and heterogeneous education responses, but rules out covariance between the two relevant components.
+This condition permits heterogeneous returns and heterogeneous education responses, but requires their individual-level covariance to equal zero.
 Under \autoref{eqn:appendix-separability}, the indirect effect is again
 \[
     \text{Indirect Effect}

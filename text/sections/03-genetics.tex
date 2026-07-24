@@ -74,10 +74,9 @@ In expectation, a child and their observed sibling's Ed PGI together proxy for t
         Z_{m(i)}^\text{\textcolor{motherColour}{Mother}},
             Z_{f(i)}^\text{\textcolor{fatherColour}{Father}}}. \]
 
-However, because siblings collectively reveal approximately 75\% of the parental genetic variation, the resulting imputed values contain measurement error compared to the ideal (but unobserved) parental mean.
-The sibling-imputed parental mean PGI can be viewed as a proxy for the true parental mean PGI, inflating the variance in error term $u_i$ in \autoref{eqn:pgi-child}.
-This error educes the precision of estimates using the imputed proxy measure, compared to true parental PGI values.
-% Also, parental Ed PGI is included as a control variable with an estimated coefficient (instead of explicitly subtracting the expected value) as the coefficient between a child's Ed PGI and their expected inheritance will suffer from attenuation bias from using sibling imputed data.
+However, because siblings collectively reveal approximately 75\% of parental genetic variation, the resulting imputed values are measured with error relative to the true parental mean.
+This reduces the precision with which the parental genetic component is controlled and may leave residual confounding in the estimated coefficient on the child's Ed PGI.
+The resulting direction of bias is not generally determined by classical attenuation arguments because the mismeasured variable enters as a control rather than as the treatment of interest.
 
 \begin{figure}[h!]
     \centering
@@ -219,8 +218,10 @@ Without assuming homogeneity of effects across the Ed PGI distribution, these es
 
 Second, the analysis sample is restricted to UKB participants of European ancestry with at least one observed family member, as described in \autoref{sec:data}.
 Internal validity is sound within this sample, although the estimated average effects may not generalise to the broader British population, whose observed and unobserved structure may systematically differ from this selected group.
-Third, the sibling-based imputation of parental PGI values introduces additional measurement error relative to the ideal case of directly observing true parental genotypes, attenuating the estimated coefficients.
-This attenuation is compounded by the fact that the Ed PGI itself is constructed from GWAS weights estimated with error, further understating the true causal effects of genetic predisposition toward educational attainment.\footnote{
+
+Third, the sibling-based imputation measures the parental PGI with error relative to observing both parental genotypes directly.
+This may leave residual confounding in the estimated child-PGI effect, with a direction that is not determined in general.
+Separately, estimation error in the GWAS weights used to construct the child's Ed PGI may attenuate estimates relative to those based on an infeasible oracle PGI.\footnote{
     The Ed PGI weights used in this paper (from \citealt{okbay2022polygenic}) are calculated with measurement error, leading to attenuation bias relative to an infeasible truth Ed PGI with oracle weights.
     See \cite{van2023overcoming} for further discussion on measurement error of this kind.
 }

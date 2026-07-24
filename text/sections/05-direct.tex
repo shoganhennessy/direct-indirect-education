@@ -19,7 +19,6 @@ Based on this insight, I combine credible estimates of the average effect of the
 
 \subsection{Causal Mediation (CM) Framework}
 \label{sec:cm-framework}
-
 \paragraph{Target Parameters.}
 The average total effect of the Ed PGI on labour market outcomes can be 
 decomposed into a direct and indirect component.
@@ -36,15 +35,25 @@ These sum to the average total effect $\theta$ estimated in
 \autoref{sec:genetic-effects},
 \begin{equation*}
     \label{eqn:ape-decomp}
-    \underbrace{\partialdiff{z} \E{Y_i(z, D_i(z))}}_{\text{Average total effect, } 
-    \theta}
-    = \underbrace{\partialdiff{z} 
-        \E{Y_i(z, D_i(Z_i^\text{\textcolor{childColour}{Child}}))}}_{\text{Direct effect}}
-    + \underbrace{\partialdiff{z} 
-        \E{Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}}_{\text{Indirect effect}},
+    \underbrace{
+        \E{\partialdiff{z} Y_i(z, D_i(z))}
+    }_{\text{Average total effect, } \theta}
+    =
+    \underbrace{
+        \E{\partialdiff{z} 
+        Y_i(z, D_i(Z_i^\text{\textcolor{childColour}{Child}}))}
+    }_{\text{Direct effect}}
+    +
+    \underbrace{
+        \E{\partialdiff{z} 
+        Y_i(Z_i^\text{\textcolor{childColour}{Child}}, D_i(z))}
+    }_{\text{Indirect effect}}.
 \end{equation*}
-evaluated at $z$ --- again, the linear specification is assuming the average effect does not vary across the $Z_i^\text{\textcolor{childColour}{Child}}$ distribution.
-\autoref{fig:scm-cm} illustrates this decomposition in the structural causal model: the direct effect corresponds to the Ed PGI arrow bypassing education, and the indirect effect to the path running through education years and its labour market return.
+This decomposition holds pointwise and is then averaged over individuals, with each effect evaluated at the realised Ed PGI value,
+$z = Z_i^\text{\textcolor{childColour}{Child}}$; the linear specification assumes that these average marginal effects do not vary across the $Z_i^\text{\textcolor{childColour}{Child}}$ distribution.
+\autoref{fig:scm-cm} illustrates this decomposition in the structural causal model: the direct effect corresponds to the Ed PGI arrow bypassing education, and the indirect effect to the path running through education years and its labour market return.\footnote{
+    Throughout, ``direct'' means direct with respect to completed education years: it is the residual channel not operating through this measured mediator, rather than a purely biological effect.
+}
 
 \begin{figure}[!h]
     \centering
@@ -106,8 +115,8 @@ The direct effect then follows as average total effect minus the indirect effect
     \text{Direct Effect} = \theta - \pi\beta.
 \end{equation*}
 
-This parametric identification also requires that no individuals have a negative education effect (i.e., a monotonicity condition), avoiding a negative weighting issue in the mediation indirect effects \citep{blackwell2024assumption}.
-% While this monotonicity condition is untestable, it is generall
+To interpret $\beta$ as an average return to education for individuals whose schooling is shifted by the Ed PGI, I additionally assume that no individual has a negative education response, $\partial D_i(z)/\partial z \geq 0$.
+The chain-rule decomposition remains valid without this monotonicity condition, but the implied average return may then place negative weight on some individual education returns \citep{blackwell2024assumption}.
 
 \paragraph{Estimation.}
 I estimate the mediation second-stage from the following specification:
@@ -118,7 +127,9 @@ I estimate the mediation second-stage from the following specification:
         + \zeta Z_{i, s(i)}^\text{\textcolor{parentColour}{Parental}}
         + \vec\varphi' \vec X_i + \varepsilon_i,
 \end{equation}
-where $\beta$ captures average returns to education, $\gamma$ the residual direct effect of the Ed PGI on earnings conditional on education, and $\delta$ the interaction between the Ed PGI and education years.\footnote{
+where the partial return to education is $\beta+\delta Z_i^\text{\textcolor{childColour}{Child}}$, and the partial direct effect of the Ed PGI is $\gamma+\delta D_i$.
+The parameters $\beta$ and $\gamma$ are the corresponding effects when the interacted variable equals zero, while $\delta$ allows both effects to vary with the other variable.
+Empirically, the estimated interaction is close to zero, so that the average return to education is approximately $\beta$ and the average direct effect is approximately $\gamma$.\footnote{
     \cite{mediation-natural-experiment} shows that the interaction term $\delta$ does not suffer from selection bias even when the mediator is not randomly assigned, provided the treatment is quasi-randomly assigned --- a condition satisfied here by the Mendelian design.
     So that near-zero estimates of the interaction term in \autoref{tab:ukb-ed-returns} mean the interaction term is irrelevant.
 }
@@ -134,9 +145,10 @@ Each bootstrap draw resamples family units with replacement, estimates the media
 Several limitations apply to the CM estimates presented in this section.
 First, the OLS estimates of the average total effect and average education effect are variance-weighted averages of individual-level effects under heterogeneity (as noted in \autoref{sec:genetics}).
 Without the linearity assumption, these average effects need not coincide with population average effects.
-Second, and more substantively, the indirect effect in \autoref{eqn:indirect-chain} implicitly assumes that the returns to education are homogeneous: individuals induced into additional schooling by a higher Ed PGI face the same average returns as the broader population.
-In the language of CM, this is an assumption about the education compliers --- those whose schooling decisions are shifted by the Ed PGI --- whose returns may differ from the population average if, for example, education-linked genes select individuals into different schooling margins with different labour market rewards.
-The validity of the CM estimates rests on the credibility of $\beta$ as an estimate of the returns to education relevant for this complier population.
+
+Second, and more substantively, the indirect effect requires the supplied education return estimates to represent the return relevant for the education margins shifted by the Ed PGI.
+One sufficient condition is homogeneous returns to education; a weaker sufficient condition permits heterogeneous returns, but requires them to be uncorrelated with individuals' education responses to the Ed PGI.
+More generally, the validity of the mediation estimates rests on the credibility of approximating the mediator-relevant returns to education (discussed further in \autoref{appendix:mediation-identification}).
 The only remaining step for identifying CM effects is to provide credible estimates of the causal returns to education in the UKB sample.
 
 \subsection{Returns to Education}
